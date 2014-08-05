@@ -3,11 +3,12 @@
 #include "pos.h"
 
 class dataset {
-public:
+private:
   pos **data;
   pos **distance;
   int size_x, size_y;
 
+public:
   dataset();
   dataset(int col, int row);
   ~dataset();
