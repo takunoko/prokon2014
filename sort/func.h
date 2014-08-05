@@ -14,4 +14,5 @@ extern void change_num(int *num1, int *num2);
 extern int convert_num(int x, int y);
 extern int convert_y(int num);
 extern int convert_x(int num);
+
 #endif

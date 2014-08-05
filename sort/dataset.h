@@ -10,6 +10,7 @@ public:
 
   dataset();
   dataset(int col, int row);
+  ~dataset();
   void delete_array();
   void disp_data(int x = -1, int y = -1);
   void disp_distance(int x = -1, int y = -1);

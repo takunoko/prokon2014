@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include "func.h"
 #include "dataset.h"
 #include "process1.h"
@@ -6,8 +7,8 @@
 pro1::process1() {
 }
 
-pro1::process1(int size_y, int size_x) {
-  table = dataset(size_y, size_x);
+pro1::process1(int size_x, int size_y) {
+  table = dataset(size_x, size_y);
   make_data();
   table.disp_data();
   table.disp_distance();
