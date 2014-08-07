@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "pos.h"
 #include "dataset.h"
-#include "func.h"
+#include "util.h"
 
 dataset::dataset() {
   height = width = 0;

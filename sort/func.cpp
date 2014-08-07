@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "func.h"
+#include "util.h"
 
 // 範囲内にいるかチェック
 int check_in_scope(int width, int height, int x, int y) {

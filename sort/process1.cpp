@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "func.h"
+#include "util.h"
 #include "dataset.h"
 #include "process1.h"
 
