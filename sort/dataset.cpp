@@ -151,6 +151,13 @@ void dataset::swap_data(int x1, int y1, int x2, int y2) {
   if(!check_in_scope(width, height, x2, y2)) exit(1);
 
   swap_pos(&data[y1][x1], &data[y2][x2]);
+<<<<<<< HEAD
+=======
+  /*
+  change_num(&data[y1][x1].x, &data[y2][x2].x);
+  change_num(&data[y1][x1].y, &data[y2][x2].y);
+  */
+>>>>>>> 48faa983742d5c8f422bf6c6cb113c0bc25fd005
   set_distance(x1, y1);
   set_distance(x2, y2);
 }
