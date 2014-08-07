@@ -2,11 +2,10 @@
 #define RIGHT 1
 #define DOWN 2
 #define LEFT 3
-#ifndef INCLUDED_FUNC_H
-#define INCLUDED_FUNC_H
+#ifndef INCLUDED_UTIL_H
+#define INCLUDED_UTIL_H
 
 extern int check_in_scope(int width, int height, int x, int y);
-extern void disp_level_line(int num);
 extern void surroundings(int *x, int *y, int direction);
 extern int min(int num1, int num2);
 extern int max(int num1, int num2);
