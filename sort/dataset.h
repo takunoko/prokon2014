@@ -15,6 +15,7 @@ public:
   void delete_array();
   void disp_data(int x = -1, int y = -1);
   void disp_distance(int x = -1, int y = -1);
+  int find_data(int data_x, int data_y, int *x, int *y);
   int get_width();
   int get_height();
   void make_array();

@@ -9,6 +9,8 @@
 
 int main(void) {
   process1 *test = new process1(WIDTH, HEIGHT);
+  test->sort();
+  test->table->disp_data();
   delete test;
 
   return 0;

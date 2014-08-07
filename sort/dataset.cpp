@@ -60,6 +60,21 @@ void dataset::disp_distance(int x, int y) {
   puts("");
 }
 
+int dataset::find_data(int data_x, int data_y, int *x, int *y) {
+  int i, j;
+
+  for(i = 0; i < this->height; i++) {
+    for(j = 0; j < this->width; j++) {
+      if(check_pos_equal(this->data[i][j].x, this->data[i][j].y, data_x, data_y)) {
+        *x = j;
+        *y = i;
+        return 0;
+      }
+    }
+  }
+  return 1;
+}
+
 int dataset::get_width() {
   return this->width;
 }

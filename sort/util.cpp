@@ -8,6 +8,10 @@ int check_in_scope(int width, int height, int x, int y) {
   else return 0;
 }
 
+int check_pos_equal(int x1, int y1, int x2, int y2) {
+  return (x1 == x2 && y1 == y2);
+}
+
 void surroundings(int *x, int *y, int direction) {
   switch(direction) {
   case UP: // 

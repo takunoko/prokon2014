@@ -34,3 +34,32 @@ void pro1::make_data() {
     }
   }
 }
+
+void pro1::sort() {
+  int i, j, k, originX = 0, originY = 0;
+
+  for(i = 0; i < table->get_height(); i++) {
+    for(j = 0; j < table->get_width(); j++) {
+      if(table->find_data(j, i, &originX, &originY)) exit(1);
+      table->disp_data(originX, originY);
+      if(originX > j) {
+        for(k = originX; k != j; k--) {
+          table->swap_next(k, originY, LEFT);
+        }
+      } else {
+        for(k = originX; k != j; k++) {
+          table->swap_next(k, originY, RIGHT);
+        }
+      }
+      if(originY > i) {
+        for(k = originY; k != i; k--) {
+          table->swap_next(j, k, UP);
+        }
+      } else {
+        for(k = originY; k != i; k++) {
+          table->swap_next(j, k, DOWN);
+        }
+      }
+    }
+  }
+}
