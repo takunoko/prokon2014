@@ -2,8 +2,7 @@
 
 ## source cords
 
-* sort
-　メイン
+* sort メイン
 * pos
 　ポジション
 * dataset
