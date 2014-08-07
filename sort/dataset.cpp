@@ -52,6 +52,7 @@ void dataset::disp_data(int x, int y) {
   puts("");
 }
 
+// distanceを表示
 void dataset::disp_distance() {
   int i, j;
 
@@ -64,6 +65,7 @@ void dataset::disp_distance() {
   puts("");
 }
 
+// data_xとdata_yの値の入ったdataの要素の場所をxとyに入れる
 int dataset::find_data(int data_x, int data_y, int *x, int *y) {
   int i, j;
 
@@ -87,6 +89,7 @@ int dataset::get_height() {
   return this->height;
 }
 
+// dataとdistanceの領域を確保
 void dataset::make_array() {
   int i, j;
 
@@ -104,6 +107,7 @@ void dataset::make_array() {
   }
 }
 
+// dataをごちゃまぜにかき回す
 void dataset::randomize_data() {
   int i, j, x, y, w, h;
 
@@ -118,6 +122,7 @@ void dataset::randomize_data() {
   }
 }
 
+// dataを綺麗にソートされた状態にする
 void dataset::reset_data() {
   int i, j;
 
