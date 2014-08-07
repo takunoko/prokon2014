@@ -9,7 +9,6 @@ public:
   process1();
   process1(int width, int height);
   ~process1();
-  void make_data();
   void sort();
 } pro1;
 

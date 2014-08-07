@@ -29,6 +29,12 @@ void surroundings(int *x, int *y, int direction) {
   }
 }
 
+void swap_pos(pos *p1, pos *p2) {
+  pos dummy = *p1;
+  *p1 = *p2;
+  *p2 = dummy;
+}
+
 int min(int num1, int num2) {
   if(num1 <= num2) return num1;
   if(num2 < num1) return num2;
