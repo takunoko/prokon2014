@@ -8,7 +8,7 @@
 #define HEIGHT 3
 
 int main(void) {
-  process1 *test = new process1(WIDTH, HEIGHT);
+  Process1 *test = new Process1(WIDTH, HEIGHT);
   delete test;
 
   return 0;
