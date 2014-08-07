@@ -7,24 +7,30 @@
 pro1::process1() {
 }
 
-pro1::process1(int size_x, int size_y) {
-  table = dataset(size_x, size_y);
+pro1::process1(int width, int height) {
+  table = new dataset(width, height);
   make_data();
-  table.disp_data();
-  table.disp_distance();
+  table->disp_data();
+  table->disp_distance();
+}
+
+pro1::~process1() {
+  delete table;
 }
 
 // 乱数でデータをかき回す
 void pro1::make_data() {
-  int i, j, r, c;
+  int i, j, x, y, w, h;
 
-  table.reset_data();
+  w = table->get_width();
+  h = table->get_height();
+  table->reset_data();
 
-  for(i = 0; i < table.size_x; i++) {
-    for(j = 0; j < table.size_y; j++) {
-      r = rand() % table.size_x;
-      c = rand() % table.size_y;
-      table.swap_data(i, j, r, c);
+  for(i = 0; i < h; i++) {
+    for(j = 0; j < w; j++) {
+      x = rand() % w;
+      y = rand() % h;
+      table->swap_data(j, i, x, y);
     }
   }
 }

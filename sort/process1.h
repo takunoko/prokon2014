@@ -4,10 +4,11 @@
 
 typedef class process1 {
 public:
-  dataset table;
+  dataset *table;
 
   process1();
-  process1(int size_x, int size_y);
+  process1(int width, int height);
+  ~process1();
   void make_data();
 } pro1;
 

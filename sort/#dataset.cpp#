@@ -5,13 +5,13 @@
 #include "func.h"
 
 dataset::dataset() {
-  height = width = 0;
+  size_y = size_x = 0;
 }
 
-dataset::dataset(int w, int h) {
-  if(w < 0 || h < 0) exit(1);
-  this->width = w;
-  this->height = h;
+dataset::dataset(int size_x, int size_y) {
+  if(size_x < 0 || size_y < 0) exit(1);
+  this->size_y = size_y;
+  this->size_x = size_x;
   make_array();
   disp_data();
 }
@@ -23,20 +23,20 @@ dataset::~dataset() {
 void dataset::delete_array() {
   int i, j;
 
-  for(i = 0; i < this->height; i++) {
-    delete [] data[i];
+  for(i = 0; i < this->size_y; i++) {
+    :q    delete [] data[i];
     delete [] distance[i];
   }
   delete [] data;
   delete [] distance;
 }
 
-// x„Å®y„Å´Ë≤†„ÅÆÂÄ§„ÇíÂÖ•„Çå„Çã„Å®[]„Çí‰ªò„Åë„Å™„ÅÑ
+// xí§»yí§Àí…Èí§Œí√Õí§Úí∆˛í§Ïí§Îí§»[]í§Úí…’í§±í§ í§§
 void dataset::disp_data(int x, int y) {
   int i, j;
 
-  for(i = 0; i < this->width; i++) {
-    for(j = 0; j < this->height; j++) {
+  for(i = 0; i < this->size_x; i++) {
+    for(j = 0; j < this->size_y; j++) {
       if(x == j && y == i) {
         printf("[%X%X]", this->data[i][j].x, this->data[i][j].y);
       }else {
@@ -51,8 +51,10 @@ void dataset::disp_data(int x, int y) {
 void dataset::disp_distance(int x, int y) {
   int i, j;
 
-  for(i = 0; i < this->width; i++) {
-    for(j = 0; j < this->height; j++) {
+  if(!check_in_scope(size_x, size_y, x, y)) exit(1);
+
+  for(i = 0; i < this->size_x; i++) {
+    for(j = 0; j < this->size_y; j++) {
       printf("[%2d,%2d]", this->distance[i][j].x, this->distance[i][j].y);
     }
     puts("");
@@ -60,23 +62,15 @@ void dataset::disp_distance(int x, int y) {
   puts("");
 }
 
-int dataset::get_width() {
-  return this->width;
-}
-
-int dataset::get_height() {
-  return this->height;
-}
-
 void dataset::make_array() {
   int i, j;
 
-  data = new pos*[height];
-  distance = new pos*[height];
-  for(i = 0; i < this->height; i++) {
-    data[i] = new pos[width];
-    distance[i] = new pos[width];
-    for(j = 0; j < this->width; j++) {
+  data = new pos*[size_y];
+  distance = new pos*[size_y];
+  for(i = 0; i < this->size_y; i++) {
+    data[i] = new pos[size_x];
+    distance[i] = new pos[size_x];
+    for(j = 0; j < this->size_x; j++) {
       data[i][j].x = j;
       data[i][j].y = i;
       distance[i][j].x = 0;
@@ -88,12 +82,15 @@ void dataset::make_array() {
 void dataset::reset_data() {
   int i, j;
 
-  for(i = 0; i < this->height; i++) {
-    for(j = 0; j < this->width; j++) {
-      this->data[i][j].x = j;
-      this->data[i][j].y = i;
-      this->distance[i][j].x = 0;
-      this->distance[i][j].y = 0;
+  if(size_y < 0 || size_x < 0) exit(1);
+
+  for(i = 0; i < this->size_y; i++) {
+    distance[i] = new pos[size_x];
+    for(j = 0; j < this->size_x; j++) {
+      data[i][j].x = j;
+      data[i][j].y = i;
+      distance[i][j].x = 0;
+      distance[i][j].y = 0;
     }
   }
 }
@@ -101,14 +98,14 @@ void dataset::reset_data() {
 void dataset::set_distance(int x, int y) {
   int distance_x, distance_y;
 
-  if(!check_in_scope(width, height, x, y)) exit(1);
+  if(!check_in_scope(size_x, size_y, x, y)) exit(1);
   distance[y][x].x = x - data[y][x].x;
   distance[y][x].y = y - data[y][x].y;
 }
 
 void dataset::swap_data(int x1, int y1, int x2, int y2) {
-  if(!check_in_scope(width, height, x1, y1)) exit(1);
-  if(!check_in_scope(width, height, x2, y2)) exit(1);
+  if(!check_in_scope(size_x, size_y, x1, y1)) exit(1);
+  if(!check_in_scope(size_x, size_y, x2, y2)) exit(1);
 
   change_num(&data[y1][x1].x, &data[y2][x2].x);
   change_num(&data[y1][x1].y, &data[y2][x2].y);
@@ -120,7 +117,7 @@ void dataset::swap_next(int x, int y, int direction) {
   int dx = x;
   int dy = y;
 
-  if(!check_in_scope(width, height, x, y)) exit(1);
+  if(!check_in_scope(size_x, size_y, x, y)) exit(1);
   if(direction < 0 || direction > 3) exit(1);
   surroundings(&dx, &dy, direction);
   swap_data(dx, dy, x, y);

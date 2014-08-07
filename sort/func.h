@@ -5,7 +5,7 @@
 #ifndef INCLUDED_FUNC_H
 #define INCLUDED_FUNC_H
 
-extern int check_in_scope(int size_x, int size_y, int x, int y);
+extern int check_in_scope(int width, int height, int x, int y);
 extern void disp_level_line(int num);
 extern void surroundings(int *x, int *y, int direction);
 extern int min(int num1, int num2);

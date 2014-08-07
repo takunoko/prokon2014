@@ -6,15 +6,17 @@ class dataset {
 private:
   pos **data;
   pos **distance;
-  int size_x, size_y;
+  int width, height;
 
 public:
   dataset();
-  dataset(int col, int row);
+  dataset(int w, int h);
   ~dataset();
   void delete_array();
   void disp_data(int x = -1, int y = -1);
   void disp_distance(int x = -1, int y = -1);
+  int get_width();
+  int get_height();
   void make_array();
   void reset_data();
   void set_distance(int x, int y);

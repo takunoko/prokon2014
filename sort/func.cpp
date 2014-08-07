@@ -2,8 +2,8 @@
 #include "func.h"
 
 // 範囲内にいるかチェック
-int check_in_scope(int size_x, int size_y, int x, int y) {
-  if(x >= 0 && x < size_x && y >= 0 && y < size_y)
+int check_in_scope(int width, int height, int x, int y) {
+  if(x >= 0 && x < width && y >= 0 && y < height)
     return 1;
   else return 0;
 }
