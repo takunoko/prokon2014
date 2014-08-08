@@ -1,23 +1,14 @@
 #include <stdlib.h>
-#include <stdio.h>
 #include "util.h"
-#include "Dataset.h"
 #include "Process1.h"
 
-Pro1::Process1() {
+Pro1::Process1(): ProcessBase() {
 }
 
-Pro1::Process1(int width, int height) {
-  table = new Dataset(width, height);
-  table->randomizeData();
-  table->dispDistance();
-  table->dispData();
-  sort();
-  table->dispCost();
+Pro1::Process1(int width, int height): ProcessBase(width, height) {
 }
 
 Pro1::~Process1() {
-  delete table;
 }
 
 void Pro1::sort() {
@@ -25,7 +16,7 @@ void Pro1::sort() {
 
   for(i = 0; i < table->getHeight(); i++) {
     for(j = 0; j < table->getWidth(); j++) {
-      if(table->findData(j, i, &originX, &originY)) exit(1);
+      if(table->findData(j, i, &originX, &originY)) myerror(1);
       table->selectData(originX, originY);
       table->dispData();
       if(originX > j) {
@@ -48,4 +39,5 @@ void Pro1::sort() {
       }
     }
   }
+  table->dispCost();
 }

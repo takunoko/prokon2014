@@ -13,6 +13,7 @@ private:
 
 private:
   Dataset();
+  int checkData(Pos **check_data);
   void deleteArray();
   void makeArray();
   void setDistance(int x, int y);
@@ -27,6 +28,7 @@ public:
   int findData(int data_x, int data_y, int *x, int *y);
   int getWidth();
   int getHeight();
+  void importData(Pos **import_data); // 未完成。使用不可
   void randomizeData();
   void resetData();
   void selectData(int x, int y);

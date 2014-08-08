@@ -1,7 +1,14 @@
 CC  = g++
+CFLAGS = -Wall -O2
 TARGET  = a.out
-SRCS    = util.cpp Pos.cpp Dataset.cpp Process1.cpp sort.cpp
-OBJS    = util.o Pos.o Dataset.o Process1.o sort.o
+SRCS= util.cpp Pos.cpp Dataset.cpp ProcessBase.cpp $(wildcard Process?.cpp) sort.cpp
+OBJS= $(SRCS:%.cpp=%.o)
+
+.SUFFIXES: .cpp .o
 
 $(TARGET): $(OBJS)
-	$(CC) -o $@ $^
+	$(CC) -o $@ $(OBJS)
+
+.cpp.o:
+	$(CC) $(CFLAGS) -c $^
+

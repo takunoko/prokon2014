@@ -1,7 +1,7 @@
 #include "Pos.h"
 
 Pos::Pos() {
-  x = y = 0;
+  x = y = -1;
 }
 
 Pos::Pos(int x, int y) {
