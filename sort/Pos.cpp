@@ -1,4 +1,5 @@
 #include "Pos.h"
+// ポジション
 
 Pos::Pos() {
   x = y = -1;

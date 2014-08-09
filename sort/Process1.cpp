@@ -13,6 +13,7 @@ Pro1::~Process1() {
 
 void Pro1::sort() {
   int i, j, k, originX = 0, originY = 0;
+  // originは動かす前の場所
 
   for(i = 0; i < table->getHeight(); i++) {
     for(j = 0; j < table->getWidth(); j++) {
