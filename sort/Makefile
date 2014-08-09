@@ -1,5 +1,4 @@
-CXX = g++
-CFLAGS = -Wall -O2
+CFLAGS = -Wall -O3
 TARGET = a.out
 HEADERS = util.h Pos.h Dataset.h ProcessBase.h $(wildcard Process?.h)
 SRCS = $(HEADERS:%.h=%.cpp) sort.cpp
