@@ -1,11 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "Pos.h"
 #include "Dataset.h"
 #include "util.h"
 
 Dataset::Dataset() {
   height = width = selected_num = changed_num = move_flag = 0;
+  selected.x = 0;
+  selected.y = 0;
 }
 
 Dataset::Dataset(int w, int h) {
@@ -66,10 +67,10 @@ void Dataset::dispData(int x, int y) {
   for(i = 0; i < this->width; i++) {
     for(j = 0; j < this->height; j++) {
       if(checkPosEqual(j, i, x, y) || checkPosEqual(j, i, selected.x, selected.y)) {
-        printf("[%X%X]", this->data[i][j].x, this->data[i][j].y);
-      } else {
-        printf(" %X%X ", this->data[i][j].x, this->data[i][j].y);
+        changeWordColor(GREEN);
       }
+      printf("%X%X ", this->data[i][j].x, this->data[i][j].y);
+      defaultWordColor();
     }
     puts("");
   }
@@ -169,6 +170,7 @@ void Dataset::resetData() {
 }
 
 void Dataset::selectData(int x, int y) {
+  if(!checkInScope(width, height, x, y)) myerror(1);
   selected.x = x;
   selected.y = y;
   move_flag = 0;
@@ -176,8 +178,8 @@ void Dataset::selectData(int x, int y) {
 
 void Dataset::setDistance(int x, int y) {
   if(!checkInScope(width, height, x, y)) myerror(1);
-  distance[y][x].x = x - data[y][x].x;
-  distance[y][x].y = y - data[y][x].y;
+  distance[y][x].x = data[y][x].x - x;
+  distance[y][x].y = data[y][x].y - y;
 }
 
 void Dataset::swapData(int x1, int y1, int x2, int y2) {

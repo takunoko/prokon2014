@@ -10,16 +10,16 @@ void myerror(int error_code) {
 // directionの方向にxとyを移動する
 void surroundings(int *x, int *y, int direction) {
   switch(direction) {
-  case UP: // 
+  case UP:
     (*y)--;
     break;
-  case RIGHT: //  
+  case RIGHT:
     (*x)++;
     break;
-  case DOWN: //
+  case DOWN:
     (*y)++;
     break;
-  case LEFT: //  
+  case LEFT:
     (*x)--;
     break;
   }
