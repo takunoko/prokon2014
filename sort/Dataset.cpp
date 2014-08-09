@@ -107,12 +107,38 @@ int Dataset::findData(int data_x, int data_y, int *x, int *y) {
   return 1;
 }
 
+Pos Dataset::getData(int x, int y) {
+  Pos dummy;
+  if(!checkInScope(width, height, x, y)) myerror(1);
+  dummy.x = data[y][x].x;
+  dummy.y = data[y][x].y;
+
+  return dummy;
+}
+
+Pos Dataset::getDistance(int x, int y) {
+  Pos dummy;
+  if(!checkInScope(width, height, x, y)) myerror(1);
+  dummy.x = distance[y][x].x;
+  dummy.y = distance[y][x].y;
+
+  return dummy;
+}
+
 int Dataset::getWidth() {
   return this->width;
 }
 
 int Dataset::getHeight() {
   return this->height;
+}
+
+Pos Dataset::getSelectedData() {
+  return getData(selected.x, selected.y);
+}
+
+Pos Dataset::getSelectedDistance() {
+  return getDistance(selected.x, selected.y);
 }
 
 // 未完成。コピーコンストラクタとか

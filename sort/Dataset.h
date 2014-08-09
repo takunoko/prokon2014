@@ -26,8 +26,12 @@ public:
   void dispData(int x = -1, int y = -1);
   void dispDistance();
   int findData(int data_x, int data_y, int *x, int *y);
+  Pos getData(int x, int y);
+  Pos getDistance(int x, int y);
   int getWidth();
   int getHeight();
+  Pos getSelectedData();
+  Pos getSelectedDistance();
   void importData(Pos **import_data); // 未完成。使用不可
   void randomizeData();
   void resetData();
