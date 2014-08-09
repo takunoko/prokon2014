@@ -2,45 +2,7 @@
 #include <stdlib.h>
 #include "util.h"
 
-// 範囲内にいるかチェック
-int checkInScope(int width, int height, int x, int y) {
-  if(x >= 0 && x < width && y >= 0 && y < height)
-    return 1;
-  else return 0;
-}
-
-// x1, y1とx2, y2の値が等しいか調べる
-int checkPosEqual(int x1, int y1, int x2, int y2) {
-  return (x1 == x2 && y1 == y2);
-}
-
-int convertHex(int x, int y) {
-  return x + y * 0x10;
-}
-
-// 数字を行の数字に変換
-int convertX(int num) {
-  return (num % 0x10);
-}
-
-// 数字を列の数字に変換
-int convertY(int num) {
-  return (num / 0x10);
-}
-
-int max(int num1, int num2) {
-  if(num1 >= num2) return num1;
-  if(num2 > num1) return num2;
-  return 0;
-}
-
-int min(int num1, int num2) {
-  if(num1 <= num2) return num1;
-  if(num2 < num1) return num2;
-  return 0;
-}
-
-extern void myerror(int error_code) {
+void myerror(int error_code) {
   puts("MYERROR");
   exit(1);
 }
