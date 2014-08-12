@@ -16,6 +16,7 @@
 2. swapSesected(direction)で選択したデータを指定した向きに動かします．
 3. dispData()で現在のデータを，dispDistance()で元の場所までの距離を表示します．
 4. dispCost()で選択回数と交換回数を表示します．
+
 #### 便利な機能
 選択回数と交換回数は自動で計算されます．  
 select()で選択した後swapSelected()を使用することで初めて選択回数は増えます．
