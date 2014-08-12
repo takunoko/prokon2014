@@ -1,6 +1,6 @@
 CFLAGS = -Wall -O3
 TARGET = a.out
-HEADERS = util.h Pos.h Dataset.h ProcessBase.h $(wildcard Process?.h)
+HEADERS = util.h Pos.h PosData.h Dataset.h ProcessBase.h $(wildcard Process?.h)
 SRCS = $(HEADERS:%.h=%.cpp) sort.cpp
 OBJS = $(SRCS:%.cpp=.%.o)
 

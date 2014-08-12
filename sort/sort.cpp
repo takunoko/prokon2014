@@ -9,6 +9,7 @@
 #define HEIGHT 3
 
 int main(void) {
+  srand((unsigned)time(NULL));
   Process1 *test = new Process1(WIDTH, HEIGHT);
   test->sort();
   delete test;

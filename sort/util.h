@@ -16,13 +16,15 @@
 #define CYAN 6
 #define WHITE 7
 
+#define changeWordColor(cc) printf("\033[3%dm", cc)
+#define changeBackColor(cc) printf("\033[4%dm", cc)
 #define checkInScope(width, height, x, y) (x>=0 && x<width && y >=0 && y<height)
 #define checkPosEqual(x1, y1, x2, y2) (x1 == x2 && y1 == y2)
 #define convertHex(x, y) x+y*0x10
 #define convertX(num) num%0x10
 #define convertY(num) num/0x10
-#define changeWordColor(cc) printf("\033[3%dm", cc)
 #define defaultWordColor() printf("\033[39m")
+#define defaultBackColor() printf("\033[49m")
 #define max(num1, num2) num1>num2?num1:num2
 #define min(num1, num2) num1<num2?num1:num2
 
