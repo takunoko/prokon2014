@@ -64,8 +64,8 @@ void Dataset::dispCost() {
 void Dataset::dispData(int x, int y) {
   int i, j;
 
-  for(i = 0; i < this->width; i++) {
-    for(j = 0; j < this->height; j++) {
+  for(i = 0; i < this->height; i++) {
+    for(j = 0; j < this->width; j++) {
       if(checkPosEqual(j, i, x, y) || checkPosEqual(j, i, selected.x, selected.y)) {
         changeWordColor(GREEN);
       }
@@ -81,8 +81,8 @@ void Dataset::dispData(int x, int y) {
 void Dataset::dispDistance() {
   int i, j;
 
-  for(i = 0; i < this->width; i++) {
-    for(j = 0; j < this->height; j++) {
+  for(i = 0; i < this->height; i++) {
+    for(j = 0; j < this->width; j++) {
       printf("[%2d,%2d]", this->distance[i][j].x, this->distance[i][j].y);
     }
     puts("");
@@ -153,10 +153,10 @@ void Dataset::makeArray() {
 
   data = new Pos*[height];
   distance = new Pos*[height];
-  for(i = 0; i < this->height; i++) {
+  for(i = 0; i < height; i++) {
     data[i] = new Pos[width];
     distance[i] = new Pos[width];
-    for(j = 0; j < this->width; j++) {
+    for(j = 0; j < width; j++) {
       data[i][j].x = j;
       data[i][j].y = i;
       distance[i][j].x = 0;

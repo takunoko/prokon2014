@@ -13,8 +13,6 @@ int main(void) {
   Process1 *test = new Process1(WIDTH, HEIGHT);
   test->sort();
   delete test;
-  Process2 *t = new Process2(WIDTH, HEIGHT);
-  delete t;
 
   return 0;
 }
