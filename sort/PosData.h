@@ -1,9 +1,9 @@
-#ifndef INCLUDED_DATASET_H
-#define INCLUDED_DATASET_H
+#ifndef INCLUDED_POSDATA_H
+#define INCLUDED_POSDATA_H
 #include "Pos.h"
 
 class PosData {
-protected:
+private:
   Pos **data;
   int width, height;
 
@@ -13,6 +13,10 @@ public:
   ~PosData();
   void dispData();
   Pos **getData();
+  int getHeight();
+  int getWidth();
+  int getX(int ox, int oy);
+  int getY(int ox, int oy);
   void setX(int ox, int oy, int x);
   void setY(int ox, int oy, int y);
   void setData(int ox, int oy, int x, int y);

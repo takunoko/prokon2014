@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "Dataset.h"
+#include "PosData.h"
 #include "util.h"
 
 Dataset::Dataset() {
@@ -10,7 +11,7 @@ Dataset::Dataset() {
 }
 
 Dataset::Dataset(int w, int h) {
-  if(w < 0 || h < 0) myerror(1);
+  if(!checkInScope(MAXWIDTH, MAXHEIGHT, w, h)) myerror(1);
   this->width = w;
   this->height = h;
   this->selected_num = this->changed_num = this->move_flag = 0;
@@ -21,18 +22,19 @@ Dataset::~Dataset() {
   deleteArray();
 }
 
-int Dataset::checkData(Pos **check_data) {
+int Dataset::checkData(PosData check_data) {
   int i, j;
+  if(!checkPosEqual(check_data.getWidth(), check_data.getHeight(), width, height)) myerror(1);
   Pos *dummy = new Pos[width * height];
 
   for(i = 0; i < height; i++) {
     for(j = 0; j < width; j++) {
-      if(!checkInScope(width, height, check_data[i][j].x, check_data[i][j].y)) {
+      if(!checkInScope(width, height, check_data.getX(j, i), check_data.getY(j, i))) {
         delete [] dummy;
         return 1;
       }
-      dummy[height*check_data[i][j].y + check_data[i][j].x].x = check_data[i][j].x;
-      dummy[height*check_data[i][j].y + check_data[i][j].x].y = check_data[i][j].y;
+      dummy[height*check_data.getY(j, i) + check_data.getX(j, i)].x = check_data.getX(j, i);
+      dummy[height*check_data.getY(j, i) + check_data.getX(j, i)].y = check_data.getY(j, i);
     }
   }
   for(i = 0; i < height*width; i++) {
@@ -64,8 +66,8 @@ void Dataset::dispCost() {
 void Dataset::dispData(int x, int y) {
   int i, j;
 
-  for(i = 0; i < this->width; i++) {
-    for(j = 0; j < this->height; j++) {
+  for(i = 0; i < this->height; i++) {
+    for(j = 0; j < this->width; j++) {
       if(checkPosEqual(j, i, x, y) || checkPosEqual(j, i, selected.x, selected.y)) {
         changeWordColor(GREEN);
       }
@@ -81,8 +83,8 @@ void Dataset::dispData(int x, int y) {
 void Dataset::dispDistance() {
   int i, j;
 
-  for(i = 0; i < this->width; i++) {
-    for(j = 0; j < this->height; j++) {
+  for(i = 0; i < this->height; i++) {
+    for(j = 0; j < this->width; j++) {
       printf("[%2d,%2d]", this->distance[i][j].x, this->distance[i][j].y);
     }
     puts("");
@@ -142,9 +144,16 @@ Pos Dataset::getSelectedDistance() {
 }
 
 // 未完成。コピーコンストラクタとか
-void Dataset::importData(Pos **import_data) {
+void Dataset::importData(PosData import_data) {
+  int i, j;
+
   if(checkData(import_data)) myerror(1);
-  this->data = import_data;
+  for(i = 0; i < import_data.getHeight(); i++) {
+    for(j = 0; j < import_data.getWidth(); j++) {
+      this->data[i][j].x = import_data.getX(j, i);
+      this->data[i][j].y = import_data.getY(j, i);
+    }
+  }
 }
 
 // dataとdistanceの領域を確保
@@ -153,10 +162,10 @@ void Dataset::makeArray() {
 
   data = new Pos*[height];
   distance = new Pos*[height];
-  for(i = 0; i < this->height; i++) {
+  for(i = 0; i < height; i++) {
     data[i] = new Pos[width];
     distance[i] = new Pos[width];
-    for(j = 0; j < this->width; j++) {
+    for(j = 0; j < width; j++) {
       data[i][j].x = j;
       data[i][j].y = i;
       distance[i][j].x = 0;

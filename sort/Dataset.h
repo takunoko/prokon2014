@@ -1,6 +1,9 @@
 #ifndef INCLUDED_DATASET_H
 #define INCLUDED_DATASET_H
+#define MAXWIDTH 16 // 0x10
+#define MAXHEIGHT 16
 #include "Pos.h"
+#include "PosData.h"
 
 class Dataset {
 private:
@@ -13,7 +16,7 @@ private:
 
 private:
   Dataset();
-  int checkData(Pos **check_data);
+  int checkData(PosData check_data);
   void deleteArray();
   void makeArray();
   void setDistance(int x, int y);
@@ -32,7 +35,7 @@ public:
   int getHeight();
   Pos getSelectedData();
   Pos getSelectedDistance();
-  void importData(Pos **import_data); // 未完成。使用不可
+  void importData(PosData import_data);
   void randomizeData();
   void resetData();
   void selectData(int x, int y);
