@@ -1,5 +1,6 @@
 #include "PosData.h"
 #include "stdio.h"
+#include "util.h"
 
 PosData::PosData() {
 }
@@ -39,11 +40,30 @@ Pos **PosData::getData() {
   return data;
 }
 
+int PosData::getHeight() {
+  return this->height;
+}
+int PosData::getWidth() {
+  return this->width;
+}
+
+int PosData::getX(int ox, int oy) {
+  if(!checkInScope(width, height, ox, oy)) myerror(1);
+  return data[oy][ox].x;
+}
+
+int PosData::getY(int ox, int oy) {
+  if(!checkInScope(width, height, ox, oy)) myerror(1);
+  return data[oy][ox].y;
+}
+
 void PosData::setX(int ox, int oy, int x) {
+  if(!checkInScope(width, height, ox, oy)) myerror(1);
   data[oy][ox].x = x;
 }
 
 void PosData::setY(int ox, int oy, int y) {
+  if(!checkInScope(width, height, ox, oy)) myerror(1);
   data[oy][ox].y = y;
 }
 
