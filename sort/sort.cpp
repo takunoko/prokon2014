@@ -3,8 +3,6 @@
 #include <time.h>
 #include "Process1.h"
 #include "Process2.h"
-#define MAXWIDTH 16 // 0x10
-#define MAXHEIGHT 16
 #define WIDTH 3
 #define HEIGHT 3
 

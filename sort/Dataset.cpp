@@ -10,7 +10,7 @@ Dataset::Dataset() {
 }
 
 Dataset::Dataset(int w, int h) {
-  if(w < 0 || h < 0) myerror(1);
+  if(!checkInScope(MAXWIDTH, MAXHEIGHT, w, h)) myerror(1);
   this->width = w;
   this->height = h;
   this->selected_num = this->changed_num = this->move_flag = 0;

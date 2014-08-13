@@ -1,5 +1,7 @@
 #ifndef INCLUDED_DATASET_H
 #define INCLUDED_DATASET_H
+#define MAXWIDTH 16 // 0x10
+#define MAXHEIGHT 16
 #include "Pos.h"
 
 class Dataset {
