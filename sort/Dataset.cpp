@@ -143,6 +143,17 @@ Pos Dataset::getSelectedDistance() {
   return getDistance(selected.x, selected.y);
 }
 
+int Dataset::getX(int ox, int oy) {
+  if(!checkInScope(width, height, ox, oy)) myerror(1);
+  return data[oy][ox].x;
+}
+
+int Dataset::getY(int ox, int oy) {
+  if(!checkInScope(width, height, ox, oy)) myerror(1);
+  return data[oy][ox].y;
+}
+
+
 // 未完成。コピーコンストラクタとか
 void Dataset::importData(PosData import_data) {
   int i, j;
