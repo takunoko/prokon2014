@@ -25,6 +25,7 @@ private:
 public:
   Dataset(int w, int h);
   ~Dataset();
+  int checkSorted();
   void dispCost();
   void dispData(int x = -1, int y = -1);
   void dispDistance();
