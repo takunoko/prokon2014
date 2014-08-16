@@ -22,6 +22,17 @@ Dataset::~Dataset() {
   deleteArray();
 }
 
+int Dataset::checkSorted() {
+  int i, j;
+
+  for(i = 0; i < height; i++) {
+    for(j = 0; j < width; j++) {
+      if(!checkPosEqual(data[i][j].x, data[i][j].y, j, i)) return 0;
+    }
+  }
+  return 1;
+}
+
 int Dataset::checkData(PosData check_data) {
   int i, j;
   if(!checkPosEqual(check_data.getWidth(), check_data.getHeight(), width, height)) myerror(1);
@@ -142,6 +153,17 @@ Pos Dataset::getSelectedData() {
 Pos Dataset::getSelectedDistance() {
   return getDistance(selected.x, selected.y);
 }
+
+int Dataset::getX(int ox, int oy) {
+  if(!checkInScope(width, height, ox, oy)) myerror(1);
+  return data[oy][ox].x;
+}
+
+int Dataset::getY(int ox, int oy) {
+  if(!checkInScope(width, height, ox, oy)) myerror(1);
+  return data[oy][ox].y;
+}
+
 
 // 未完成。コピーコンストラクタとか
 void Dataset::importData(PosData import_data) {

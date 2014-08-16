@@ -30,14 +30,11 @@ void PosData::dispData() {
 
   for(i = 0; i < height; i++) {
     for(j = 0; j < width; j++) {
-      printf("%X%X", data[i][j].x, data[i][j].y);
+      printf("%X%X ", data[i][j].x, data[i][j].y);
     }
     puts("");
   }
-}
-
-Pos **PosData::getData() {
-  return data;
+  puts("");
 }
 
 int PosData::getHeight() {

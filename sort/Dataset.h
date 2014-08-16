@@ -25,6 +25,7 @@ private:
 public:
   Dataset(int w, int h);
   ~Dataset();
+  int checkSorted();
   void dispCost();
   void dispData(int x = -1, int y = -1);
   void dispDistance();
@@ -35,6 +36,8 @@ public:
   int getHeight();
   Pos getSelectedData();
   Pos getSelectedDistance();
+  int getX(int ox, int oy);
+  int getY(int ox, int oy);
   void importData(PosData import_data);
   void randomizeData();
   void resetData();
