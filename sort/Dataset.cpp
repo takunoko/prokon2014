@@ -25,11 +25,9 @@ Dataset::~Dataset() {
 int Dataset::checkSorted() {
   int i, j;
 
-  for(i = 0; i < height; i++) {
-    for(j = 0; j < width; j++) {
+  for(i = 0; i < height; i++)
+    for(j = 0; j < width; j++)
       if(!checkPosEqual(data[i][j].x, data[i][j].y, j, i)) return 0;
-    }
-  }
   return 1;
 }
 
@@ -79,9 +77,8 @@ void Dataset::dispData(int x, int y) {
 
   for(i = 0; i < this->height; i++) {
     for(j = 0; j < this->width; j++) {
-      if(checkPosEqual(j, i, x, y) || checkPosEqual(j, i, selected.x, selected.y)) {
+      if(checkPosEqual(j, i, x, y) || checkPosEqual(j, i, selected.x, selected.y))
         changeWordColor(GREEN);
-      }
       printf("%X%X ", this->data[i][j].x, this->data[i][j].y);
       defaultWordColor();
     }
@@ -101,6 +98,13 @@ void Dataset::dispDistance() {
     puts("");
   }
   puts("");
+}
+
+void Dataset::findAndSelectData(int x, int y) {
+  int fx, fy;
+
+  findData(x, y, &fx, &fy);
+  selectData(fx, fy);
 }
 
 // data_xとdata_yの値の入ったdataの要素の場所をxとyに入れる

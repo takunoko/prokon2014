@@ -25,6 +25,8 @@
 #define convertY(num) num/0x10
 #define defaultWordColor() printf("\033[39m")
 #define defaultBackColor() printf("\033[49m")
+#define getDirectionLR(ox, x) ((ox < x) ? RIGHT : LEFT)  // o?から見た方向
+#define getDirectionUD(oy, y) ((oy < y) ? UP : DOWN)
 #define max(num1, num2) num1>num2?num1:num2
 #define min(num1, num2) num1<num2?num1:num2
 

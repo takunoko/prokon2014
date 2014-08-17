@@ -1,5 +1,6 @@
 #include "PosData.h"
 #include "stdio.h"
+#include "stdlib.h"
 #include "util.h"
 
 PosData::PosData() {
@@ -52,6 +53,18 @@ int PosData::getX(int ox, int oy) {
 int PosData::getY(int ox, int oy) {
   if(!checkInScope(width, height, ox, oy)) myerror(1);
   return data[oy][ox].y;
+}
+
+void PosData::randomizeData() {
+  int i, j, x, y;
+
+  for(i = 0; i < height; i++) {
+    for(j = 0; j < width; j++) {
+      x = rand() % width;
+      y = rand() % height;
+      swapPos(&data[i][j], &data[y][x]);
+    }
+  }
 }
 
 void PosData::setX(int ox, int oy, int x) {

@@ -16,6 +16,7 @@ public:
   int getWidth();
   int getX(int ox, int oy);
   int getY(int ox, int oy);
+  void randomizeData();
   void setX(int ox, int oy, int x);
   void setY(int ox, int oy, int y);
   void setData(int ox, int oy, int x, int y);

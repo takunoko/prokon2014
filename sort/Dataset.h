@@ -29,6 +29,7 @@ public:
   void dispCost();
   void dispData(int x = -1, int y = -1);
   void dispDistance();
+  void findAndSelectData(int x, int y);
   int findData(int data_x, int data_y, int *x, int *y);
   Pos getData(int x, int y);
   Pos getDistance(int x, int y);

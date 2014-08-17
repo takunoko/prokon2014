@@ -11,6 +11,7 @@ protected:
 public:
   ProcessBase(int width, int height);
   ~ProcessBase();
+  void importData(PosData data);
 } ProBase;
 
 #endif
