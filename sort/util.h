@@ -19,7 +19,7 @@
 #define changeWordColor(cc) printf("\033[3%dm", cc)
 #define changeBackColor(cc) printf("\033[4%dm", cc)
 #define checkInScope(width, height, x, y) (x>=0 && x<width && y >=0 && y<height)
-#define checkPosEqual(x1, y1, x2, y2) (x1 == x2 && y1 == y2)
+#define checkPosEqual(x1, y1, x2, y2) ((x1 == x2) && (y1 == y2))
 #define convertHex(x, y) x+y*0x10
 #define convertX(num) num%0x10
 #define convertY(num) num/0x10
@@ -33,6 +33,7 @@
 extern void myerror(int error_code);
 extern void swapNum(int *num1, int *num2); // num1とnum2を交換
 extern void surroundings(int *x, int *y, int direction);
+extern Pos surroundingsp(Pos Data, int direction);
 extern void swapPos(Pos *p1, Pos *p2);
 
 #endif

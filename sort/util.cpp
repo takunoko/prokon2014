@@ -25,6 +25,24 @@ void surroundings(int *x, int *y, int direction) {
   }
 }
 
+Pos surroundingsp(Pos Data, int direction) {
+  switch(direction) {
+  case UP:
+    Data.y--;
+    break;
+  case RIGHT:
+    Data.x++;
+    break;
+  case DOWN:
+    Data.y++;
+    break;
+  case LEFT:
+    Data.x--;
+    break;
+  }
+  return Data;
+}
+
 // num1とnum2の値を交換
 void swapNum(int *num1, int *num2) {
   int dummy = *num1;

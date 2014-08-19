@@ -150,6 +150,10 @@ int Dataset::getHeight() {
   return this->height;
 }
 
+Pos Dataset::getSelected() {
+  return selected;
+}
+
 Pos Dataset::getSelectedData() {
   return getData(selected.x, selected.y);
 }

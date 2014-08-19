@@ -35,6 +35,7 @@ public:
   Pos getDistance(int x, int y);
   int getWidth();
   int getHeight();
+  Pos getSelected();
   Pos getSelectedData();
   Pos getSelectedDistance();
   int getX(int ox, int oy);
