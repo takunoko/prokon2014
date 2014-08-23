@@ -7,6 +7,7 @@ public:
 
   Pos();
   Pos(int x, int y);
+  void setZero();
 };
 
 #endif

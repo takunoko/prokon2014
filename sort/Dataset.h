@@ -30,11 +30,13 @@ public:
   void dispData(int x = -1, int y = -1);
   void dispDistance();
   void findAndSelectData(int x, int y);
-  int findData(int data_x, int data_y, int *x, int *y);
+  void findAndSelectData(Pos data);
+  Pos findData(int data_x, int data_y);
+  Pos findData(Pos data);
   Pos getData(int x, int y);
   Pos getDistance(int x, int y);
-  int getWidth();
   int getHeight();
+  int getWidth();
   Pos getSelected();
   Pos getSelectedData();
   Pos getSelectedDistance();

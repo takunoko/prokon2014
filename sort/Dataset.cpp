@@ -6,8 +6,7 @@
 
 Dataset::Dataset() {
   height = width = selected_num = changed_num = move_flag = 0;
-  selected.x = 0;
-  selected.y = 0;
+  selected.setZero();
 }
 
 Dataset::Dataset(int w, int h) {
@@ -77,8 +76,9 @@ void Dataset::dispData(int x, int y) {
 
   for(i = 0; i < this->height; i++) {
     for(j = 0; j < this->width; j++) {
-      if(checkPosEqual(j, i, x, y) || checkPosEqual(j, i, selected.x, selected.y))
+      if(checkPosEqual(j, i, selected.x, selected.y))
         changeWordColor(GREEN);
+      else if(checkPosEqual(j, i, x, y)) changeWordColor(BLUE);
       printf("%X%X ", this->data[i][j].x, this->data[i][j].y);
       defaultWordColor();
     }
@@ -101,27 +101,37 @@ void Dataset::dispDistance() {
 }
 
 void Dataset::findAndSelectData(int x, int y) {
-  int fx, fy;
+  Pos fd;
 
-  findData(x, y, &fx, &fy);
-  selectData(fx, fy);
+  fd = findData(x, y);
+  selectData(fd.x, fd.y);
+}
+
+void Dataset::findAndSelectData(Pos data) {
+  findAndSelectData(data.x, data.y);
 }
 
 // data_xとdata_yの値の入ったdataの要素の場所をxとyに入れる
-int Dataset::findData(int data_x, int data_y, int *x, int *y) {
+Pos Dataset::findData(int data_x, int data_y) {
   int i, j;
+  Pos loc;
 
   if(!checkInScope(width, height, data_x, data_y)) myerror(1);
   for(i = 0; i < this->height; i++) {
     for(j = 0; j < this->width; j++) {
       if(checkPosEqual(this->data[i][j].x, this->data[i][j].y, data_x, data_y)) {
-        *x = j;
-        *y = i;
-        return 0;
+        loc.x = j;
+        loc.y = i;
+        return loc;
       }
     }
   }
-  return 1;
+  puts("Cant find data");
+  return Pos(-1, -1);
+}
+
+Pos Dataset::findData(Pos data) {
+  return findData(data.x, data.y);
 }
 
 Pos Dataset::getData(int x, int y) {

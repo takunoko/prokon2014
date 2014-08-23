@@ -12,29 +12,31 @@ Pro1::~Process1() {
 }
 
 void Pro1::sort() {
-  int i, j, k, originX = 0, originY = 0;
+  int i, j, k;
+  Pos origin;
+  origin.x = 0;
+  origin.y = 0;
   // originは動かす前の場所
 
   for(i = 0; i < table->getHeight(); i++) {
     for(j = 0; j < table->getWidth(); j++) {
-      if(table->findData(j, i, &originX, &originY)) myerror(1);
-      table->selectData(originX, originY);
+      table->selectData(origin.x, origin.y);
       table->dispData();
-      if(originX > j) {
-        for(k = originX; k != j; k--) {
+      if(origin.x > j) {
+        for(k = origin.x; k != j; k--) {
           table->swapSelected(LEFT);
         }
       } else {
-        for(k = originX; k != j; k++) {
+        for(k = origin.x; k != j; k++) {
           table->swapSelected(RIGHT);
         }
       }
-      if(originY > i) {
-        for(k = originY; k != i; k--) {
+      if(origin.y > i) {
+        for(k = origin.y; k != i; k--) {
           table->swapSelected(UP);
         }
       } else {
-        for(k = originY; k != i; k++) {
+        for(k = origin.y; k != i; k++) {
           table->swapSelected(DOWN);
         }
       }
