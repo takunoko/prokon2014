@@ -3,18 +3,21 @@
 #include "ProcessBase.h"
 #include <list>
 
+using namespace std;
+
 typedef class Process3 : public ProcessBase {
 private:
   Pos target;
   Pos target_data;
-  std::list<Pos> sorted;
+  list<Pos> sorted;
 
 private:
   Process3();
+  void dispSorted();
   int isSelectedNextToTarget();
   void moveSelectedNextTarget();
-  void moveSelectedToOppositeTarget(int direction);
   int moveTarget();
+  void rotateSelected(int direction);
 public:
   Process3(int w, int h);
   void sort();

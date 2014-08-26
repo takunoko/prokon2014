@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "ProcessBase.h"
 
 ProBase::ProcessBase() {

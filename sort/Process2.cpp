@@ -55,28 +55,28 @@ void Pro2::moveSelectedToOppositeTarget(int direction) {
   Pos p = table->getSelected();
   Pos dummy = target;
 
-  dummy = surroundingsp(target, direction);
+  dummy = surroundings(target, direction);
   if(checkPosEqual(dummy.x, dummy.y, p.x, p.y)) return;
 
-  if(direction == UP && (surroundingsp(target, LEFT).x == p.x && target.y == p.y))
+  if(direction == UP && (surroundings(target, LEFT).x == p.x && target.y == p.y))
     table->swapSelected(DOWN);
-  if(direction == DOWN && (surroundingsp(target, RIGHT).x == p.x && target.y == p.y))
+  if(direction == DOWN && (surroundings(target, RIGHT).x == p.x && target.y == p.y))
     table->swapSelected(UP);
-  if(direction == LEFT && (surroundingsp(target, UP).y == p.y && target.x == p.x))
+  if(direction == LEFT && (surroundings(target, UP).y == p.y && target.x == p.x))
     table->swapSelected(RIGHT);
-  if(direction == RIGHT && (surroundingsp(target, DOWN).y == p.y && target.x == p.x))
+  if(direction == RIGHT && (surroundings(target, DOWN).y == p.y && target.x == p.x))
     table->swapSelected(LEFT);
 
-  if(direction == UP && (surroundingsp(target, LEFT).x == p.x && surroundingsp(target, DOWN).y == p.y)) {
+  if(direction == UP && (surroundings(target, LEFT).x == p.x && surroundings(target, DOWN).y == p.y)) {
     table->swapSelected(RIGHT);
   }
-  if(direction == DOWN && (surroundingsp(target, RIGHT).x == p.x && surroundingsp(target, UP).y == p.y)) {
+  if(direction == DOWN && (surroundings(target, RIGHT).x == p.x && surroundings(target, UP).y == p.y)) {
     table->swapSelected(LEFT);
   }
-  if(direction == LEFT && (surroundingsp(target, RIGHT).x == p.x && surroundingsp(target, UP).y == p.y)) {
+  if(direction == LEFT && (surroundings(target, RIGHT).x == p.x && surroundings(target, UP).y == p.y)) {
     table->swapSelected(DOWN);
   }
-  if(direction == RIGHT && (surroundingsp(target, LEFT).x == p.x && surroundingsp(target, UP).y == p.y)) {
+  if(direction == RIGHT && (surroundings(target, LEFT).x == p.x && surroundings(target, UP).y == p.y)) {
     table->swapSelected(RIGHT);
   }
 
@@ -84,18 +84,18 @@ void Pro2::moveSelectedToOppositeTarget(int direction) {
   // 目的の位置より一番遠い時
   // 左右移動
   if(direction % 2 == 1 && p.y == dummy.y) {
-    if(checkInScope(table->getWidth(), table->getHeight(), dummy.x, surroundingsp(dummy, DOWN).y)) table->swapSelected(DOWN);
-    else if(checkInScope(table->getWidth(), table->getHeight(), dummy.x, surroundingsp(dummy, UP).y)) table->swapSelected(UP);
+    if(checkInScope(table->getWidth(), table->getHeight(), dummy.x, surroundings(dummy, DOWN).y)) table->swapSelected(DOWN);
+    else if(checkInScope(table->getWidth(), table->getHeight(), dummy.x, surroundings(dummy, UP).y)) table->swapSelected(UP);
   }
   // 上下移動
   if(direction % 2 == 0 && p.x == dummy.x) {
-    if(checkInScope(table->getWidth(), table->getHeight(), surroundingsp(dummy, RIGHT).x, dummy.y)) table->swapSelected(RIGHT);
-    else if(checkInScope(table->getWidth(), table->getHeight(), surroundingsp(dummy, LEFT).x, dummy.y)) table->swapSelected(LEFT);
+    if(checkInScope(table->getWidth(), table->getHeight(), surroundings(dummy, RIGHT).x, dummy.y)) table->swapSelected(RIGHT);
+    else if(checkInScope(table->getWidth(), table->getHeight(), surroundings(dummy, LEFT).x, dummy.y)) table->swapSelected(LEFT);
   }
 
   // 目的の位置の隣じゃない時
   p = table->getSelected();
-  dummy = surroundingsp(target, direction);
+  dummy = surroundings(target, direction);
   // 左右
   if(direction == RIGHT) {
     for(i = dummy.x - p.x; i > 0; i--) {
@@ -117,7 +117,7 @@ void Pro2::moveSelectedToOppositeTarget(int direction) {
 
   // 目的の位置の隣の時
   p = table->getSelected();
-  dummy = surroundingsp(target, direction);
+  dummy = surroundings(target, direction);
   if(p.x > dummy.x)
     table->swapSelected(LEFT);
   if(p.x < dummy.x)
@@ -139,14 +139,14 @@ int Pro2::moveTarget() {
   for(; target.x != target_d.x; ) {
     moveSelectedToOppositeTarget(direction);
     table->swapSelected(selected_direction);
-    target = surroundingsp(target, direction);
+    target = surroundings(target, direction);
   }
   direction = target_d.y < target.y ? UP : DOWN;
   selected_direction = target_d.y < target.y ? DOWN : UP ;
   for(; target.y != target_d.y; ) {
     moveSelectedToOppositeTarget(direction);
     table->swapSelected(selected_direction);
-    target = surroundingsp(target, direction);
+    target = surroundings(target, direction);
   }
   table->dispData();
   return 0;

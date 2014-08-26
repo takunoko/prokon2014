@@ -271,12 +271,13 @@ void Dataset::swapNext(int x, int y, int direction) {
   int dy = y;
 
   if(!checkInScope(width, height, x, y)) myerror(1);
-  if(direction < 0 || direction > 3) myerror(1);
+  if(direction < EQUAL || direction > UPPERLEFT) myerror(1);
   surroundings(&dx, &dy, direction);
   swapData(dx, dy, x, y);
 }
 
 void Dataset::swapSelected(int direction) {
+  if(direction == EQUAL) return;
   swapNext(selected.x, selected.y, direction);
   surroundings(&selected.x, &selected.y, direction);
   changed_num++;
