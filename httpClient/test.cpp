@@ -11,6 +11,7 @@ int main(){
  ProkonClient client;
  string res;
  try {
+  // 引数に問題番号を指定して画像のバイナリstringを返す(cv::Mat形式にするかも)
   res=client.getProbrem(0);
   
  } catch (char const * exception) {
