@@ -20,6 +20,7 @@ class ProkonClient{
    return dataLength;
   }
  public:
-  string getProbrem(int porbremNo);
+  static const string SERVER_ADDRESS;
+  string getProbrem(int probremNo);
 };
 #endif

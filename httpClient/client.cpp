@@ -7,11 +7,13 @@
 
 using namespace std;
 
-#define SERVER_ADDRESS "127.0.0.1"
+const string ProkonClient::SERVER_ADDRESS="localhost";
 
-string ProkonClient::getProbrem(int porbremNo){
+string ProkonClient::getProbrem(int probremNo){
  CURL *curl;
  CURLcode res;
+ string url="http://" + SERVER_ADDRESS + "/web2/pic/" + to_string(probremNo) + ".ppm";
+ //string url="http://localhost/web2/pic/1.ppm";
  string chunk;
 
  curl = curl_easy_init();
@@ -21,7 +23,7 @@ string ProkonClient::getProbrem(int porbremNo){
  }
 
  // 要編集
- curl_easy_setopt(curl,CURLOPT_URL,"http://localhost/web2/pic/sample.ppm");
+ curl_easy_setopt(curl,CURLOPT_URL,url.c_str());
  // port:8080
  curl_easy_setopt(curl,CURLOPT_PORT,8080);
 

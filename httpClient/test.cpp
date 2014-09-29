@@ -10,7 +10,15 @@ using namespace std;
 int main(){
  ProkonClient client;
  ofstream ofs("./downloaded.ppm");
- string res=client.getProbrem(0);
+ string res;
+ try {
+  res=client.getProbrem(1);
+  
+ } catch (char * exception) {
+
+  cerr << "Exception: " << exception << endl;
+  exit(EXIT_FAILURE);
+ }
  vector<char> v(res.begin(),res.end());
 
  cv::Mat pic;
