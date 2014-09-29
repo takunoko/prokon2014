@@ -1,12 +1,13 @@
 #include <curl/curl.h>
 #include <iostream>
+#include <fstream>
 #include <string>
 
 #include "client.h"
 
 using namespace std;
 
-#define SERVER_ADDRESS 127.0.0.1
+#define SERVER_ADDRESS "127.0.0.1"
 
 string ProkonClient::getProbrem(int porbremNo){
  CURL *curl;
@@ -17,11 +18,10 @@ string ProkonClient::getProbrem(int porbremNo){
  if(curl==NULL){
   cerr << "!!!curl_easy_init failed!!!" << endl;
   throw "CURL_FAILED";
-  return "";
  }
 
  // 要編集
- curl_easy_setopt(curl,CURLOPT_URL,"http://localhost/index.html");
+ curl_easy_setopt(curl,CURLOPT_URL,"http://localhost/web2/pic/sample.ppm");
  // port:8080
  curl_easy_setopt(curl,CURLOPT_PORT,8080);
 
