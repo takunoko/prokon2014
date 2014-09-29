@@ -40,6 +40,8 @@ void Pro3::moveSelectedNextTarget() {
   int directionUD;
   int move_flagLR;
   int move_flagUD;
+  // ルート検索関数とか作ってここで使いたい
+  // listにルートを保存しとく…？
 
   puts("-------moveSelectedNextTarget-------");
   while(!isSelectedNextToTarget()) {
@@ -54,6 +56,9 @@ void Pro3::moveSelectedNextTarget() {
       if(checkPosEqual(surroundings(s, directionLR), *p))
         move_flagLR = 0;
     }
+    printf("%d, %d\n", move_flagLR, move_flagUD);
+    table->dispData(target.x, target.y);
+    // isNextYとか入れてると出来ない
     if(move_flagUD && !isNextY(target, table->getSelected())) table->swapSelected(directionUD);
     if(move_flagLR && !isNextX(target, table->getSelected())) table->swapSelected(directionLR);
   }
@@ -76,11 +81,11 @@ int Pro3::moveTarget() {
     directionLR = getDirectionLR(target.x, target_data.x);
     movflag_x = 1;
     movflag_y = 1;
+    if(checkPosEqual(target, target_data)) return 1;
     for(p = sorted.begin(); p != sorted.end(); p++) {
-      if(checkPosEqual(target, target_data)) return 1;
       // 横がソートされてたら縦をソートする
       // に変える
-      if(checkPosEqual(surroundings(target, directionUD), *p)) {
+      if(checkPosEqual(surroundings(target, directionLR), *p)) {
         movflag_x = 0;
       }
     }
@@ -89,10 +94,13 @@ int Pro3::moveTarget() {
       rotateSelected(directionLR);
       table->swapSelected(getReversedDirection(directionLR));
       table->dispData();
-    } else {
+    } /*else {
       rotateSelected(directionUD);
       table->swapSelected(getReversedDirection(directionUD));
-    }
+    }*/
+
+    directionUD = getDirectionUD(target.y, target_data.y);
+    directionLR = getDirectionLR(target.x, target_data.x);
     target = table->findData(target_data);
     if(checkPosEqual(target, target_data)) return 1;
 
@@ -107,10 +115,10 @@ int Pro3::moveTarget() {
     if(movflag_y) {
       rotateSelected(directionUD);
       table->swapSelected(getReversedDirection(directionUD));
-    } else {
+    } /*else {
       rotateSelected(directionLR);
       table->swapSelected(getReversedDirection(directionLR));
-    }
+    }*/
     target = table->findData(target_data);
   }
   while(target.y != target_data.y) {
@@ -134,9 +142,10 @@ void Pro3::rotateSelected(int direction) {
   // 間違ってる
   int move_direction = dir_selected > direction ? -1 : 1;
 
+  if(direction == EQUAL) return;
   if(checkPosEqual(table->getSelected(), surroundings(target, direction))) return;
   if(!checkInScope(table->getWidth(), table->getHeight(), surroundings(target, direction).x, surroundings(target, direction).y)) {
-    puts("cant ratate...");
+    puts("cant rotate...");
     return;
   }
 
@@ -159,6 +168,7 @@ void Pro3::rotateSelected(int direction) {
       }
     }
     if(reverse_flag == 1) {
+      move_distance = DIRECTION_NUM - move_distance;
       move_direction *= -1;
       break;
     }
@@ -169,14 +179,19 @@ void Pro3::rotateSelected(int direction) {
   puts("-------rotateSelected-------");
   printf("move_direction = %d\n", move_direction);
   printf("move_distance = %d\n", move_distance);
+  printf("direction = %d\n", direction);
+  printf("target = %d, %d\n", target.x, target.y);
   for(i = 0; i < move_distance; i++) {
     // 目的地についたら止めたほうがいいかも
     j = (j + move_direction + DIRECTION_NUM) % DIRECTION_NUM;
     move_dir = getDirection(table->getSelected(), surroundings(target, j));
+    printf("j = %d\n", j);
     printf("move_dir = %d\n", move_dir);
     table->swapSelected(move_dir);
+    puts("gnalfg");
     table->dispData(target.x, target.y);
   }
+  puts("end");
 }
 
 void Pro3::sort() {
@@ -193,9 +208,9 @@ void Pro3::sort() {
   return;
 */
   // 上半分
-  for(i = 0; i < table->getHeight() - 2; i++) {
+  for(i = 0; i < /*table->getHeight() - 2*/3; i++) {
     // 端以外の
-    for(j = 0; j < table->getWidth() - 1; j++) {
+    for(j = 0; j < /*table->getWidth() - 1*/3; j++) {
       target_data = Pos(j, i);
       target = table->findData(target_data);
       table->dispData(target.x, target.y);

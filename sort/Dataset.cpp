@@ -266,18 +266,46 @@ void Dataset::swapData(int x1, int y1, int x2, int y2) {
   setDistance(x2, y2);
 }
 
+void Dataset::swapDataSelected(int x, int y) {
+  swapData(selected.x, selected.y, x, y);
+  selected.x = x;
+  selected.y = y;
+  changed_num++;
+  if(move_flag == 0) {
+    selected_num++;
+    move_flag = 1;
+  }
+}
+
+void Dataset::swapDataSelected(Pos pos) {
+  swapData(selected.x, selected.y, pos.x, pos.y);
+  selected.x = pos.x;
+  selected.y = pos.y;
+  changed_num++;
+  if(move_flag == 0) {
+    selected_num++;
+    move_flag = 1;
+  }
+}
+
 void Dataset::swapNext(int x, int y, int direction) {
   int dx = x;
   int dy = y;
 
   if(!checkInScope(width, height, x, y)) myerror(1);
-  if(direction < EQUAL || direction > UPPERLEFT) myerror(1);
+  if(direction < EQUAL || direction >= DIRECTION_NUM) myerror(1);
   surroundings(&dx, &dy, direction);
   swapData(dx, dy, x, y);
 }
 
 void Dataset::swapSelected(int direction) {
-  if(direction == EQUAL) return;
+  if(direction == EQUAL) {
+    puts("direction = EQUAL");
+    return;
+  } else if(direction % 2 == 1) {
+    puts("naname direction");
+    return;
+  }
   swapNext(selected.x, selected.y, direction);
   surroundings(&selected.x, &selected.y, direction);
   changed_num++;
