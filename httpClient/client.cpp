@@ -17,6 +17,7 @@ string ProkonClient::getProbrem(int probremNo){
  string chunk;
 
  curl = curl_easy_init();
+ //curl=NULL;
  if(curl==NULL){
   cerr << "!!!curl_easy_init failed!!!" << endl;
   throw "CURL_FAILED";
