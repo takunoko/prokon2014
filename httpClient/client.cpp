@@ -12,6 +12,7 @@ const string ProkonClient::SERVER_ADDRESS="localhost";
 string ProkonClient::getProbrem(int probremNo){
  CURL *curl;
  CURLcode res;
+ long http_code=0;
  string url="http://" + SERVER_ADDRESS + "/web2/pic/" + to_string(probremNo) + ".ppm";
  //string url="http://localhost/web2/pic/1.ppm";
  string chunk;
@@ -31,11 +32,16 @@ string ProkonClient::getProbrem(int probremNo){
  curl_easy_setopt(curl,CURLOPT_WRITEFUNCTION,ProkonClient::callbackWrite);
  curl_easy_setopt(curl,CURLOPT_WRITEDATA,&chunk);
  res=curl_easy_perform(curl);
+ curl_easy_getinfo(curl,CURLINFO_RESPONSE_CODE,&http_code);
  curl_easy_cleanup(curl);
 
  if(res != CURLE_OK){
   cerr << "!!!curl_easy_perform failed!!!" << endl;
   throw "PERFORM FAILED";
+ }
+ if(http_code != 200){
+  cerr << "STATUS CODE IS NOT 200:" << to_string(http_code) << endl;
+  throw "STATUS CODE WRONG";
  }
  return chunk;
 }
