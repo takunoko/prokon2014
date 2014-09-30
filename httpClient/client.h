@@ -21,6 +21,8 @@ class ProkonClient{
   }
  public:
   static const string SERVER_ADDRESS;
-  string getProbrem(int probremNo);
+  static const string TEAM_TOKEN;
+  string getProblem(int problemNo);
+  string sendAnswer(int problemNo,string answer);
 };
 #endif
