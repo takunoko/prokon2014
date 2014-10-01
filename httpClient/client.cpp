@@ -1,6 +1,6 @@
 #include <curl/curl.h>
 #include <iostream>
-#include <fstream>
+#include <sstream>
 #include <string>
 
 #include "client.h"
@@ -8,15 +8,23 @@
 using namespace std;
 
 // サーバー
-const string ProkonClient::SERVER_ADDRESS="localhost";
+const string ProkonClient::SERVER_ADDRESS="localhost/web2/pic";
 // チーム固有トークン
-const string ProkonClient::TEAM_TOKEN="localhost";
+const string ProkonClient::TEAM_TOKEN="SKYHIGH\nCHRONOS\nENDLESS\n";
 
 string ProkonClient::getProblem(int problemNo){
  CURL *curl;
  CURLcode res;
  long http_code=0;
- string url="http://" + SERVER_ADDRESS + "/web2/pic/problem/" + to_string(problemNo) + ".ppm";
+ ostringstream probStr;
+ //問題番号部分指定
+ probStr.setf(ios::right);
+ probStr.fill('0');
+ probStr.width(2);
+ probStr << problemNo;
+
+ string url="http://" + SERVER_ADDRESS + "/problem/prob" + probStr.str() + ".ppm";
+ cout << url << endl;
  //string url="http://localhost/web2/pic/1.ppm";
  string chunk;
 
@@ -57,7 +65,7 @@ string ProkonClient::sendAnswer(int problemNo,string answer){
  char *tmp;
 
  //http://{ServerAddress}/SubmitAnswer
- string url="http://" + SERVER_ADDRESS + "/web2/pic/SubmitAnswer.pl";
+ string url="http://" + SERVER_ADDRESS + "/SubmitAnswer.pl";
  string chunk;
 
  curl = curl_easy_init();
