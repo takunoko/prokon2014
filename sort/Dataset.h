@@ -46,6 +46,8 @@ public:
   void randomizeData();
   void resetData();
   void selectData(int x, int y);
+  void swapDataSelected(int x, int y);
+  void swapDataSelected(Pos pos);
   void swapSelected(int direction);
 };
 

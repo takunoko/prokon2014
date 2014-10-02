@@ -6,7 +6,7 @@ using namespace std;
 int main(void){
 	string a;
 
-	a = "test";
+	a = "test1";
 
 	cout << a << endl;
 

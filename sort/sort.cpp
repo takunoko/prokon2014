@@ -4,8 +4,8 @@
 #include "Process1.h"
 #include "Process2.h"
 #include "Process3.h"
-#define WIDTH 4
-#define HEIGHT 4
+#define WIDTH 6
+#define HEIGHT 6
 
 int main(void) {
   srand((unsigned)time(NULL));
