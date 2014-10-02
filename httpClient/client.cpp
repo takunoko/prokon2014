@@ -5,7 +5,7 @@
 
 #include "client.h"
 
-#define debug 1
+#define DEBUG 1
 
 using namespace std;
 
