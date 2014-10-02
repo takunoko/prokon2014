@@ -5,6 +5,8 @@
 
 #include "client.h"
 
+#define debug 1
+
 using namespace std;
 
 // サーバー
@@ -13,9 +15,17 @@ const string ProkonClient::SERVER_ADDRESS="localhost/web2/pic";
 const string ProkonClient::TEAM_TOKEN="SKYHIGH\nCHRONOS\nENDLESS\n";
 
 string ProkonClient::getProblem(int problemNo){
+ // curlオブジェクト
  CURL *curl;
+ // 実行結果
  CURLcode res;
+ // httpコード (200とか404とか)
  long http_code=0;
+ // ダウンロードしたデータ
+ string chunk;
+
+
+ // URL用問題番号の文字列
  ostringstream probStr;
  //問題番号部分指定
  probStr.setf(ios::right);
@@ -23,11 +33,11 @@ string ProkonClient::getProblem(int problemNo){
  probStr.width(2);
  probStr << problemNo;
 
+ // URL
  string url="http://" + SERVER_ADDRESS + "/problem/prob" + probStr.str() + ".ppm";
+#if DEBUG==1
  cout << url << endl;
- //string url="http://localhost/web2/pic/1.ppm";
- string chunk;
-
+#endif
  curl = curl_easy_init();
  //curl=NULL;
  if(curl==NULL){
