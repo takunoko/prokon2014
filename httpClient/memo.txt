@@ -1,0 +1,13 @@
+問題情報
+http://{ServerAddress}/problem/probXX.ppm
+* {ServerAddress}: サーバアドレス
+* XX: 問題番号
+
+回答提出 *フォーム*
+http://{ServerAddress}/SubmitForm
+
+回答提出先 
+http://{ServerAddress}/SubmitAnswer
+POST形式で送信
+playerid={TeamToken}&problemid={ProblemID}&answer={Answer}
+RFC 2396に従ってエスケープ
