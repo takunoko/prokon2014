@@ -47,6 +47,10 @@ int getDirectionUD(int oy, int y) {
   return (oy < y) ? DOWN : UP;
 }
 
+int isConnected(Pos p1, Pos p2) {
+  return ((p1.x-1 == p2.x && p1.y == p2.y) || (p1.x+1 == p2.x && p1.y == p2.y) || (p1.x == p2.x && p1.y-1 == p2.y) || (p1.x == p2.x && p1.y+1 == p2.y));
+}
+
 int isNext(Pos p1, Pos p2) {
   return ((p1.x+1 == p2.x || p1.x-1 == p2.x || p1.x == p2.x) && (p1.y-1 == p2.y || p1.y+1 == p2.y || p1.y == p2.y));
 }

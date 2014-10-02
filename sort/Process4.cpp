@@ -1,21 +1,21 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "Process3.h"
+#include "Process4.h"
 #include "util.h"
 
 using namespace std;
 
-Pro3::Process3(): ProcessBase() {
+Pro4::Process4(): ProcessBase() {
   target.setZero();
   target_data.setZero();
 }
 
-Pro3::Process3(int w, int h): ProcessBase(w, h) {
+Pro4::Process4(int w, int h): ProcessBase(w, h) {
   target.setZero();
   target_data.setZero();
 }
 
-void Pro3::dispSorted() {
+void Pro4::dispSorted() {
   list<Pos>::iterator p;
 
   for(p = sorted.begin(); p != sorted.end(); p++) {
@@ -25,14 +25,13 @@ void Pro3::dispSorted() {
 }
 
 // 安全
-int Pro3::isSelectedNextToTarget() {
+int Pro4::isSelectedNextToTarget() {
   Pos s = table->getSelected();
 
   return isNext(s, target);
-  //return ((s.x+1 == target.x || s.x-1 == target.x || s.x == target.x) && (s.y-1 == target.y || s.y+1 == target.y || s.y == target.y));
 }
 
-void Pro3::moveSelectedNextTarget() {
+void Pro4::moveSelectedNextTarget() {
   Pos s = table->getSelected();
   list<Pos>::iterator p;
 
@@ -65,23 +64,23 @@ void Pro3::moveSelectedNextTarget() {
   table->dispData(target.x, target.y);
 }
 
-int Pro3::moveTarget() {
+int Pro4::moveTarget(Pos pos) {
   list<Pos>::iterator p;
-  int directionUD = getDirectionUD(target.y, target_data.y);
-  int directionLR = getDirectionLR(target.x, target_data.x);
+  int directionUD = getDirectionUD(target.y, pos.y);
+  int directionLR = getDirectionLR(target.x, pos.x);
   int movflag_x = 1;
   int movflag_y = 1;
 
-  if(checkPosEqual(target, target_data)) return 1;
+  if(checkPosEqual(target, pos)) return 1;
   // targetの隣へ
   moveSelectedNextTarget();
   // 動かすループ
-  while(target.x != target_data.x) {
-    directionUD = getDirectionUD(target.y, target_data.y);
-    directionLR = getDirectionLR(target.x, target_data.x);
+  while(target.x != pos.x) {
+    directionUD = getDirectionUD(target.y, pos.y);
+    directionLR = getDirectionLR(target.x, pos.x);
     movflag_x = 1;
     movflag_y = 1;
-    if(checkPosEqual(target, target_data)) return 1;
+    if(checkPosEqual(target, pos)) return 1;
     for(p = sorted.begin(); p != sorted.end(); p++) {
       // 横がソートされてたら縦をソートする
       // に変える
@@ -99,10 +98,10 @@ int Pro3::moveTarget() {
       table->swapSelected(getReversedDirection(directionUD));
     }*/
 
-    directionUD = getDirectionUD(target.y, target_data.y);
-    directionLR = getDirectionLR(target.x, target_data.x);
-    target = table->findData(target_data);
-    if(checkPosEqual(target, target_data)) return 1;
+    directionUD = getDirectionUD(target.y, pos.y);
+    directionLR = getDirectionLR(target.x, pos.x);
+    target = table->findData(pos);
+    if(checkPosEqual(target, pos)) return 1;
 
     for(p = sorted.begin(); p != sorted.end(); p++) {
       // 横がソートされてたら縦をソートする
@@ -119,20 +118,20 @@ int Pro3::moveTarget() {
       rotateSelected(directionLR);
       table->swapSelected(getReversedDirection(directionLR));
     }*/
-    target = table->findData(target_data);
+    target = table->findData(pos);
   }
-  while(target.y != target_data.y) {
+  while(target.y != pos.y) {
     //for(p = sorted.begin(); p != sorted.end(); p++) {
-      directionUD = getDirectionUD(target.y, target_data.y);
+      directionUD = getDirectionUD(target.y, pos.y);
       rotateSelected(directionUD);
       table->swapSelected(getReversedDirection(directionUD));
-      target = table->findData(target_data);
+      target = table->findData(pos);
     //}
   }
   return 0;
 }
 
-void Pro3::rotateSelected(int direction) {
+void Pro4::rotateSelected(int direction) {
   // int dir_val = (direction + DIRECTION_NUM / 2) % DIRECTION_NUM;
   // directionは動かす方向
   // targetから見たselectedの方向
@@ -140,10 +139,14 @@ void Pro3::rotateSelected(int direction) {
   int move_distance = abs(direction - dir_selected);
   // 1か-1
   // 間違ってる
+  //-----------------------------直すところ
   int move_direction = dir_selected > direction ? -1 : 1;
 
   if(direction == EQUAL) return;
-  if(checkPosEqual(table->getSelected(), surroundings(target, direction))) return;
+  if(checkPosEqual(table->getSelected(), surroundings(target, direction)))  {
+    puts("selected dont need to rotate");
+    return;
+  }
   if(!checkInScope(table->getWidth(), table->getHeight(), surroundings(target, direction).x, surroundings(target, direction).y)) {
     puts("cant rotate...");
     return;
@@ -188,13 +191,12 @@ void Pro3::rotateSelected(int direction) {
     printf("j = %d\n", j);
     printf("move_dir = %d\n", move_dir);
     table->swapSelected(move_dir);
-    puts("gnalfg");
     table->dispData(target.x, target.y);
   }
   puts("end");
 }
 
-void Pro3::sort() {
+void Pro4::sort() {
   int i, j;
 
   table->dispData();
@@ -215,17 +217,23 @@ void Pro3::sort() {
       target = table->findData(target_data);
       table->dispData(target.x, target.y);
       // 目的地へ移動
-      moveTarget();
+      moveTarget(target_data);
       target = table->findData(target_data);
       sorted.push_back(target);
     }
+    puts("alhsiudhfaisudhfoiauh");
     target_data = Pos(table->getWidth()-1, i);
     target = table->findData(target_data);
+    moveTarget(Pos(table->getWidth()-2, i));
+    target_data = Pos(table->getWidth()-2, i);
+    target = table->findData(target_data);
+    moveTarget(Pos(table->getWidth()-2, i+1));
     // 一番右側
     // ソートした部分をずらす
     // 一番右側のを正しい位置に
     // ずらしたのを戻す
     // sorted.push_back(target);
+    return;
   }
   table->dispData();
 
