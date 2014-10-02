@@ -24,7 +24,7 @@ int main(){
  //cout << res << endl;
  vector<char> v(res.begin(),res.end());
 
-#if 0
+#if 1
  cv::Mat pic;
  pic=cv::imdecode(cv::Mat(v),-1);
  cv::namedWindow("testWindow",CV_WINDOW_AUTOSIZE);
