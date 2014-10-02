@@ -39,6 +39,7 @@ extern int getDirection(Pos source, Pos destination);
 extern int getDirectionLR(int ox, int x);
 extern int getDirectionUD(int oy, int y);
 extern int getReversedDirection(int direction);
+extern int isConnected(Pos p1, Pos p2);
 extern int isNext(Pos p1, Pos p2);
 extern int isNextX(Pos p1, Pos p2);
 extern int isNextY(Pos p1, Pos p2);
