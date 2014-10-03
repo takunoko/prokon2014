@@ -246,6 +246,7 @@ void Dataset::resetData() {
 
 void Dataset::selectData(int x, int y) {
   if(!checkInScope(width, height, x, y)) myerror(1);
+  if(checkPosEqual(x, y, selected.x, selected.y)) return;
   selected.x = x;
   selected.y = y;
   move_flag = 0;
@@ -265,7 +266,7 @@ void Dataset::swapData(int x1, int y1, int x2, int y2) {
   setDistance(x1, y1);
   setDistance(x2, y2);
 }
-
+/*
 void Dataset::swapDataSelected(int x, int y) {
   swapData(selected.x, selected.y, x, y);
   selected.x = x;
@@ -286,7 +287,7 @@ void Dataset::swapDataSelected(Pos pos) {
     selected_num++;
     move_flag = 1;
   }
-}
+}*/
 
 void Dataset::swapNext(int x, int y, int direction) {
   int dx = x;
@@ -306,11 +307,15 @@ void Dataset::swapSelected(int direction) {
     puts("naname direction");
     return;
   }
+  if(move_flag == 0) {
+    selected_num++;
+    selected_pos.push_back(convertHex(selected.y, selected.x));
+    changed_nums.push_back(0);
+    move_flag = 1;
+  }
   swapNext(selected.x, selected.y, direction);
   surroundings(&selected.x, &selected.y, direction);
   changed_num++;
-  if(move_flag == 0) {
-    selected_num++;
-    move_flag = 1;
-  }
+  (*changed_nums.end())++;
+  process.push_back(direction);
 }

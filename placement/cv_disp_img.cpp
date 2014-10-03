@@ -19,7 +19,7 @@
 //画像ファイル名と分割数
 //後々、分割数をファイルから読み込む
 #define FILENAME "../pic_data/9.ppm"
-#define PIECE_X 16 
+#define PIECE_X 16
 #define PIECE_Y 16
 
 //XY座標を1次元に変換する
@@ -85,7 +85,7 @@ class PPMFILE{
 			vector< vector< vector< pair<int,int> > > > cost( part_size_x*part_size_y, vector<vector<pair<int,int> > >(4, vector<pair<int,int> >( part_size_x*part_size_y)));
 			//上下左右のcostを保持
 			int cost_tmp[4];
-		
+
 			cout << "start_calc" << endl;
 
 			//自分の座標 abs_*
@@ -133,20 +133,21 @@ class PPMFILE{
 
 			cout << "start_sort" << endl;
 
-			// for(int abs_y=0; abs_y < part_size_y; ++abs_y){
-			// 	for(int abs_x=0; abs_x < part_size_x; ++abs_x){
-			// 		// 優先度順
-			// 		cout << "x: " << abs_x << "y: " << abs_y << endl;
-			// 		cout << " u d r l" << endl;
-			// 		for(int i=0; i < part_size_x * part_size_y; i++){
-			// 			cout << " sc:" << cost[CONV_XY( abs_x, abs_y)][0][i].first << " in: " << cost[CONV_XY( abs_x, abs_y)][0][i].second;
-			// 			cout << "| sc:" << cost[CONV_XY( abs_x, abs_y)][1][i].first << " in: " << cost[CONV_XY( abs_x, abs_y)][1][i].second;
-			// 			cout << "| sc:" << cost[CONV_XY( abs_x, abs_y)][2][i].first << " in: " << cost[CONV_XY( abs_x, abs_y)][2][i].second;
-			// 			cout << "| sc:" << cost[CONV_XY( abs_x, abs_y)][3][i].first << " in: " << cost[CONV_XY( abs_x, abs_y)][3][i].second;
-			// 			cout << endl;
-			// 		}
-			// 	}
-			// }
+			for(int abs_y=0; abs_y < part_size_y; ++abs_y){
+				for(int abs_x=0; abs_x < part_size_x; ++abs_x){
+					// 優先度順
+					cout << "x: " << abs_x << "y: " << abs_y << endl;
+					cout << " u d r l" << endl;
+					for(int i=0; i < part_size_x * part_size_y; i++){
+						cout << " sc:" << cost[CONV_XY( abs_x, abs_y)][0][i].first << " in: " << cost[CONV_XY( abs_x, abs_y)][0][i].second;
+						cout << "| sc:" << cost[CONV_XY( abs_x, abs_y)][1][i].first << " in: " << cost[CONV_XY( abs_x, abs_y)][1][i].second;
+						cout << "| sc:" << cost[CONV_XY( abs_x, abs_y)][2][i].first << " in: " << cost[CONV_XY( abs_x, abs_y)][2][i].second;
+						cout << "| sc:" << cost[CONV_XY( abs_x, abs_y)][3][i].first << " in: " << cost[CONV_XY( abs_x, abs_y)][3][i].second;
+						cout << endl;
+					}
+				}
+			}
+
 			cout << "end calc" << endl;
 		}
 };

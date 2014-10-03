@@ -1,14 +1,13 @@
+#include <tuple>
+
 #include <iostream>
 #include <string>
 
 using namespace std;
 
 int main(void){
-	string a;
 
-	a = "test1";
-
-	cout << a << endl;
+	tuple <int, int, int> t;
 
 	return 0;
 }

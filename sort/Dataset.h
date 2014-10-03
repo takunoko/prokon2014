@@ -4,6 +4,9 @@
 #define MAXHEIGHT 16
 #include "Pos.h"
 #include "PosData.h"
+#include <list>
+
+using namespace std;
 
 class Dataset {
 private:
@@ -13,6 +16,9 @@ private:
   int width, height;
   int selected_num, changed_num;
   int move_flag;
+  list<int> process;
+  list<int> selected_pos;
+  list<int> changed_nums;
 
 private:
   Dataset();
@@ -46,8 +52,8 @@ public:
   void randomizeData();
   void resetData();
   void selectData(int x, int y);
-  void swapDataSelected(int x, int y);
-  void swapDataSelected(Pos pos);
+  /*void swapDataSelected(int x, int y);
+  void swapDataSelected(Pos pos);*/
   void swapSelected(int direction);
 };
 

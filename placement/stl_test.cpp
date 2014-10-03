@@ -1,57 +1,56 @@
-// stlを使ってみる　
 #include <iostream>
-#include <string>
-
-#include <random>
-
+#include <tuple>
 #include <vector>
+#include <algorithm>
 
-using namespace std;
+// C++11のタプルをvectorに突っ込んでソート
 
-int main(void){
-	int size;
+typedef std::tuple<int, std::string, double> mytuple;
 
-	// 乱数をうんぬんするための処理。
-	// あまり気にしなくてOK
-	random_device rd;
-	mt19937 mt(rd());
-	uniform_int_distribution<int> dice(1,100);
+// タプルの最初の要素から順番に比較　もしその要素が同じなら次の要素で比較
+bool mycompare( const mytuple &lhs, const mytuple &rhs )
+{
+	if (std::get<0>(lhs) != std::get<0>(rhs)) return std::get<0>(lhs) < std::get<0>(rhs);
+	if (std::get<1>(lhs) != std::get<1>(rhs)) return std::get<1>(lhs) < std::get<1>(rhs);
+	return std::get<2>(lhs) < std::get<2>(rhs);
+}
 
-
-	//cin >> size;
-	//vector<int> v(size);
-	
-	std::vector<int> v;
-
-	for(int i=0; i<10; i++){
-		v.push_back(dice(mt));
+void print_vector( std::vector<mytuple>& vec )
+{
+	for( auto& element : vec ) {
+		std::cout << std::get<0>(element) << ", " << std::get<1>(element) << ", " << std::get<2>(element) << std::endl;
 	}
+	std::cout << std::endl;
+}
 
-	//for(int i; i<10; i++){
-	//	cout << "v : " << v[i] << endl;
-	//}
-	//cout << endl;
+int main() {
+	std::vector<mytuple> vec{
+		std::make_tuple(50, "ccc", 7.5),
+			std::make_tuple(30, "kkk", 8.5),
+			std::make_tuple(20, "ddd", 9.5),
+			std::make_tuple(50, "aaa", 7.5),
+			std::make_tuple(20, "ddd", 3.5),
+			std::make_tuple(50, "ccc", 2.5),
+			std::make_tuple(30, "zzz", -1.5)
+	};
 
-	for(vector<int>::iterator i=v.begin(); i!=v.end(); i++){
-		cout << "v : " << *i << endl;
-	}
+	// 比較関数を使ってソートする場合
+	sort(vec.begin(), vec.end(), mycompare);
+	print_vector(vec);
 
-	cout << endl;
+	// いったんシャッフル
+	std::random_shuffle(std::begin(vec), std::end(vec));
 
-	std::sort(v.begin(), v.end()); // ソートしてくれる
-
-	for(vector<int>::iterator i=v.begin(); i!=v.end(); i++){
-		cout << "v : " << *i << endl;
-	}
-
-	// 最初から vector<int>::iterator i=v.begin(); i!=v.end(); i++
-	// 後ろから vector<int>::reverse_iterator i=v.rbegin(); i!=v.rend(); i++ (全体的にrがつく)
-
-	//cout << endl;
-	//for(int value : v){
-	//	cout << "v : " << value << endl;
-	//}//ちょっとヤバそうなやり方
-
+	// ラムダ式を使ってソートする場合
+	sort(vec.begin(),
+			vec.end(),
+			[](mytuple const &lhs, mytuple const &rhs) {
+			if (std::get<0>(lhs) != std::get<0>(rhs)) return std::get<0>(lhs) < std::get<0>(rhs);
+			if (std::get<1>(lhs) != std::get<1>(rhs)) return std::get<1>(lhs) < std::get<1>(rhs);
+			return std::get<2>(lhs) < std::get<2>(rhs);
+			}
+			);
+	print_vector(vec);
 
 	return 0;
 }
