@@ -27,6 +27,16 @@
 
 using namespace std;
 
+typedef tuple< int, int, int, int> cost_tuple;
+
+// tupleを比較するときのルール
+bool my_compare( const cost_tuple &lhs, const cost_tuple &rhs){
+	if (std::get<0>(lhs) != std::get<0>(rhs)) return std::get<0>(lhs) < std::get<0>(rhs);
+	if (std::get<1>(lhs) != std::get<1>(rhs)) return std::get<1>(lhs) < std::get<1>(rhs);
+	if (std::get<2>(lhs) != std::get<2>(rhs)) return std::get<2>(lhs) < std::get<2>(rhs);
+	return std::get<2>(lhs) < std::get<2>(rhs);
+}
+
 void disp_img();
 
 class PPMFILE{
@@ -81,10 +91,14 @@ class PPMFILE{
 				}
 			}
 		}
+		// 配列の近似値を計算ｎする。
 		void calc_cost(void){
+			// costの宣言
 			vector< vector< vector< pair<int,int> > > > cost( part_size_x*part_size_y, vector<vector<pair<int,int> > >(4, vector<pair<int,int> >( part_size_x*part_size_y)));
 			//上下左右のcostを保持
 			int cost_tmp[4];
+
+			vector<cost_tuple> cost_t((part_size_x*part_size_y)*(part_size_x*part_size_y)*4);
 
 			cout << "start_calc" << endl;
 
@@ -112,6 +126,8 @@ class PPMFILE{
 								}
 							}
 
+							// cost_t[abs_x*abs_y*x*y*1]
+
 							cost[CONV_XY( abs_x, abs_y)][0][CONV_XY( x, y)] = make_pair( cost_tmp[0], CONV_XY( x, y));
 							cost[CONV_XY( abs_x, abs_y)][1][CONV_XY( x, y)] = make_pair( cost_tmp[1], CONV_XY( x, y));
 							cost[CONV_XY( abs_x, abs_y)][2][CONV_XY( x, y)] = make_pair( cost_tmp[2], CONV_XY( x, y));
@@ -120,6 +136,8 @@ class PPMFILE{
 					}
 				}
 			}
+
+			cout << "start_sort" << endl;
 
 			// それぞれの方向について、良い結果順にソート
 			for(int abs_y=0; abs_y < part_size_y; ++abs_y){
@@ -130,8 +148,6 @@ class PPMFILE{
 					sort( cost[CONV_XY( abs_x, abs_y)][3].begin(), cost[CONV_XY( abs_x, abs_y)][3].end());
 				}
 			}
-
-			cout << "start_sort" << endl;
 
 			for(int abs_y=0; abs_y < part_size_y; ++abs_y){
 				for(int abs_x=0; abs_x < part_size_x; ++abs_x){
