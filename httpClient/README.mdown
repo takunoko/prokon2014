@@ -1,3 +1,7 @@
 # ProkonClient #
 * string ProkonClient::getProbrem(int 問題番号)  
     問題番号に対応した画像データダウンロード
+* string sendAnswer(int problemNo,string answer)  
+    回答送信  
+    + answer:回答データ
+    + problemNo: 問題番号
