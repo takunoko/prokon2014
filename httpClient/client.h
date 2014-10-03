@@ -4,6 +4,7 @@
 #include <string>
 #include <stdio.h>
 #include <fstream>
+#include <curl/curl.h>
 
 using namespace std;
 
@@ -19,7 +20,14 @@ class ProkonClient{
    // サイズを返す
    return dataLength;
   }
+  string getData(string url,string postData);
+  string getData(string url);
+  // curlオブジェクト
+  CURL *curl;
  public:
+  // コンストラクタ
+  ProkonClient();
+  ~ProkonClient();
   static const string SERVER_ADDRESS;
   static const string TEAM_TOKEN;
   string getProblem(int problemNo);
