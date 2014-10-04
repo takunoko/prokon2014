@@ -108,51 +108,77 @@ class PPMFILE{
 
 			cout << "start_calc" << endl;
 
-			//自分の座標 abs_*
-			for(int abs_y=0; abs_y < part_size_y; ++abs_y){
-				for(int abs_x=0; abs_x < part_size_x; ++abs_x){
-					//自分と他の比較
-					for(int y=0; y < part_size_y; ++y){
-						for(int x=0; x < part_size_x; ++x){
-							//コスト初期化
-							for(int i=0; i<4; i++){
-								cost_tmp[i] = 0;
-							}
-							//カラーの数だけ繰り返す
-							for(int c=0; c < part_img[CONV_XY( abs_x, abs_y)].channels(); ++c){
-								//各ピクセル上下
-								for(int px_x=0; px_x < part_img[0].cols; ++px_x){
-									cost_tmp[0] += abs(part_img[CONV_XY( abs_x, abs_y)].at<cv::Vec3b>( 0, px_x)[c] - part_img[CONV_XY( x, y)].at<cv::Vec3b>( part_img[0].rows-1, px_x)[c]);
-									cost_tmp[1] += abs(part_img[CONV_XY( abs_x, abs_y)].at<cv::Vec3b>( part_img[0].rows-1, px_x)[c] - part_img[CONV_XY( x, y)].at<cv::Vec3b>( 0, px_x)[c]);
-								}
-								//各ピクセル左右
-								for(int px_y=0; px_y < part_img[0].rows; ++px_y){
-									cost_tmp[2] += abs(part_img[CONV_XY( abs_x, abs_y)].at<cv::Vec3b>( px_y, part_img[0].cols-1)[c] - part_img[CONV_XY( x, y)].at<cv::Vec3b>( px_y, 0)[c]);
-									cost_tmp[3] += abs(part_img[CONV_XY( abs_x, abs_y)].at<cv::Vec3b>( px_y, 0)[c] - part_img[CONV_XY( x, y)].at<cv::Vec3b>( px_y, part_img[0].cols-1)[c]);
-								}
-							}
+			// 差分積算を求める
+			// 効率が悪い
+			// for(int abs_y=0; abs_y < part_size_y; ++abs_y){
+			// 	for(int abs_x=0; abs_x < part_size_x; ++abs_x){
+			// 		{
+			// 			//自分と他の比較
+			// 			// 無駄な比較を防ぐ abs_x+1が正しく動作してるかは微妙
+			// 			for(int y=0; y < part_size_y; ++y){
+			// 				for(int x=0; x < part_size_x; ++x){
+			// 					//コスト初期化
+			// 					for(int i=0; i<4; i++){
+			// 						cost_tmp[i] = 0;
+			// 					}
+			// 					//カラーの数だけ繰り返す
+			// 					for(int c=0; c < part_img[CONV_XY( abs_x, abs_y)].channels(); ++c){
+			// 						//各ピクセル上下
+			// 						for(int px_x=0; px_x < part_img[0].cols; ++px_x){
+			// 							cost_tmp[0] += abs(part_img[CONV_XY( abs_x, abs_y)].at<cv::Vec3b>( 0, px_x)[c] - part_img[CONV_XY( x, y)].at<cv::Vec3b>( part_img[0].rows-1, px_x)[c]);
+			// 							cost_tmp[1] += abs(part_img[CONV_XY( abs_x, abs_y)].at<cv::Vec3b>( part_img[0].rows-1, px_x)[c] - part_img[CONV_XY( x, y)].at<cv::Vec3b>( 0, px_x)[c]);
+			// 						}
+			// 						//各ピクセル左右
+			// 						for(int px_y=0; px_y < part_img[0].rows; ++px_y){
+			// 							cost_tmp[2] += abs(part_img[CONV_XY( abs_x, abs_y)].at<cv::Vec3b>( px_y, part_img[0].cols-1)[c] - part_img[CONV_XY( x, y)].at<cv::Vec3b>( px_y, 0)[c]);
+			// 							cost_tmp[3] += abs(part_img[CONV_XY( abs_x, abs_y)].at<cv::Vec3b>( px_y, 0)[c] - part_img[CONV_XY( x, y)].at<cv::Vec3b>( px_y, part_img[0].cols-1)[c]);
+			// 						}
+			// 					}
 
-							// cost_t [ コスト, 自分の座標, 相手の座標, 方向]
-							for(int k=0; k<4; k++){
-								cost_t.push_back(make_tuple( cost_tmp[k], CONV_XY( abs_x, abs_y), CONV_XY( x, y), k));
-								cost[CONV_XY( abs_x, abs_y)][k][CONV_XY( x, y)] = make_pair( cost_tmp[k], CONV_XY( x, y));
-							}
+			// 					// cost_t [ コスト, 自分の座標, 相手の座標, 方向]
+			// 					for(int k=0; k<4; k++){
+			// 						cost_t.push_back(make_tuple( cost_tmp[k], CONV_XY( abs_x, abs_y), CONV_XY( x, y), k));
+			// 						cost[CONV_XY( abs_x, abs_y)][k][CONV_XY( x, y)] = make_pair( cost_tmp[k], CONV_XY( x, y));
+			// 					}
+			// 				}
+			// 			}
+			// 		}
+
+			// 効率が良い
+			// 差分積算量は数が少ない方から多い方にじゃないと調べられない
+			for(int abs_xy=0; abs_xy < part_size_x * part_size_y; ++abs_xy){
+				// 無駄を省く。
+				for(int xy=abs_xy+1; xy < part_size_x * part_size_y; ++xy){
+					//コスト初期化
+					for(int i=0; i<4; i++){
+						cost_tmp[i] = 0;
+					}
+					//カラーの数だけ繰り返す
+					for(int c=0; c < part_img[abs_xy].channels(); ++c){
+						//各ピクセル上下
+						for(int px_x=0; px_x < part_img[0].cols; ++px_x){
+							cost_tmp[0] += abs(part_img[abs_xy].at<cv::Vec3b>( 0, px_x)[c] - part_img[xy].at<cv::Vec3b>( part_img[0].rows-1, px_x)[c]);
+							cost_tmp[1] += abs(part_img[abs_xy].at<cv::Vec3b>( part_img[0].rows-1, px_x)[c] - part_img[xy].at<cv::Vec3b>( 0, px_x)[c]);
 						}
+						//各ピクセル左右
+						for(int px_y=0; px_y < part_img[0].rows; ++px_y){
+							cost_tmp[2] += abs(part_img[abs_xy].at<cv::Vec3b>( px_y, part_img[0].cols-1)[c] - part_img[xy].at<cv::Vec3b>( px_y, 0)[c]);
+							cost_tmp[3] += abs(part_img[abs_xy].at<cv::Vec3b>( px_y, 0)[c] - part_img[xy].at<cv::Vec3b>( px_y, part_img[0].cols-1)[c]);
+						}
+					}
+
+					// cost_t [ コスト, 自分の座標, 相手の座標, 方向]
+					// cost [自分の座標][方向][相手の座標]
+					for(int k=0; k < 4; ++k){
+						cost_t.push_back(make_tuple( cost_tmp[k], abs_xy, xy, k));
+						cost[abs_xy][k][xy] = make_pair( cost_tmp[k], xy);
+						cout << "k " << k << endl;
 					}
 				}
 			}
+			cout << "channels : " << part_img[0].channels() << endl;
 
 			cout << "start_sort" << endl;
-
-			// // それぞれの方向について、良い結果順にソート
-			// for(int abs_y=0; abs_y < part_size_y; ++abs_y){
-			// 	for(int abs_x=0; abs_x < part_size_x; ++abs_x){
-			// 		sort( cost[CONV_XY( abs_x, abs_y)][0].begin(), cost[CONV_XY( abs_x, abs_y)][0].end());
-			// 		sort( cost[CONV_XY( abs_x, abs_y)][1].begin(), cost[CONV_XY( abs_x, abs_y)][1].end());
-			// 		sort( cost[CONV_XY( abs_x, abs_y)][2].begin(), cost[CONV_XY( abs_x, abs_y)][2].end());
-			// 		sort( cost[CONV_XY( abs_x, abs_y)][3].begin(), cost[CONV_XY( abs_x, abs_y)][3].end());
-			// 	}
-			// }
 
 			// // 表示
 			// for(int abs_y=0; abs_y < part_size_y; ++abs_y){
@@ -174,9 +200,8 @@ class PPMFILE{
 			sort( cost_t.begin(), cost_t.end(), my_compare);
 
 			cout << "score : my_pos : pair_pos : direction " << endl;
-			for(int i=0; i<=cost_t.size(); i++){
-			//for(int i=0; i<= 10; i++){
-				cout << "cost: " << get<0>(cost_t[i]) << ", (" << CONV_X( get<1>(cost_t[i])) << "," << CONV_Y( get<1>(cost_t[i])) << "), (" << CONV_X(get<2>(cost_t[i])) << "," << CONV_Y(get<2>(cost_t[i])) << "), " << get<3>(cost_t[i]) << ", " << endl;
+			for(int i=0; i < cost_t.size(); i++){
+				cout << i << " |cost: " << get<0>(cost_t[i]) << ", (" << CONV_X( get<1>(cost_t[i])) << "," << CONV_Y( get<1>(cost_t[i])) << "), (" << CONV_X(get<2>(cost_t[i])) << "," << CONV_Y(get<2>(cost_t[i])) << "), " << get<3>(cost_t[i]) << ", " << endl;
 			}
 
 			cout << "end calc" << endl;
