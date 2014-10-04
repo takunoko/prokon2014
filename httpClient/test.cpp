@@ -11,14 +11,16 @@ int main(){
  ProkonClient client;
  string res;
 
+#if DEBUG == 1
  cout << "Picture Downloading" << endl;
+#endif
  try {
   // 引数に問題番号を指定して画像のバイナリstringを返す(cv::Mat形式にするかも)
   res=client.getProblem(1);
   
- } catch (char const * exception) {
+ } catch (runtime_error & exception) {
 
-  cerr << "Exception: " << exception << endl;
+  cerr << "Exception: " << exception.what() << endl;
   exit(EXIT_FAILURE);
  }
  //cout << res << endl;
