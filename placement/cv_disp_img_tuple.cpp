@@ -106,7 +106,6 @@ class PPMFILE{
 				}
 			}
 		}
-
 		// 配列の近似値を計算ｎする。
 		void calc_cost(void){
 			// costのサイズ変更
@@ -192,7 +191,6 @@ class PPMFILE{
 					}
 				}
 			}
-			cout << "channels : " << part_img[0].channels() << endl;
 
 			cout << "start_sort" << endl;
 
@@ -208,14 +206,57 @@ class PPMFILE{
 				cout << i << " |cost: " << get<0>(cost_t[i]) << ", (" << CONV_X( get<1>(cost_t[i])) << "," << CONV_Y( get<1>(cost_t[i])) << "), (" << CONV_X(get<2>(cost_t[i])) << "," << CONV_Y(get<2>(cost_t[i])) << "), " << get<3>(cost_t[i]) << ", " << endl;
 			}
 		}
+		// スクラップ(いくつかのパーツの集まり)
+		struct SCRAP{
+			int w,h;
+			vector<int> used_part;
+			int def_pos_xy;
+			int def_pos_part;
+		};
+		// 配置
+		void placement(void){
+		}
+		// xy_1のdire方向のxy_2とのcost
+		int get_cost(int xy_1, int xy_2, int dire){
+			int pair_cost;
+			if(xy_1 < xy_2){
+				pair_cost = cost[xy_1][dire][xy_2].first;
+			}else if(xy_1 > xy_2){
+				// 比較順が変わると上下左右が変わる
+				switch (dire){
+					case 0:
+						dire = 1;
+						break;
+					case 1:
+						dire = 0;
+						break;
+					case 2:
+						dire = 3;
+						break;
+					case 3:
+						dire = 2;
+						break;
+					default:
+						cout << "select direction error" << endl;
+						break;
+				}
+				pair_cost = cost[xy_2][dire][xy_1].first;
+			}else{
+				pair_cost = -1;
+			}
+			return pair_cost;
+		}
 };
 
 int main(void){
 	PPMFILE *img1 = new PPMFILE(FILENAME);
 
 	img1->calc_cost();
-
 	img1->disp_cost_list();
+
+	// 指定した座標のcostを取得する
+	// cout << "get (3,1),(1,1),2 : " << img1->get_cost( CONV_XY(3,1), CONV_XY(1,1), 2) << endl;
+
 	// img1->write_line();
 	// img1->disp_img(LINE_IMG);
 
