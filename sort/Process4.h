@@ -5,7 +5,6 @@
 #include "ProcessBase.h"
 #include <list>
 
-
 using namespace std;
 
 typedef class Process4 : public ProcessBase {
