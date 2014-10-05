@@ -31,37 +31,147 @@ int Pro4::isSelectedNextToTarget() {
   return isNext(s, target);
 }
 
+void Pro4::moveSelected(Pos destination) {
+  Pos s = table->getSelected();
+  list<Pos>::iterator p;
+
+  int directionLR;
+  int directionUD;
+  int move_dir = 0;
+  int move_flag = 0;
+  int half = s.y / (table->getWidth() / 2);
+  int old_direction = -1;
+
+  puts("-------moveSelected-------");
+
+  while(!checkPosEqual(destination, s)) {
+    s = table->getSelected();
+    directionLR = getDirectionLR(s.x, destination.x);
+    directionUD = getDirectionUD(s.y, destination.y);
+    table->dispData();
+    if(half == 1) {
+      if(directionLR == EQUAL) {
+        move_dir = directionUD;
+        move_flag = UD;
+      } else {
+        move_dir = directionLR;
+        move_flag = LR;
+      }
+    } else if(half == 0) {
+      if(directionUD == EQUAL) {
+        move_dir = directionLR;
+        move_flag = LR;
+      } else {
+        move_dir = directionUD;
+        move_flag = UD;
+      }
+    }
+    for(p = sorted.begin(); p != sorted.end(); p++) {
+      if(checkPosEqual(surroundings(s, move_dir), *p)) {
+        if(move_flag == LR) {
+          move_dir = directionUD;
+          move_flag = UD;
+          break;
+        }
+        if(move_flag == UD) {
+          move_dir = directionLR;
+          move_flag = LR;
+          break;
+        }
+      }
+    }
+    if(old_direction == move_dir) {
+      move_dir = getReversedDirection(move_dir);
+    }
+    for(p = sorted.begin(); p != sorted.end(); p++) {
+      if(checkPosEqual(surroundings(s, move_dir), *p)) {
+        if(move_flag == LR) {
+          move_dir = getReversedDirection(directionUD);
+          move_flag = UD;
+          break;
+        }
+        if(move_flag == UD) {
+          move_dir = getReversedDirection(directionLR);
+          move_flag = LR;
+          break;
+        }
+      }
+    }
+    table->swapSelected(move_dir);
+    old_direction = getReversedDirection(move_dir);
+  }
+}
+
 void Pro4::moveSelectedNextTarget() {
   Pos s = table->getSelected();
   list<Pos>::iterator p;
 
   int directionLR;
   int directionUD;
-  int move_flagLR;
-  int move_flagUD;
-  // ルート検索関数とか作ってここで使いたい
-  // listにルートを保存しとく…？
+  int move_dir = 0;
+  int move_flag = 0;
+  int half = s.y / (table->getWidth() / 2);
+  int old_direction = -1;
 
   puts("-------moveSelectedNextTarget-------");
+  table->dispData(target.x, target.y);
+
   while(!isSelectedNextToTarget()) {
+    s = table->getSelected();
     directionLR = getDirectionLR(s.x, target.x);
     directionUD = getDirectionUD(s.y, target.y);
-    move_flagLR = 1;
-    move_flagUD = 1;
-    for(p = sorted.begin(); p != sorted.end(); p++) {
-      // 隣に来たらでいいかも
-      if(checkPosEqual(surroundings(s, directionUD), *p))
-        move_flagUD = 0;
-      if(checkPosEqual(surroundings(s, directionLR), *p))
-        move_flagLR = 0;
+    if(half == 1) {
+      if(isNextX(target, s)) {
+        move_dir = directionUD;
+        move_flag = UD;
+      } else {
+        move_dir = directionLR;
+        move_flag = LR;
+      }
+    } else if(half == 0) {
+      if(isNextY(target, s)) {
+        move_dir = directionLR;
+        move_flag = LR;
+      } else {
+        move_dir = directionUD;
+        move_flag = UD;
+      }
     }
-    printf("%d, %d\n", move_flagLR, move_flagUD);
+    for(p = sorted.begin(); p != sorted.end(); p++) {
+      if(checkPosEqual(surroundings(s, move_dir), *p)) {
+        if(move_flag == LR) {
+          move_dir = directionUD;
+          move_flag = UD;
+          break;
+        }
+        if(move_flag == UD) {
+          move_dir = directionLR;
+          move_flag = LR;
+          break;
+        }
+      }
+    }
+    if(old_direction == move_dir) {
+      move_dir = getReversedDirection(move_dir);
+    }
+    for(p = sorted.begin(); p != sorted.end(); p++) {
+      if(checkPosEqual(surroundings(s, move_dir), *p)) {
+        if(move_flag == LR) {
+          move_dir = getReversedDirection(directionUD);
+          move_flag = UD;
+          break;
+        }
+        if(move_flag == UD) {
+          move_dir = getReversedDirection(directionLR);
+          move_flag = LR;
+          break;
+        }
+      }
+    }
+    table->swapSelected(move_dir);
     table->dispData(target.x, target.y);
-    // isNextYとか入れてると出来ない
-    if(move_flagUD && !isNextY(target, table->getSelected())) table->swapSelected(directionUD);
-    if(move_flagLR && !isNextX(target, table->getSelected())) table->swapSelected(directionLR);
+    old_direction = getReversedDirection(move_dir);
   }
-  table->dispData(target.x, target.y);
 }
 
 int Pro4::moveTarget(Pos pos) {
@@ -140,7 +250,7 @@ void Pro4::rotateSelected(int direction) {
   // 1か-1
   // 間違ってる
   //-----------------------------直すところ
-  int move_direction = dir_selected > direction ? -1 : 1;
+  int move_direction = (dir_selected > direction) ? -1 : 1;
 
   if(direction == EQUAL) return;
   if(checkPosEqual(table->getSelected(), surroundings(target, direction)))  {
@@ -202,6 +312,7 @@ void Pro4::sort() {
   table->dispData();
   // 一番右下になるデータを選択
   table->findAndSelectData(table->getWidth()-1, table->getHeight()-1);
+  table->dispData();
   /*target = table->findData(0, 0);
   moveSelectedNextTarget();
   rotateSelected(UP);
@@ -212,7 +323,7 @@ void Pro4::sort() {
   // 上半分
   for(i = 0; i < table->getHeight() - 2; i++) {
     // 端以外の
-    for(j = 0; j < table->getWidth() - 2; j++) {
+    for(j = 0; j < table->getWidth() - 1; j++) {
       target_data = Pos(j, i);
       target = table->findData(target_data);
       table->dispData(target.x, target.y);
@@ -221,19 +332,11 @@ void Pro4::sort() {
       target = table->findData(target_data);
       sorted.push_back(target);
     }
-    puts("alhsiudhfaisudhfoiauh");
-    target_data = Pos(table->getWidth()-1, i);
-    target = table->findData(target_data);
-    moveTarget(Pos(table->getWidth()-2, i));
-    target_data = Pos(table->getWidth()-2, i);
-    target = table->findData(target_data);
-    moveTarget(Pos(table->getWidth()-2, i+1));
     // 一番右側
     // ソートした部分をずらす
     // 一番右側のを正しい位置に
     // ずらしたのを戻す
     // sorted.push_back(target);
-    return;
   }
   table->dispData();
 
