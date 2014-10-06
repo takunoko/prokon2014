@@ -2,8 +2,12 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <vector>
+// for isdigit
+#include <cctype>
 
 #include "client.h"
+#include "QuestionHeader.hpp"
 
 #define DEBUG 1
 
@@ -26,9 +30,23 @@ ProkonClient::~ProkonClient(){
  curl_easy_cleanup(curl);
 }
 
-string ProkonClient::getProblem(int problemNo){
+string ProkonClient::getProblem(int problemNo,QuestionHeader & data){
  // 受信データ
  string chunk;
+ // 入れるポインタデータ
+ vector<unsigned int *> dataPointer;
+ // 現在操作するポインタ
+ vector<unsigned int *>::iterator now;
+ // フラグ
+ bool enable,endNum;
+
+ // 代入するデータを順に入れる
+ dataPointer.push_back(& data.splitX);
+ dataPointer.push_back(& data.splitY);
+ dataPointer.push_back(& data.selectableCount);
+ dataPointer.push_back(& data.selectRate);
+ dataPointer.push_back(& data.exchangeRate);
+
  // URL用問題番号の文字列
  ostringstream probStr;
  //問題番号部分指定
@@ -44,6 +62,31 @@ string ProkonClient::getProblem(int problemNo){
 #endif
 
  chunk=getData(url);
+ // コメント抜き取り
+ now=dataPointer.begin();
+ **now=0;
+ enable=false;
+ for(char &c : chunk){
+  // コメント読み取り有効
+  if(c=='#'){
+   // 有効
+   enable=true;
+  }
+  // コメント読み取り無効
+  if(c=='\n'){
+   enable=false;
+  }
+  if(enable){
+   if(isdigit(c)){
+    **now= (**now) * 10+(c-'0');
+   }else if(**now!=0){
+    now++;
+   }
+  }
+  if(now == dataPointer.end()){
+   break;
+  }
+ }
  return chunk;
 }
 

@@ -35,6 +35,9 @@
 // XY座標を1次元に
 #define CONV_X(XY) (XY % PIECE_X)
 #define CONV_Y(XY) (XY / PIECE_X)
+// 小さい方を返す
+#define MIN_2( A, B) ((A) < (B) ? (A) : (B))
+#define BIG_2( A, B) ((A) > (B) ? (A) : (B))
 
 using namespace std;
 
@@ -110,6 +113,8 @@ class PPMFILE{
 		string img_name;
 		cv::Mat origin_img;
 		cv::Mat	line_img;
+		cv::Mat	result_img;
+
 		vector<cv::Mat>	part_img;
 
 		// cost配列(3次元)
@@ -177,51 +182,9 @@ class PPMFILE{
 				}
 			}
 
-			//上下左右のcostを保持
-			// 0:上 1:下 2:左 3:右
-			int cost_tmp[4];
-
 			cout << "start_calc" << endl;
 
-			{
-				// 差分積算を求める
-				// 効率が悪い
-				// for(int abs_y=0; abs_y < part_size_y; ++abs_y){
-				// 	for(int abs_x=0; abs_x < part_size_x; ++abs_x){
-				// 		{
-				// 			//自分と他の比較
-				// 			// 無駄な比較を防ぐ abs_x+1が正しく動作してるかは微妙
-				// 			for(int y=0; y < part_size_y; ++y){
-				// 				for(int x=0; x < part_size_x; ++x){
-				// 					//コスト初期化
-				// 					for(int i=0; i<4; i++){
-				// 						cost_tmp[i] = 0;
-				// 					}
-				// 					//カラーの数だけ繰り返す
-				// 					for(int c=0; c < part_img[CONV_XY( abs_x, abs_y)].channels(); ++c){
-				// 						//各ピクセル上下
-				// 						for(int px_x=0; px_x < part_img[0].cols; ++px_x){
-				// 							cost_tmp[0] += abs(part_img[CONV_XY( abs_x, abs_y)].at<cv::Vec3b>( 0, px_x)[c] - part_img[CONV_XY( x, y)].at<cv::Vec3b>( part_img[0].rows-1, px_x)[c]);
-				// 							cost_tmp[1] += abs(part_img[CONV_XY( abs_x, abs_y)].at<cv::Vec3b>( part_img[0].rows-1, px_x)[c] - part_img[CONV_XY( x, y)].at<cv::Vec3b>( 0, px_x)[c]);
-				// 						}
-				// 						//各ピクセル左右
-				// 						for(int px_y=0; px_y < part_img[0].rows; ++px_y){
-				// 							cost_tmp[2] += abs(part_img[CONV_XY( abs_x, abs_y)].at<cv::Vec3b>( px_y, part_img[0].cols-1)[c] - part_img[CONV_XY( x, y)].at<cv::Vec3b>( px_y, 0)[c]);
-				// 							cost_tmp[3] += abs(part_img[CONV_XY( abs_x, abs_y)].at<cv::Vec3b>( px_y, 0)[c] - part_img[CONV_XY( x, y)].at<cv::Vec3b>( px_y, part_img[0].cols-1)[c]);
-				// 						}
-				// 					}
-
-				// 					// cost_t [ コスト, 自分の座標, 相手の座標, 方向]
-				// 					for(int k=0; k<4; k++){
-				// 						cost_t.push_back(make_tuple( cost_tmp[k], CONV_XY( abs_x, abs_y), CONV_XY( x, y), k));
-				// 						cost[CONV_XY( abs_x, abs_y)][k][CONV_XY( x, y)] = make_pair( cost_tmp[k], CONV_XY( x, y));
-				// 					}
-				// 				}
-				// 			}
-				// 		}
-			}
-
-			// 効率が良い
+			int cost_tmp[4];
 			// 差分積算量は数が少ない方から多い方にじゃないと調べられない
 			for(int abs_xy=0; abs_xy < part_size_x * part_size_y; ++abs_xy){
 				// 無駄を省く。
@@ -271,6 +234,14 @@ class PPMFILE{
 			vector<SCRAP> scraps;
 			vector<int> used_part(part_size_x*part_size_y, -1);
 
+
+			// 目的の場所
+			int dif_x, dif_y;
+
+			int part_s, part_l;
+			int part_s_x, part_s_y;
+			int part_l_x, part_l_y;
+
 			int part_1, part_2;
 			int part_1_x, part_1_y;
 			int part_2_x, part_2_y;
@@ -279,6 +250,7 @@ class PPMFILE{
 				SCRAP scrap_tmp;
 				part_1 = used_part[get<1>(cost_t[i])];
 				part_2 = used_part[get<2>(cost_t[i])];
+
 				if(part_1 == -1){
 					if(part_2 == -1){ // まだ使われてなかったら
 						// どちらもまだ使われていない
@@ -287,8 +259,6 @@ class PPMFILE{
 						scrap_tmp.used_p[make_pair(0,0)] = get<1>(cost_t[i]);
 						scrap_tmp.elements[get<2>(cost_t[i])] = make_direction_pair(get<3>(cost_t[i]));
 						scrap_tmp.used_p[make_direction_pair(get<3>(cost_t[i]))] = get<2>(cost_t[i]);
-						cout << "scrap len : " << scraps.size() << endl;
-						cout << "1 : " << get<1>(cost_t[i]) << "2 : " << get<2>(cost_t[i]) << endl;
 						scraps.push_back(scrap_tmp);
 					}
 					else{						// 2だけつかわれてる
@@ -313,7 +283,6 @@ class PPMFILE{
 							used_part[get<1>(cost_t[i])] = part_2;
 							scraps[part_2].elements[get<1>(cost_t[i])] = make_pair( part_2_x, part_2_y);
 							scraps[part_2].used_p[make_pair( part_2_x, part_2_y)] = get<1>(cost_t[i]);
-							cout << "pair1: " << part_2 << " add(" << part_2_x << "," << part_2_y << ")" << endl;
 						}else{
 							// すでに要素が入っていた場合
 						}
@@ -342,15 +311,92 @@ class PPMFILE{
 							used_part[get<2>(cost_t[i])] = part_1;
 							scraps[part_1].elements[get<2>(cost_t[i])] = make_pair( part_1_x, part_1_y);
 							scraps[part_1].used_p[make_pair( part_1_x, part_1_y)] = get<2>(cost_t[i]);
-							cout << "pair2: " << part_1 << " add(" << part_1_x << "," << part_1_y << ")" << endl;
 						}else{
 							// 既に要素が入っていた場合
 						}
-					}else{						// 両方ともつかわれている
-						part_1_x = scraps[part_1].elements[get<1>(cost_t[i])].first;
-						part_1_y = scraps[part_1].elements[get<1>(cost_t[i])].second;
-						part_2_x = scraps[part_2].elements[get<2>(cost_t[i])].first;
-						part_2_y = scraps[part_2].elements[get<2>(cost_t[i])].second;
+					}else{	// 両方ともつかわれている -> スクラップの添字が小さい方に大きい方をくっつける
+						if( part_1 != part_2){  // 同じスクラップでない場合
+							part_s = MIN_2( part_1, part_2);
+							part_l = BIG_2( part_1, part_2);
+							cout << "part_1 : " << part_1 << endl;
+							cout << "marg : " << part_s << " to " << part_l << endl;
+
+							cout << "PP : (" << CONV_X(get<1>(cost_t[i])) << "," << CONV_Y(get<1>(cost_t[i])) << ")" << endl;
+							cout << "PP : (" << CONV_X(get<2>(cost_t[i])) << "," << CONV_Y(get<2>(cost_t[i])) << ")" << endl;
+							cout << "discription : " << get<3>(cost_t[i]) << endl;
+
+							if(part_s == part_1){
+								cout << "type:A" << endl;
+								part_s_x = scraps[part_1].elements[get<1>(cost_t[i])].first;
+								part_s_y = scraps[part_1].elements[get<1>(cost_t[i])].second;
+								part_l_x = scraps[part_2].elements[get<2>(cost_t[i])].first;
+								part_l_y = scraps[part_2].elements[get<2>(cost_t[i])].second;
+
+								cout << "p_s_x : " << part_s_x << " p_s_y : " << part_s_y << endl;
+								switch(get<3>(cost_t[i])){
+									case DIRE_U:
+										--part_s_y;
+										break;
+									case DIRE_D:
+										++part_s_y;
+										break;
+									case DIRE_R:
+										++part_s_x;
+										break;
+									case DIRE_L:
+										--part_s_x;
+										break;
+								}
+							}else{
+								// part_2 を基準とする　
+								cout << "type:B" << endl;
+								part_l_x = scraps[part_1].elements[get<1>(cost_t[i])].first;
+								part_l_y = scraps[part_1].elements[get<1>(cost_t[i])].second;
+								part_s_x = scraps[part_2].elements[get<2>(cost_t[i])].first;
+								part_s_y = scraps[part_2].elements[get<2>(cost_t[i])].second;
+								switch(get<3>(cost_t[i])){
+									case DIRE_U:
+										++part_s_y;
+										break;
+									case DIRE_D:
+										--part_s_y;
+										break;
+									case DIRE_R:
+										--part_s_x;
+										break;
+									case DIRE_L:
+										++part_s_x;
+										break;
+								}
+							}
+
+							cout << "p_s_x : " << part_s_x << " p_s_y : " << part_s_y << endl;
+
+							dif_x = part_s_x - part_l_x;
+							dif_y = part_s_y - part_l_y;
+
+							cout << "dif_x : " << dif_x << " dif_y : " << dif_y << endl;
+
+							// scrapが小さい方に統合(何も考えずに)
+							for(map<int, pair<int,int> >::iterator j = scraps[part_l].elements.begin(); j != scraps[part_l].elements.end(); j++){
+								int key = j->first;
+								used_part[key] = part_s;
+								pair<int, int> pos = j->second;
+								scraps[part_s].elements[key] = make_pair( pos.first + dif_x, pos.second + dif_y);
+								scraps[part_s].used_p[make_pair( pos.first + dif_x, pos.second + dif_y)] = key;
+							}
+							scraps[part_l].elements.clear();
+#ifdef DEBUG
+							for(int i=0; i < scraps.size(); i++){
+								cout << "pair : " << i << endl;
+								for(map<int, pair<int,int> >::iterator j = scraps[i].elements.begin(); j != scraps[i].elements.end(); j++){
+									int key = j->first;
+									pair<int, int> pos = j->second;
+									cout << "  (" << CONV_X(key) << "," << CONV_Y(key) << ") || (" << pos.first << "," << pos.second << ")" << endl;
+								}
+							}
+#endif
+						}
 					}
 				}
 			}
