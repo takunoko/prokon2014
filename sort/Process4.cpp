@@ -24,6 +24,27 @@ void Pro4::dispSorted() {
   puts("");
 }
 
+void Pro4::dispSortedData() {
+  list<Pos>::iterator p;
+
+  int i, j;
+
+  for(i = 0; i < table->getHeight(); i++) {
+    for(j = 0; j < table->getWidth(); j++) {
+      for(p = sorted.begin(); p != sorted.end(); p++) {
+        if(checkPosEqual(j, i, p->x, p->y))
+          changeWordColor(RED);
+      }
+      if(checkPosEqual(j, i, table->getSelected().x, table->getSelected().y))
+        changeWordColor(GREEN);
+      printf("%X%X ", table->getData(j, i).x, table->getData(j, i).y);
+      defaultWordColor();
+    }
+    puts("");
+  }
+  puts("");
+}
+
 // 安全
 int Pro4::isSelectedNextToTarget() {
   Pos s = table->getSelected();
@@ -245,7 +266,7 @@ int Pro4::moveTarget(Pos pos) {
   int directionUD;
   int move_dir = 0;
   int move_flag = 0;
-  int half = target.y / (table->getHeight() / 2);
+  //int half = target.y / (table->getHeight() / 2);
   int old_direction = -1;
   int old_flag = -1;
 
@@ -391,16 +412,49 @@ void Pro4::sort() {
   return;
   */
   sortUp();
+  dispSortedData();
+  sortDown();
+  dispSortedData();
   table->dispData();
   table->dispCost();
 
   // 下二列
 }
 
+void Pro4::sortDown() {
+  int i;
+
+  for(i = 0; i < table->getWidth()-2; i++) {
+    Pos dummy = table->findData(Pos(i, table->getHeight()-2));
+    if(dummy.x >= i && dummy.x < i+2) {
+      target_data = Pos(i, table->getHeight()-2);
+      target = table->findData(target_data);
+      moveTarget(Pos(i+2, dummy.y));
+    }
+    target_data = Pos(i, table->getHeight()-1);
+    target = table->findData(target_data);
+    moveTarget(Pos(i, table->getHeight()-2));
+    sorted.push_back(Pos(i, table->getHeight()-2));
+    target_data = Pos(i, table->getHeight()-2);
+    target = table->findData(target_data);
+    moveTarget(Pos(i+1, table->getHeight()-2));
+    sorted.push_back(Pos(i+1, table->getHeight()-2));
+
+    moveSelected(Pos(i, table->getHeight()-1));
+    table->swapSelected(UP);
+    table->swapSelected(RIGHT);
+    sorted.pop_back();
+    sorted.pop_back();
+    sorted.push_back(Pos(i, table->getHeight()-1));
+    sorted.push_back(Pos(i, table->getHeight()-2));
+    table->dispData();
+  }
+}
+
 void Pro4::sortUp() {
   int i, j;
   // 上半分
-  for(i = 0; i < table->getHeight() - 2; i++) {
+  for(i = 0; i < table->getHeight()-2; i++) {
     // 端以外の
     if(isSorted(i)) {
       puts("continue1");
@@ -409,7 +463,7 @@ void Pro4::sortUp() {
       }
       continue;
     }
-    for(j = 0; j < table->getWidth() - 2; j++) {
+    for(j = 0; j < table->getWidth()-2; j++) {
       target_data = Pos(j, i);
       target = table->findData(target_data);
       table->dispData(target.x, target.y);

@@ -16,12 +16,14 @@ private:
 private:
   Process4();
   void dispSorted();
+  void dispSortedData();
   int isSelectedNextToTarget();
   int isSorted(int y);
   void moveSelected(Pos destination);// なにか間違っているかも
   void moveSelectedNextTarget();
   int moveTarget(Pos pos);
   void rotateSelected(int direction);
+  void sortDown();
   void sortUp();
 public:
   Process4(int w, int h);
