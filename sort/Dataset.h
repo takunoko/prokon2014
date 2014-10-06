@@ -46,6 +46,7 @@ public:
   Pos getSelected();
   Pos getSelectedData();
   Pos getSelectedDistance();
+  string getStringSortData();
   int getX(int ox, int oy);
   int getY(int ox, int oy);
   void importData(PosData import_data);

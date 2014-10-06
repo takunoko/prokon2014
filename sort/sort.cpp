@@ -5,12 +5,13 @@
 #include "Process2.h"
 #include "Process3.h"
 #include "Process4.h"
+#include "Process5.h"
 #define WIDTH 4
 #define HEIGHT 5
 
 int main(void) {
   srand((unsigned)time(NULL));
-  Process4 *test = new Process4(WIDTH, HEIGHT);
+  Process5 *test = new Process5(WIDTH, HEIGHT);
   test->sort();
   delete test;
 

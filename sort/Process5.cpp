@@ -1,30 +1,29 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "Process4.h"
+#include "Process5.h"
 #include "util.h"
 
 using namespace std;
 
-Pro4::Process4(): ProcessBase() {
+Pro5::Process5(): ProcessBase() {
   target.setZero();
   target_data.setZero();
 }
 
-Pro4::Process4(int w, int h): ProcessBase(w, h) {
+Pro5::Process5(int w, int h): ProcessBase(w, h) {
   target.setZero();
   target_data.setZero();
 }
 
-void Pro4::dispSorted() {
+void Pro5::dispSorted() {
   list<Pos>::iterator p;
 
   for(p = sorted.begin(); p != sorted.end(); p++) {
     printf("%d, %d\n", p->x, p->y);
   }
-  puts("");
 }
 
-void Pro4::dispSortedData() {
+void Pro5::dispSortedData() {
   list<Pos>::iterator p;
 
   int i, j;
@@ -46,13 +45,13 @@ void Pro4::dispSortedData() {
 }
 
 // 安全
-int Pro4::isSelectedNextToTarget() {
+int Pro5::isSelectedNextToTarget() {
   Pos s = table->getSelected();
 
   return isNext(s, target);
 }
 
-int Pro4::isSorted(int y) {
+int Pro5::isSorted(int y) {
   int x;
   Pos data;
 
@@ -63,7 +62,7 @@ int Pro4::isSorted(int y) {
   return 1;
 }
 
-void Pro4::moveSelected(Pos destination) {
+void Pro5::moveSelected(Pos destination) {
   Pos s = table->getSelected();
   list<Pos>::iterator p;
 
@@ -73,8 +72,6 @@ void Pro4::moveSelected(Pos destination) {
   int move_flag = 0;
   int half;
   int old_direction = -1;
-
-  puts("-------moveSelected-------");
 
   while(!checkPosEqual(destination, s)) {
     s = table->getSelected();
@@ -141,15 +138,13 @@ void Pro4::moveSelected(Pos destination) {
     if(old_direction == move_dir) {
       move_dir = getReversedDirection(move_dir);
     }*/
-    printf("move_dir = %d\n", move_dir);
     table->swapSelected(move_dir);
     table->dispData(target.x, target.y);
     old_direction = getReversedDirection(move_dir);
   }
-  puts("========moveSelected end=======");
 }
 
-void Pro4::moveSelectedNextTarget() {
+void Pro5::moveSelectedNextTarget() {
   Pos s = table->getSelected();
   list<Pos>::iterator p;
 
@@ -160,7 +155,6 @@ void Pro4::moveSelectedNextTarget() {
   int half = 1;
   int old_direction = -1;
 
-  puts("-------moveSelectedNextTarget-------");
   table->dispData(target.x, target.y);
 
   while(!isSelectedNextToTarget()) {
@@ -221,44 +215,13 @@ void Pro4::moveSelectedNextTarget() {
         }
       }
     }
-    /*
-    for(p = sorted.begin(); p != sorted.end(); p++) {
-      if(checkPosEqual(surroundings(s, move_dir), *p)) {
-        if(move_flag == LR) {
-          move_dir = directionUD;
-          move_flag = UD;
-          break;
-        } else if(move_flag == UD) {
-          move_dir = directionLR;
-          move_flag = LR;
-          break;
-        }
-      }
-    }
-    if(old_direction == move_dir) {
-      move_dir = getReversedDirection(move_dir);
-    }
-    for(p = sorted.begin(); p != sorted.end(); p++) {
-      if(checkPosEqual(surroundings(s, move_dir), *p)) {
-        if(move_flag == LR) {
-          move_dir = getReversedDirection(directionUD);
-          move_flag = UD;
-          break;
-        } else if(move_flag == UD) {
-          move_dir = getReversedDirection(directionLR);
-          move_flag = LR;
-          break;
-        }
-      }
-    }*/
     table->swapSelected(move_dir);
     table->dispData(target.x, target.y);
     old_direction = getReversedDirection(move_dir);
   }
-  puts("=======moveSelectedNextTarget=======");
 }
 
-int Pro4::moveTarget(Pos pos) {
+int Pro5::moveTarget(Pos pos) {
   list<Pos>::iterator p;
 
   int directionLR;
@@ -268,8 +231,6 @@ int Pro4::moveTarget(Pos pos) {
   //int half = target.y / (table->getHeight() / 2);
   int old_direction = -1;
   int old_flag = -1;
-
-  puts("-------moveTarget-------");
 
   while(!checkPosEqual(target, pos)) {
     target = table->findData(target_data);
@@ -322,7 +283,6 @@ int Pro4::moveTarget(Pos pos) {
         }
       }
     }
-    printf("directionaaaaa%d, %d, %d\n", directionLR, directionUD, move_dir);
     moveSelectedNextTarget();
     rotateSelected(move_dir);
     table->swapSelected(getReversedDirection(move_dir));
@@ -330,11 +290,10 @@ int Pro4::moveTarget(Pos pos) {
     old_direction = getReversedDirection(move_dir);
     old_flag = move_flag;
   }
-  puts("=======moveTarget end========");
   return 0;
 }
 
-void Pro4::rotateSelected(int direction) {
+void Pro5::rotateSelected(int direction) {
   // directionは動かす方向
   // targetから見たselectedの方向
   int dir_selected = getDirection(target, table->getSelected());
@@ -344,21 +303,15 @@ void Pro4::rotateSelected(int direction) {
   //-----------------------------直すところ
   int move_direction = (dir_selected > direction) ? -1 : 1;
 
-  puts("-------rotateSelected-------");
-  printf("direction = %d\n", direction);
-  printf("target = %d, %d\n", target.x, target.y);
   if(direction == EQUAL) return;
   if(checkPosEqual(table->getSelected(), surroundings(target, direction)))  {
-    puts("selected dont need to rotate");
     return;
   }
   if(!checkInScope(table->getWidth(), table->getHeight(), surroundings(target, direction).x, surroundings(target, direction).y)) {
-    puts("cant rotate(move target)...");
     return;
   }
 
   if(move_distance > DIRECTION_NUM / 2) {
-    puts("rotate distance is too long");
     move_distance = DIRECTION_NUM - move_distance;
     move_direction *= -1;
   }
@@ -385,21 +338,16 @@ void Pro4::rotateSelected(int direction) {
 
   int move_dir;
   int j = dir_selected;
-  printf("move_direction = %d\n", move_direction);
-  printf("move_distance = %d\n", move_distance);
   for(i = 0; i < move_distance; i++) {
     // 目的地についたら止めたほうがいいかも
     j = (j + move_direction + DIRECTION_NUM) % DIRECTION_NUM;
     move_dir = getDirection(table->getSelected(), surroundings(target, j));
-    printf("j = %d\n", j);
-    printf("move_dir = %d\n", move_dir);
     table->swapSelected(move_dir);
     table->dispData(target.x, target.y);
   }
-  puts("======rotate end========");
 }
 
-void Pro4::sort() {
+void Pro5::sort() {
   table->dispData();
   // 一番右下になるデータを選択
   table->findAndSelectData(table->getWidth()-1, table->getHeight()-1);
@@ -411,7 +359,6 @@ void Pro4::sort() {
   return;
   */
   sortUp();
-  dispSortedData();
   sortDown();
   dispSortedData();
   table->dispData();
@@ -420,7 +367,7 @@ void Pro4::sort() {
   // 下二列
 }
 
-void Pro4::sortDown() {
+void Pro5::sortDown() {
   int i;
 
   for(i = 0; i < table->getWidth()-2; i++) {
@@ -474,13 +421,12 @@ void Pro4::sortDown() {
   moveSelected(target_data);
 }
 
-void Pro4::sortUp() {
+void Pro5::sortUp() {
   int i, j;
   // 上半分
   for(i = 0; i < table->getHeight()-2; i++) {
     // 端以外の
     if(isSorted(i)) {
-      puts("continue1");
       for(j = 0; j < table->getWidth(); j++) {
         sorted.push_back(Pos(j, i));
       }
@@ -497,7 +443,6 @@ void Pro4::sortUp() {
     }
     // もし、1列全部揃ってたらcontinue
     if(isSorted(i)) {
-      puts("continue2");
       sorted.push_back(Pos(table->getWidth()-2, i));
       sorted.push_back(Pos(table->getWidth()-1, i));
       continue;

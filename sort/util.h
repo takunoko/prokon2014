@@ -30,8 +30,6 @@
 #define convertY(num) num/0x10
 #define defaultWordColor() printf("\033[39m")
 #define defaultBackColor() printf("\033[49m")
-#define max(num1, num2) num1>num2?num1:num2
-#define min(num1, num2) num1<num2?num1:num2
 
 extern int checkPosEqual(int x1, int y1, int x2, int y2);
 extern int checkPosEqual(Pos p1, Pos p2);
