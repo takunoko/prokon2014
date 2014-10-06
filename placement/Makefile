@@ -1,6 +1,6 @@
 
 CC = g++
-TARGET = cv_disp_img
+TARGET = cv_disp_img_tuple
 
 # OpenCVまでのパス
 # プログラム上では<opencv2/core/core.hpp>のように書く
@@ -16,16 +16,7 @@ FLAGS = -lm
 #  これを入れないとtupleが使えない。
 OPTION = -O3 -std=c++11 -stdlib=libc++
 
-all : cv_disp_img stl_test stl_test2 stl_test3
+all : cv_disp_img_tuple
 
-cv_disp_img : cv_disp_img.cpp
-	${CC} ${OPTION} ${OPEN_CV_HEADER} ${OPEN_CV_LIBS} ${FLAGS} -o $@ $<
-
-stl_test : stl_test.cpp
-	${CC} ${OPTION} ${OPEN_CV_HEADER} ${OPEN_CV_LIBS} ${FLAGS} -o $@ $<
-
-stl_test2 : stl_test2.cpp
-	${CC} ${OPTION} ${OPEN_CV_HEADER} ${OPEN_CV_LIBS} ${FLAGS} -o $@ $<
-
-stl_test3 : stl_test3.cpp
+${TARGET} : ${TARGET}.cpp
 	${CC} ${OPTION} ${OPEN_CV_HEADER} ${OPEN_CV_LIBS} ${FLAGS} -o $@ $<

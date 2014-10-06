@@ -3,6 +3,7 @@
 #include "Dataset.h"
 #include "PosData.h"
 #include "util.h"
+#define PRINT 1
 
 Dataset::Dataset() {
   height = width = selected_num = changed_num = move_flag = 0;
@@ -67,11 +68,14 @@ void Dataset::deleteArray() {
 }
 
 void Dataset::dispCost() {
+#if PRINT
   printf("(selected=%d, changed=%d)\n", selected_num, changed_num);
+#endif
 }
 
 // xとyに負の値を入れると[]を付けない
 void Dataset::dispData(int x, int y) {
+#if PRINT
   int i, j;
 
   for(i = 0; i < this->height; i++) {
@@ -85,10 +89,12 @@ void Dataset::dispData(int x, int y) {
     puts("");
   }
   puts("");
+#endif
 }
 
 // distanceを表示
 void Dataset::dispDistance() {
+#if PRINT
   int i, j;
 
   for(i = 0; i < this->height; i++) {
@@ -98,6 +104,7 @@ void Dataset::dispDistance() {
     puts("");
   }
   puts("");
+#endif
 }
 
 void Dataset::findAndSelectData(int x, int y) {
@@ -126,7 +133,9 @@ Pos Dataset::findData(int data_x, int data_y) {
       }
     }
   }
+#if PRINT
   puts("Cant find data");
+#endif
   return Pos(-1, -1);
 }
 
@@ -301,10 +310,14 @@ void Dataset::swapNext(int x, int y, int direction) {
 
 void Dataset::swapSelected(int direction) {
   if(direction == EQUAL) {
+#if PRINT
     puts("direction = EQUAL");
+#endif
     return;
   } else if(direction % 2 == 1) {
+#if PRINT
     puts("naname direction");
+#endif
     return;
   }
   if(move_flag == 0) {
