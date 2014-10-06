@@ -162,7 +162,6 @@ void Pro4::moveSelectedNextTarget() {
 
   puts("-------moveSelectedNextTarget-------");
   table->dispData(target.x, target.y);
-  dispSorted();
 
   while(!isSelectedNextToTarget()) {
     s = table->getSelected();
@@ -449,6 +448,32 @@ void Pro4::sortDown() {
     sorted.push_back(Pos(i, table->getHeight()-2));
     table->dispData();
   }
+  target_data = Pos(table->getWidth()-2, table->getHeight()-2);
+  target = table->findData(target_data);
+  moveTarget(target_data);
+  sorted.push_back(Pos(table->getWidth()-2, table->getHeight()-2));
+  table->dispData();
+
+  target_data = Pos(table->getWidth()-2, table->getHeight()-1);
+  target = table->findData(target_data);
+  table->dispData(target.x, target.y);
+  if(checkPosEqual(target, Pos(table->getWidth()-1, table->getHeight()-2))) {
+    puts("----------&&&&&&&&&&&&&------------");
+    table->selectData(target.x, target.y);
+    moveSelected(target_data);
+  }
+  target_data = Pos(table->getWidth()-1, table->getHeight()-2);
+  target = table->findData(target_data);
+  table->dispData(target.x, target.y);
+  if(checkPosEqual(target, Pos(table->getWidth()-2, table->getHeight()-1))) {
+    puts("----------$$$$$$$$$$$$$------------");
+    table->selectData(target.x, target.y);
+    moveSelected(target_data);
+  }
+  target_data = Pos(table->getWidth()-1, table->getHeight()-1);
+  target = table->findData(target_data);
+  table->selectData(target.x, target.y);
+  moveSelected(target_data);
 }
 
 void Pro4::sortUp() {
