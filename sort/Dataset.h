@@ -1,7 +1,7 @@
 #ifndef INCLUDED_DATASET_H
 #define INCLUDED_DATASET_H
-#define MAXWIDTH 16 // 0x10
-#define MAXHEIGHT 16
+#define MAXWIDTH 17 // 0x10
+#define MAXHEIGHT 17
 #include "Pos.h"
 #include "PosData.h"
 #include <list>

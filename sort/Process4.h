@@ -17,10 +17,12 @@ private:
   Process4();
   void dispSorted();
   int isSelectedNextToTarget();
-  void moveSelected(Pos destination);
+  int isSorted(int y);
+  void moveSelected(Pos destination);// なにか間違っているかも
   void moveSelectedNextTarget();
   int moveTarget(Pos pos);
   void rotateSelected(int direction);
+  void sortUp();
 public:
   Process4(int w, int h);
   void sort();
