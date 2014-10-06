@@ -2,6 +2,10 @@
 #define INCLUDED_UTIL_H
 #include "Pos.h"
 #include <stdio.h>
+#include <iostream>
+#include <string>
+
+using namespace std;
 
 #define EQUAL -1
 #define UP 0
@@ -36,6 +40,7 @@ extern int checkPosEqual(Pos p1, Pos p2);
 extern int getDirection(Pos source, Pos destination);
 extern int getDirectionLR(int ox, int x);
 extern int getDirectionUD(int oy, int y);
+extern string getDirectionChar(int direction);
 extern int getReversedDirection(int direction);
 extern int isConnected(Pos p1, Pos p2);
 extern int isNext(Pos p1, Pos p2);

@@ -13,6 +13,6 @@ ProBase::~ProcessBase() {
   delete table;
 }
 
-void ProBase::importData(PosData data) {
+void ProBase::importData(PosData &data) {
   table->importData(data);
 }

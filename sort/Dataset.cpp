@@ -1,9 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <iostream>
+#include <sstream>
+#include <string>
 #include "Dataset.h"
 #include "PosData.h"
 #include "util.h"
 #define PRINT 1
+
+using namespace std;
 
 Dataset::Dataset() {
   height = width = selected_num = changed_num = move_flag = 0;
@@ -181,6 +186,34 @@ Pos Dataset::getSelectedDistance() {
   return getDistance(selected.x, selected.y);
 }
 
+string Dataset::getStringSortData() {
+  string str = "";
+  char ss[3];
+  int i, j;
+  list<int>::iterator p1_x, p1_y, p2, p3;
+
+  p1_x = selected_x.begin();
+  p1_y = selected_y.begin();
+  p2 = changed_nums.begin();
+  p3 = process.begin();
+  str += to_string(selected_num);
+  str += "\n";
+  for(i = 0; i < selected_num; i++, p1_x++, p1_y++, p2++) {
+    sprintf(ss, "%X", *p1_x);
+    str += ss;
+    sprintf(ss, "%X", *p1_y);
+    str += ss;
+    str += "\n";
+    str += to_string(*p2);
+    str += "\n";
+    for(j = 0; j < *p2; j++, p3++) {
+      str += getDirectionChar(*p3);
+    }
+    str += "\n";
+  }
+  return str;
+}
+
 int Dataset::getX(int ox, int oy) {
   if(!checkInScope(width, height, ox, oy)) myerror(1);
   return data[oy][ox].x;
@@ -193,16 +226,17 @@ int Dataset::getY(int ox, int oy) {
 
 
 // 未完成。コピーコンストラクタとか
-void Dataset::importData(PosData import_data) {
+void Dataset::importData(PosData &import_data) {
   int i, j;
 
-  if(checkData(import_data)) myerror(1);
+  //if(checkData(import_data)) myerroR(1);
   for(i = 0; i < import_data.getHeight(); i++) {
     for(j = 0; j < import_data.getWidth(); j++) {
       this->data[i][j].x = import_data.getX(j, i);
       this->data[i][j].y = import_data.getY(j, i);
     }
   }
+  dispData();
 }
 
 // dataとdistanceの領域を確保
@@ -322,13 +356,14 @@ void Dataset::swapSelected(int direction) {
   }
   if(move_flag == 0) {
     selected_num++;
-    selected_pos.push_back(convertHex(selected.y, selected.x));
+    selected_x.push_back(selected.x);
+    selected_y.push_back(selected.y);
     changed_nums.push_back(0);
     move_flag = 1;
   }
   swapNext(selected.x, selected.y, direction);
   surroundings(&selected.x, &selected.y, direction);
   changed_num++;
-  (*changed_nums.end())++;
+  (*--changed_nums.end())++;
   process.push_back(direction);
 }

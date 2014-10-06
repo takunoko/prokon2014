@@ -399,17 +399,12 @@ void Pro4::rotateSelected(int direction) {
   puts("======rotate end========");
 }
 
-void Pro4::sort() {
+string Pro4::sort() {
   table->dispData();
   // 一番右下になるデータを選択
   table->findAndSelectData(table->getWidth()-1, table->getHeight()-1);
   table->dispData();
-  /*target = table->findData(0, 0);
-  moveSelectedNextTarget();
-  rotateSelected(UP);
 
-  return;
-  */
   sortUp();
   dispSortedData();
   sortDown();
@@ -417,12 +412,13 @@ void Pro4::sort() {
   table->dispData();
   table->dispCost();
 
-  // 下二列
+  return table->getStringSortData();
 }
 
 void Pro4::sortDown() {
   int i;
 
+  if(isSorted(table->getHeight()-2) && isSorted(table->getHeight()-1)) return;
   for(i = 0; i < table->getWidth()-2; i++) {
     Pos dummy = table->findData(Pos(i, table->getHeight()-2));
     if(dummy.x >= i && dummy.x < i+2) {

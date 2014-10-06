@@ -1,6 +1,10 @@
 #include <stdio.h>
+#include <iostream>
+#include <string>
 #include <stdlib.h>
 #include "util.h"
+
+using namespace std;
 
 int checkPosEqual(int x1, int y1, int x2, int y2) {
   return ((x1 == x2) && (y1 == y2));
@@ -45,6 +49,24 @@ int getDirectionLR(int ox, int x) {
 int getDirectionUD(int oy, int y) {
   if(oy == y) return EQUAL;
   return (oy < y) ? DOWN : UP;
+}
+
+string getDirectionChar(int direction) {
+  switch(direction) {
+  case UP:
+    return "U";
+    break;
+  case RIGHT:
+    return "R";
+    break;
+  case DOWN:
+    return "D";
+    break;
+  case LEFT:
+    return "L";
+    break;
+  }
+  return "";
 }
 
 int isConnected(Pos p1, Pos p2) {

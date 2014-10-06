@@ -27,7 +27,7 @@ private:
   void sortUp();
 public:
   Process4(int w, int h);
-  void sort();
+  string sort();
 } Pro4;
 
 // 指定した座標に，sortedを使いながらselectedを移動するメソッドを追加する．

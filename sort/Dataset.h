@@ -17,7 +17,8 @@ private:
   int selected_num, changed_num;
   int move_flag;
   list<int> process;
-  list<int> selected_pos;
+  list<int> selected_x;
+  list<int> selected_y;
   list<int> changed_nums;
 
 private:
@@ -49,7 +50,7 @@ public:
   string getStringSortData();
   int getX(int ox, int oy);
   int getY(int ox, int oy);
-  void importData(PosData import_data);
+  void importData(PosData &import_data);
   void randomizeData();
   void resetData();
   void selectData(int x, int y);
