@@ -8,7 +8,6 @@
 #include <vector>
 #include <tuple>
 
-//使ってない？
 // openCV関連
 // Makefileの方でライブラリとかの場所を指定してある
 #include <opencv2/core/core.hpp>
@@ -18,12 +17,13 @@
 
 // 画像ファイル名と分割数
 // 後々、分割数をファイルから読み込む
-#define FILENAME "../pic_data/2.ppm"
-#define PIECE_X 4
+#define FILENAME "../pic_data/8.ppm"
+#define PIECE_X 9
 #define PIECE_Y 8
 
 #define ORIGIN_IMG 0
 #define LINE_IMG 1
+#define RESULT_IMG 2
 
 #define DIRE_U 0
 #define DIRE_D 1
@@ -35,7 +35,7 @@
 // XY座標を1次元に
 #define CONV_X(XY) (XY % PIECE_X)
 #define CONV_Y(XY) (XY / PIECE_X)
-// 小さい方を返す
+
 #define MIN_2( A, B) ((A) < (B) ? (A) : (B))
 #define BIG_2( A, B) ((A) > (B) ? (A) : (B))
 
@@ -45,9 +45,6 @@ typedef tuple< int, int, int, int> COST_TUPLE;
 
 // スクラップ(いくつかのパーツの集まり)
 typedef struct{
-	// int w,h;
-	// vector<int> used_part;
-	//vector<pair<int,pair<int,int> > > elements; // element< 自分のxy,< baseからのx, baseからのy> >
 	map<int,pair<int,int> > elements;	// パーツidから、それが使われているか?
 	map<pair<int, int>, int> used_p;// ポジションから、そこに何があるか？
 }SCRAP;
@@ -110,7 +107,6 @@ class PPMFILE{
 	private:
 		int part_size_x, part_size_y;	//左右どれだけのピース数があるか?
 
-		string img_name;
 		cv::Mat origin_img;
 		cv::Mat	line_img;
 		cv::Mat	result_img;
@@ -121,15 +117,14 @@ class PPMFILE{
 		vector< vector< vector< pair<int,int> > > > cost;
 		// cost_t配列(1次元)
 		vector<COST_TUPLE> cost_t;
+		// 配置の位置を示す配列
+		map<int,pair<int,int> > placement_pos;
 
 	public:
-		PPMFILE(string filename){
-			//file.push_back(filename);
-			img_name = filename;
-			origin_img = cv::imread(img_name, -1);
-			part_size_x = PIECE_X;
-			part_size_y = PIECE_Y;
-			// costのリサイズ
+		PPMFILE(cv::Mat origin_img_tmp, int piece_x, int piece_y){
+			origin_img = origin_img_tmp.clone();
+			part_size_x = piece_x;
+			part_size_y = piece_y;
 
 			//それぞれのピースに分割
 			this->create_partition();
@@ -142,6 +137,8 @@ class PPMFILE{
 													break;
 				case LINE_IMG: cv::imshow("image", line_img);
 											 break;
+				case RESULT_IMG:	cv::imshow("image", result_img);
+											break;
 				default:
 											 break;
 			}
@@ -187,7 +184,6 @@ class PPMFILE{
 			int cost_tmp[4];
 			// 差分積算量は数が少ない方から多い方にじゃないと調べられない
 			for(int abs_xy=0; abs_xy < part_size_x * part_size_y; ++abs_xy){
-				// 無駄を省く。
 				for(int xy=abs_xy+1; xy < part_size_x * part_size_y; ++xy){
 					//コスト初期化
 					for(int i=0; i<4; i++){
@@ -207,6 +203,14 @@ class PPMFILE{
 						}
 					}
 
+					// 上下に対しては縦のピクセル数、左右に対しては横のピクセル数
+					// を×る事によって、結合度の重みを長さに依存させない
+					// ワンちゃんオーバーフローが恐い(たぶん大丈夫)
+					cost_tmp[DIRE_U] *= part_img[0].rows;
+					cost_tmp[DIRE_D] *= part_img[0].rows;
+					cost_tmp[DIRE_R] *= part_img[0].cols;
+					cost_tmp[DIRE_L] *= part_img[0].cols;
+
 					// cost_t [ コスト, 自分の座標, 相手の座標, 方向]
 					// cost [自分の座標][方向][相手の座標]
 					for(int k=0; k < 4; ++k){
@@ -221,6 +225,7 @@ class PPMFILE{
 			sort( cost_t.begin(), cost_t.end(), my_compare);
 			cout << "end calc" << endl;
 		}
+
 		void disp_cost_list(void){
 			// 表示
 			cout << "score : my_pos : pair_pos : direction " << endl;
@@ -228,14 +233,14 @@ class PPMFILE{
 				cout << i << " |cost: " << get<0>(cost_t[i]) << ", (" << CONV_X( get<1>(cost_t[i])) << "," << CONV_Y( get<1>(cost_t[i])) << "), (" << CONV_X(get<2>(cost_t[i])) << "," << CONV_Y(get<2>(cost_t[i])) << "), " << get<3>(cost_t[i]) << ", " << endl;
 			}
 		}
+
 	// 配置
 		void placement(void){
 			// 使われたかどうかのフラグ
 			vector<SCRAP> scraps;
 			vector<int> used_part(part_size_x*part_size_y, -1);
 
-
-			// 目的の場所
+			// 目的の場所への差分
 			int dif_x, dif_y;
 
 			int part_s, part_l;
@@ -245,6 +250,10 @@ class PPMFILE{
 			int part_1, part_2;
 			int part_1_x, part_1_y;
 			int part_2_x, part_2_y;
+
+			// 再配置の時に使う
+			int pos_x_min = 0;
+			int pos_y_min = 0;
 
 			for(int i=0; i < cost_t.size(); i++){
 				SCRAP scrap_tmp;
@@ -267,10 +276,10 @@ class PPMFILE{
 						// 目的の場所(2が基準だから左右が逆になる)
 						switch(get<3>(cost_t[i])){
 							case DIRE_U:
-								--part_2_y;
+								++part_2_y;
 								break;
 							case DIRE_D:
-								++part_2_y;
+								--part_2_y;
 								break;
 							case DIRE_R:
 								--part_2_x;
@@ -294,10 +303,10 @@ class PPMFILE{
 						// 目的の場所
 						switch(get<3>(cost_t[i])){
 							case DIRE_U:
-								++part_1_y;
+								--part_1_y;
 								break;
 							case DIRE_D:
-								--part_1_y;
+								++part_1_y;
 								break;
 							case DIRE_R:
 								++part_1_x;
@@ -306,7 +315,7 @@ class PPMFILE{
 								--part_1_x;
 								break;
 						}
-						// 目撃の場所に要素が入っていなかった場合
+						// 目的の場所に要素が入っていなかった場合
 						if(scraps[part_1].used_p.find(make_pair(part_1_x,part_1_y)) == scraps[part_1].used_p.end()){
 							used_part[get<2>(cost_t[i])] = part_1;
 							scraps[part_1].elements[get<2>(cost_t[i])] = make_pair( part_1_x, part_1_y);
@@ -318,12 +327,24 @@ class PPMFILE{
 						if( part_1 != part_2){  // 同じスクラップでない場合
 							part_s = MIN_2( part_1, part_2);
 							part_l = BIG_2( part_1, part_2);
+
+#ifdef DEBUG
+							cout << "now data " << endl;
+							for(int i=0; i < scraps.size(); i++){
+								cout << "pair : " << i << endl;
+								for(map<int, pair<int,int> >::iterator j = scraps[i].elements.begin(); j != scraps[i].elements.end(); j++){
+									int key = j->first;
+									pair<int, int> pos = j->second;
+									cout << "  (" << CONV_X(key) << "," << CONV_Y(key) << ") || (" << pos.first << "," << pos.second << ")" << endl;
+								}
+							}
 							cout << "part_1 : " << part_1 << endl;
 							cout << "marg : " << part_s << " to " << part_l << endl;
 
-							cout << "PP : (" << CONV_X(get<1>(cost_t[i])) << "," << CONV_Y(get<1>(cost_t[i])) << ")" << endl;
-							cout << "PP : (" << CONV_X(get<2>(cost_t[i])) << "," << CONV_Y(get<2>(cost_t[i])) << ")" << endl;
+							cout << "PP1 : (" << CONV_X(get<1>(cost_t[i])) << "," << CONV_Y(get<1>(cost_t[i])) << ")" << endl;
+							cout << "PP2 : (" << CONV_X(get<2>(cost_t[i])) << "," << CONV_Y(get<2>(cost_t[i])) << ")" << endl;
 							cout << "discription : " << get<3>(cost_t[i]) << endl;
+#endif
 
 							if(part_s == part_1){
 								cout << "type:A" << endl;
@@ -386,7 +407,6 @@ class PPMFILE{
 								scraps[part_s].used_p[make_pair( pos.first + dif_x, pos.second + dif_y)] = key;
 							}
 							scraps[part_l].elements.clear();
-#ifdef DEBUG
 							for(int i=0; i < scraps.size(); i++){
 								cout << "pair : " << i << endl;
 								for(map<int, pair<int,int> >::iterator j = scraps[i].elements.begin(); j != scraps[i].elements.end(); j++){
@@ -395,22 +415,79 @@ class PPMFILE{
 									cout << "  (" << CONV_X(key) << "," << CONV_Y(key) << ") || (" << pos.first << "," << pos.second << ")" << endl;
 								}
 							}
-#endif
 						}
 					}
 				}
 			}
 
-#ifdef DEBUG
-			for(int i=0; i < scraps.size(); i++){
-				cout << "pair : " << i << endl;
-				for(map<int, pair<int,int> >::iterator j = scraps[i].elements.begin(); j != scraps[i].elements.end(); j++){
+			// 座標の左上を0,0にする
+			// この時点でscrapsは[0]しか要素を持たないはず
+			for(map<int, pair<int,int> >::iterator j = scraps[0].elements.begin(); j != scraps[0].elements.end(); j++){
 					int key = j->first;
 					pair<int, int> pos = j->second;
-					cout << "  (" << CONV_X(key) << "," << CONV_Y(key) << ") || (" << pos.first << "," << pos.second << ") " << endl;
-				}
+					if(pos.first < pos_x_min)
+						pos_x_min = pos.first;
+					if(pos.second < pos_y_min)
+						pos_y_min = pos.second;
 			}
-#endif
+
+			// 一番小さいものに座標を合わせて再配置
+			for(map<int, pair<int,int> >::iterator j = scraps[0].elements.begin(); j != scraps[0].elements.end(); j++){
+				int key = j->first;
+				pair<int, int> pos = j->second;
+				scraps[0].elements[key] = make_pair( (pos.first - pos_x_min), (pos.second - pos_y_min));
+			}
+
+			// グローバルに結果をコピー
+			placement_pos = scraps[0].elements;
+		}
+
+		void disp_placement(void){
+			cout << "----------" << endl;
+			cout << "placement " << endl;
+			for(map<int, pair<int,int> >::iterator j = placement_pos.begin(); j != placement_pos.end(); j++){
+				int key = j->first;
+				pair<int, int> pos = j->second;
+				cout << "  (" << CONV_X(key) << "," << CONV_Y(key) << ") || (" << pos.first << "," << pos.second << ") " << endl;
+			}
+		}
+
+		// 配置してみた時の表示
+		void create_result_img(void){
+			int part_width = origin_img.cols/part_size_x;
+			int part_height = origin_img.rows/part_size_y;
+
+			int max_part_x = 0, max_part_y = 0;
+
+			// 最大の幅と高さを求める
+			for(map<int, pair<int,int> >::iterator j = placement_pos.begin(); j != placement_pos.end(); j++){
+				int key = j->first;
+				pair<int, int> pos = j->second;
+				if(max_part_x < pos.first)
+					max_part_x = pos.first;
+				if(max_part_y < pos.second)
+					max_part_y = pos.second;
+			}
+			cout << "mpx :" << max_part_x << " mpy :" << max_part_y << endl;
+
+			// 大きさに応じたサイズのresult_imgを作成
+			cv::Mat tmp_result_img( cv::Size((max_part_x+1) * part_width, (max_part_y+1) * part_height), CV_8UC3, cv::Scalar(0,0,0));
+			// cv::Mat tmp_result_img( cv::Size( 2000, 2000), CV_8UC3, cv::Scalar(0,0,0));
+
+			for(map<int, pair<int,int> >::iterator j = placement_pos.begin(); j != placement_pos.end(); j++){
+				int key = j->first;
+				pair<int, int> pos = j->second;
+				part_img[key].copyTo(tmp_result_img( \
+							cv::Rect( \
+								pos.first*part_width, \
+								pos.second*part_height, \
+								part_width, \
+								part_height) \
+							));
+				cout << "s_x :" << pos.first*part_width << " s_y :" <<	pos.second*part_height << " CopyTo:" << key << endl;
+			}
+			result_img = tmp_result_img.clone();
+
 		}
 
 		// xy_1のdire方向のxy_2とのcost
@@ -430,10 +507,14 @@ class PPMFILE{
 };
 
 int main(void){
-	PPMFILE *img1 = new PPMFILE(FILENAME);
+	// 引数で渡されるべき部分
+	cv::Mat origin_img_tmp = cv::imread(FILENAME, -1);
+
+	// 本番環境では、PPMFILE( cv::Mat オリジナルのイメージ, int 分割数X, int 分割数Y, PosData);
+	PPMFILE *img1 = new PPMFILE( origin_img_tmp, PIECE_X, PIECE_Y);
 
 	img1->calc_cost();
-	img1->disp_cost_list();
+	img1->disp_cost_list();  // こいつを消すと結構時間が良くなる
 
 	// 指定した座標のcostを取得する
 	// cout << "get (3,1),(1,1),2 : " << img1->get_cost( CONV_XY(3,1), CONV_XY(1,1), 2) << endl;
@@ -443,8 +524,12 @@ int main(void){
 	// img1->write_line();
 	// img1->disp_img(LINE_IMG);
 	// img1->disp_img(ORIGIN_IMG);
+	img1->disp_placement();
+	img1->create_result_img();
 
-	// cv::waitKey(0);	//waitKey(0)で何か入力するまで処理を停止
+	img1->disp_img(RESULT_IMG);
+
+	cv::waitKey(0);	//waitKey(0)で何か入力するまで処理を停止
 
 	return 0;
 }
