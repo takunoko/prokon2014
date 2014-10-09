@@ -17,9 +17,9 @@
 
 // 画像ファイル名と分割数
 // 後々、分割数をファイルから読み込む
-#define FILENAME "../pic_data/9.ppm"
+#define FILENAME "../pic_data/2.ppm"
 #define PIECE_X 4
-#define PIECE_Y 2
+#define PIECE_Y 8
 
 #define ORIGIN_IMG 0
 #define LINE_IMG 1
@@ -130,9 +130,6 @@ class PPMFILE{
 
 			//それぞれのピースに分割
 			this->create_partition();
-
-			// オリジナル画像を結果画像にコピー
-			result_img = origin_img.clone();
 		}
 		//画像を表示する
 		void disp_img(int type){
@@ -461,14 +458,28 @@ class PPMFILE{
 		void create_result_img(void){
 			int part_width = origin_img.cols/part_size_x;
 			int part_height = origin_img.rows/part_size_y;
-			cv::Mat result_img_part;
 
-			cv::Mat new_img(origin_img.rows, origin_img.cols, CV_8UC3);
+			int max_part_x = 0, max_part_y = 0;
+
+			// 最大の幅と高さを求める
+			for(map<int, pair<int,int> >::iterator j = placement_pos.begin(); j != placement_pos.end(); j++){
+				int key = j->first;
+				pair<int, int> pos = j->second;
+				if(max_part_x < pos.first)
+					max_part_x = pos.first;
+				if(max_part_y < pos.second)
+					max_part_y = pos.second;
+			}
+			cout << "mpx :" << max_part_x << " mpy :" << max_part_y << endl;
+
+			// 大きさに応じたサイズのresult_imgを作成
+			cv::Mat tmp_result_img( cv::Size((max_part_x+1) * part_width, (max_part_y+1) * part_height), CV_8UC3, cv::Scalar(0,0,0));
+			// cv::Mat tmp_result_img( cv::Size( 2000, 2000), CV_8UC3, cv::Scalar(0,0,0));
 
 			for(map<int, pair<int,int> >::iterator j = placement_pos.begin(); j != placement_pos.end(); j++){
 				int key = j->first;
 				pair<int, int> pos = j->second;
-				part_img[key].copyTo(result_img( \
+				part_img[key].copyTo(tmp_result_img( \
 							cv::Rect( \
 								pos.first*part_width, \
 								pos.second*part_height, \
@@ -477,6 +488,7 @@ class PPMFILE{
 							));
 				cout << "s_x :" << pos.first*part_width << " s_y :" <<	pos.second*part_height << " CopyTo:" << key << endl;
 			}
+			result_img = tmp_result_img.clone();
 
 		}
 
