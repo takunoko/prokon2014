@@ -9,6 +9,9 @@
 // 問題ヘッダ部(コメント部分)
 #include "httpClient/QuestionHeader.hpp"
 
+// 画像解析
+#include "placement/PPMFILE.hpp"
+
 // デバッグ用
 #define VERBOSE
 
@@ -34,6 +37,7 @@ int solveProbrem(int id){
  // 受信した画像データ
  cv::Mat recievedData;
  // PPMFILE
+ PPMFILE *img;
 
 #ifdef VERBOSE
  cout << "Picture Downloading\nID: " << id<< endl;
@@ -65,13 +69,12 @@ int solveProbrem(int id){
  cv::imshow("testWindow",pic);
  cv::waitKey(0);
 #endif
- // 参照か値渡し
 
 #ifdef VERBOSE
  cout << "placement" << endl;
 #endif
  // ここに画像解析処理
- // ファイルの分割が必要だと思われ
+ img= new PPMFILE(recievedData,header.splitX,header.splitY);
 
 #ifdef VERBOSE
  cout << "sort" << endl;
