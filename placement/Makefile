@@ -20,3 +20,6 @@ all : cv_disp_img_tuple
 
 ${TARGET} : ${TARGET}.cpp
 	${CC} ${OPTION} ${OPEN_CV_HEADER} ${OPEN_CV_LIBS} ${FLAGS} -o $@ $<
+
+clean:
+	rm -vf ${TARGET}
