@@ -17,8 +17,8 @@
 
 // 画像ファイル名と分割数
 // 後々、分割数をファイルから読み込む
-#define FILENAME "../pic_data/2.ppm"
-#define PIECE_X 4
+#define FILENAME "../pic_data/8.ppm"
+#define PIECE_X 9
 #define PIECE_Y 8
 
 #define ORIGIN_IMG 0
@@ -107,7 +107,6 @@ class PPMFILE{
 	private:
 		int part_size_x, part_size_y;	//左右どれだけのピース数があるか?
 
-		string img_name;
 		cv::Mat origin_img;
 		cv::Mat	line_img;
 		cv::Mat	result_img;
@@ -122,11 +121,10 @@ class PPMFILE{
 		map<int,pair<int,int> > placement_pos;
 
 	public:
-		PPMFILE(string filename){
-			img_name = filename;
-			origin_img = cv::imread(img_name, -1);
-			part_size_x = PIECE_X;
-			part_size_y = PIECE_Y;
+		PPMFILE(cv::Mat origin_img_tmp, int piece_x, int piece_y){
+			origin_img = origin_img_tmp.clone();
+			part_size_x = piece_x;
+			part_size_y = piece_y;
 
 			//それぞれのピースに分割
 			this->create_partition();
@@ -317,7 +315,7 @@ class PPMFILE{
 								--part_1_x;
 								break;
 						}
-						// 目撃の場所に要素が入っていなかった場合
+						// 目的の場所に要素が入っていなかった場合
 						if(scraps[part_1].used_p.find(make_pair(part_1_x,part_1_y)) == scraps[part_1].used_p.end()){
 							used_part[get<2>(cost_t[i])] = part_1;
 							scraps[part_1].elements[get<2>(cost_t[i])] = make_pair( part_1_x, part_1_y);
@@ -343,8 +341,8 @@ class PPMFILE{
 							cout << "part_1 : " << part_1 << endl;
 							cout << "marg : " << part_s << " to " << part_l << endl;
 
-							cout << "PP : (" << CONV_X(get<1>(cost_t[i])) << "," << CONV_Y(get<1>(cost_t[i])) << ")" << endl;
-							cout << "PP : (" << CONV_X(get<2>(cost_t[i])) << "," << CONV_Y(get<2>(cost_t[i])) << ")" << endl;
+							cout << "PP1 : (" << CONV_X(get<1>(cost_t[i])) << "," << CONV_Y(get<1>(cost_t[i])) << ")" << endl;
+							cout << "PP2 : (" << CONV_X(get<2>(cost_t[i])) << "," << CONV_Y(get<2>(cost_t[i])) << ")" << endl;
 							cout << "discription : " << get<3>(cost_t[i]) << endl;
 #endif
 
@@ -509,10 +507,14 @@ class PPMFILE{
 };
 
 int main(void){
-	PPMFILE *img1 = new PPMFILE(FILENAME);
+	// 引数で渡されるべき部分
+	cv::Mat origin_img_tmp = cv::imread(FILENAME, -1);
+
+	// 本番環境では、PPMFILE( cv::Mat オリジナルのイメージ, int 分割数X, int 分割数Y, PosData);
+	PPMFILE *img1 = new PPMFILE( origin_img_tmp, PIECE_X, PIECE_Y);
 
 	img1->calc_cost();
-	img1->disp_cost_list();
+	img1->disp_cost_list();  // こいつを消すと結構時間が良くなる
 
 	// 指定した座標のcostを取得する
 	// cout << "get (3,1),(1,1),2 : " << img1->get_cost( CONV_XY(3,1), CONV_XY(1,1), 2) << endl;
