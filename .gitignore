@@ -2,4 +2,6 @@ a.out
 *.o
 *.swp
 *.d
+*.aux
+*.log
 prokon25
