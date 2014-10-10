@@ -80,9 +80,9 @@ int solveProbrem(int id){
  // どこかでPosData設定が必要
  img= new PPMFILE(recievedData,header.splitX,header.splitY);
  img->calc_cost();
- img->calc_cost_maru();
+ // img->calc_cost_maru(); // まだこのコスト計算は実装されていない
  img->placement();
- img->create_result_img();
+ // img->create_result_img(); //画像を表示しないなら使わないでOK
 
 #ifdef VERBOSE
  cout << "sort" << endl;
