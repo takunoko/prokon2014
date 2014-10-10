@@ -18,7 +18,7 @@ OPTION = -O3 -std=c++11 -stdlib=libc++
 
 all : cv_disp_img_tuple
 
-cv_disp_img_tuple : PPMFILE.cpp cv_disp_img_tuple.cpp 
+cv_disp_img_tuple : PPMFILE.cpp cv_disp_img_tuple.cpp
 	${CC} ${OPTION} ${OPEN_CV_HEADER} ${OPEN_CV_LIBS} ${FLAGS} -o $@ $^
 
 clean:
