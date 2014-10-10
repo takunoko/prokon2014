@@ -14,14 +14,7 @@ class ProkonClient{
  private:
   // streamにsize*nmembの大きさのptrを追加
   // 大きさを返す
-  static size_t callbackWrite(char *ptr,size_t size, size_t nmemb,string *stream){
-   // サイズ計算
-   int dataLength = size * nmemb;
-   // 書き込み
-   stream->append(ptr,dataLength);
-   // サイズを返す
-   return dataLength;
-  }
+  static size_t callbackWrite(char *ptr,size_t size, size_t nmemb,string *stream);
   string getData(string url,string postData);
   string getData(string url);
   // curlオブジェクト

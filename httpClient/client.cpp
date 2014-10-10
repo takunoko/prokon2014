@@ -158,3 +158,12 @@ string ProkonClient::getData(string url,string postData){
 string ProkonClient::getData(string url){
  return getData(url,"");
 }
+
+size_t ProkonClient::callbackWrite(char *ptr,size_t size, size_t nmemb,string *stream){
+   // サイズ計算
+   int dataLength = size * nmemb;
+   // 書き込み
+   stream->append(ptr,dataLength);
+   // サイズを返す
+   return dataLength;
+  }
