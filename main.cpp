@@ -12,6 +12,10 @@
 // 画像解析
 #include "placement/PPMFILE.hpp"
 
+// sort
+#include "sort/PosData.h"
+#include "sort/Process5.h"
+
 // デバッグ用
 #define VERBOSE
 
@@ -38,6 +42,9 @@ int solveProbrem(int id){
  cv::Mat recievedData;
  // PPMFILE
  PPMFILE *img;
+ // PosData
+ PosData *data;
+ Process5 *sort;
 
 #ifdef VERBOSE
  cout << "Picture Downloading\nID: " << id<< endl;
@@ -53,7 +60,7 @@ int solveProbrem(int id){
 
 #ifdef VERBOSE
  cerr << "Split X: " << header.splitX << endl;
- cerr << "Split Y: " << header.splitX << endl;
+ cerr << "Split Y: " << header.splitY << endl;
  cerr << "Selectable Count: " << header.selectableCount << endl;
  cerr << "Select Rate: " << header.selectRate << endl;
  cerr << "Exchange Rate: " << header.exchangeRate << endl;
@@ -63,31 +70,33 @@ int solveProbrem(int id){
  vector<char> v(res.begin(),res.end());
  recievedData=cv::imdecode(cv::Mat(v),-1);
 
-#if 0
- // 受信データ確認用ウィンドウ
- cv::namedWindow("testWindow",CV_WINDOW_AUTOSIZE);
- cv::imshow("testWindow",pic);
- cv::waitKey(0);
-#endif
+ data=new PosData(header.splitX,header.splitY);
+ sort=new Process5(header.splitX,header.splitY);
 
 #ifdef VERBOSE
  cout << "placement" << endl;
 #endif
  // ここに画像解析処理
+ // どこかでPosData設定が必要
  img= new PPMFILE(recievedData,header.splitX,header.splitY);
+ img->calc_cost();
+ img->calc_cost_maru();
+ img->placement();
+ img->create_result_img();
 
 #ifdef VERBOSE
  cout << "sort" << endl;
 #endif
  // ここにソート処理
+ sort->importData(*data);
 
 #ifdef VERBOSE
- cout <<"Answer Send" << endl;
+ cout <<"(not sort done)Answer And Send" << endl;
 #endif
 
  try {
   // 引数に問題番号を指定して画像のバイナリstringを返す(cv::Mat形式にするかも)
-  res=client.sendAnswer(id,"1145148938101919889466364364");
+  res=client.sendAnswer(id,sort->sort());
  } catch (char const * exception) {
 
   cerr << "Exception: " << exception << endl;
