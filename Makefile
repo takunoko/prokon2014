@@ -11,7 +11,7 @@ LDFLAGS= `pkg-config --libs libcurl` `pkg-config --libs opencv`
 .PHONY: all clean
 .SUFFIXES: .cpp .o
 
-prokon25_SRCS= main.cpp httpClient/client.cpp sort/Process5.cpp sort/ProcessBase.cpp sort/Dataset.cpp sort/PosData.cpp sort/Pos.cpp sort/util.cpp
+prokon25_SRCS= main.cpp httpClient/client.cpp sort/Process5.cpp sort/ProcessBase.cpp sort/Dataset.cpp sort/PosData.cpp sort/Pos.cpp sort/util.cpp placement/PPMFILE.cpp
 # FIXME: Makefileの置換
 prokon25_DEPS= $(prokon25_SRCS:.cpp=.d)
 prokon25_OBJS= $(prokon25_SRCS:.cpp=.o)
