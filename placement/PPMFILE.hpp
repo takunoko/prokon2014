@@ -3,6 +3,7 @@
 
 #include <opencv2/core/core.hpp>
 
+#include "../sort/PosData.h"
 #define DEBUG
 
 #define ORIGIN_IMG 0
