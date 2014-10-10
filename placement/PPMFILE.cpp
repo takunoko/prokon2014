@@ -4,6 +4,7 @@
 #include <opencv2/highgui/highgui.hpp>
 
 #include "PPMFILE.hpp"
+#include "../sort/PosData.h"
 
 // tupleを比較するときのルール
 bool my_compare( const COST_TUPLE &lhs, const COST_TUPLE &rhs){
@@ -414,6 +415,15 @@ int PPMFILE::get_cost(int xy_1, int xy_2, int dire){
   pair_cost = -1;
  }
  return pair_cost;
+}
+
+void PPMFILE::set_PosData(){
+ for(map<int, pair<int,int> >::iterator j = placement_pos.begin(); j != placement_pos.end(); j++){
+	 int key = j->first;
+	 pair<int, int> pos = j->second;
+
+	 //setData( CONV_X(key), CONV_Y(key), pos.first, pos.second);
+ }
 }
 
 

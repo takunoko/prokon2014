@@ -14,6 +14,7 @@
 #include <opencv2/highgui/highgui.hpp>
 
 #include "PPMFILE.hpp"
+#include "../sort/PosData.h"
 
 // 画像ファイル名と分割数
 // 後々、分割数をファイルから読み込む
@@ -24,6 +25,9 @@ using namespace std;
 #define PIECE_Y 3
 
 int main(void){
+
+	PosData *tmp_pos = new PosData( PIECE_X, PIECE_Y);
+
 	// 引数で渡されるべき部分
 	cv::Mat origin_img_tmp = cv::imread(FILENAME, -1);
 
@@ -31,7 +35,7 @@ int main(void){
 	PPMFILE *img1 = new PPMFILE( origin_img_tmp, PIECE_X, PIECE_Y);
 
 	img1->calc_cost();
-	img1->disp_cost_list();  // こいつを消すと結構時間が良くなる
+	img1->disp_cost_list();  // 消すと結構時間が良くなる
 
 	img1->calc_cost_maru();
 	// 指定した座標のcostを取得する
@@ -42,9 +46,10 @@ int main(void){
 	// img1->write_line();
 	// img1->disp_img(LINE_IMG);
 	// img1->disp_img(ORIGIN_IMG);
-	img1->disp_placement();
-	img1->create_result_img();
 
+	img1->disp_placement();
+
+	img1->create_result_img();
 	img1->disp_img(RESULT_IMG);
 
 	cv::waitKey(0);	//waitKey(0)で何か入力するまで処理を停止

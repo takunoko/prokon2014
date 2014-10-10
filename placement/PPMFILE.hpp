@@ -79,6 +79,8 @@ class PPMFILE{
 		void placement(void);
 
 		void disp_placement(void);
+		//PosDataにデータを挿入
+		void set_PosData();
 
 		// 配置してみた時の表示
 		void create_result_img(void);
