@@ -26,9 +26,10 @@ int main(void) {
       data->setData(i, j, i, j);
     }
   }
-  Process5 *test = new Process5(WIDTH, HEIGHT);
-  test->importData(*data);
-  data_send = test->sort();
+  Process1 *test = new Process1(WIDTH, HEIGHT);
+  //test->importData(*data);
+  //data_send = test->sort();
+  test->sort();
   delete test;
 
   return 0;

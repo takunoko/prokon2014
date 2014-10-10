@@ -20,6 +20,7 @@ void Pro1::sort() {
 
   for(i = 0; i < table->getHeight(); i++) {
     for(j = 0; j < table->getWidth(); j++) {
+      origin = table->findData(j, i);
       table->selectData(origin.x, origin.y);
       table->dispData();
       if(origin.x > j) {
