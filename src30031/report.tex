@@ -1,0 +1,89 @@
+\documentclass[a4j]{jarticle}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage{listings,jlisting}
+\usepackage{multicol}
+\usepackage{pdflscape}
+
+\renewcommand{\lstlistingname}{List}
+
+\lstset{language=C++,%
+ basicstyle=\ttfamily\scriptsize,%
+ commentstyle=\textit,%
+ classoffset=1,%
+ keywordstyle=\bfseries,%
+ frame=tRBl,framesep=5pt,%
+ showstringspaces=false,%
+ numbers=left,stepnumber=1,numberstyle=\footnotesize%
+}%
+
+
+\makeatletter%% プリアンブルで定義する場合は必須
+\renewcommand{\section}{
+ \@startsection{section}{1}{\z@}%
+ %{1.5\Cvs \@plus.5\Cvs \@minus.2\Cvs}%
+ %{.5\Cvs \@plus.3\Cvs}%
+ {1.5\Cvs} %
+ {.5\Cvs} %
+ {\reset@font\Large\bfseries}
+}
+\renewcommand{\subsection}{
+ \@startsection{subsection}{2}{\z@}%
+ {.5\Cvs}%
+ {.5\Cvs}%
+ {\reset@font\large\bfseries}
+}
+\makeatother%% プリアンブルで定義する場合は必須
+
+
+\pagestyle{empty}
+\begin{document}
+
+
+
+\setlength{\columnsep}{40pt}
+\begin{landscape}
+ \begin{multicols}{2}
+
+
+  \makeatletter
+  \@tfor\xx@t:=
+  {../main.cpp}
+  {../httpClient/QuestionHeader.hpp}
+  {../httpClient/client.cpp}
+  {../httpClient/client.h}
+  {../placement/PPMFILE.cpp}
+  {../placement/PPMFILE.hpp}
+  {../placement/cv_disp_img_tuple.cpp}
+  {../placement/placement.cpp}
+  {../sort/Dataset.cpp}
+  {../sort/Dataset.h}
+  {../sort/Pos.cpp}
+  {../sort/Pos.h}
+  {../sort/PosData.cpp}
+  {../sort/PosData.h}
+  {../sort/Process1.cpp}
+  {../sort/Process1.h}
+  {../sort/Process2.cpp}
+  {../sort/Process2.h}
+  {../sort/Process3.cpp}
+  {../sort/Process3.h}
+  {../sort/Process4.cpp}
+  {../sort/Process4.h}
+  {../sort/Process5.cpp}
+  {../sort/Process5.h}
+  {../sort/ProcessBase.cpp}
+  {../sort/ProcessBase.h}
+  {../sort/old.cpp}
+  {../sort/sort.cpp}
+  {../sort/util.cpp}
+  {../sort/util.h}
+  \do{%
+   \lstinputlisting[breaklines=true,caption=\xx@t]
+   {\xx@t}
+  }
+  \makeatother
+ \end{multicols}
+\end{landscape}
+
+
+\end{document}
