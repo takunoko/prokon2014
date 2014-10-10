@@ -17,9 +17,9 @@
 
 // 画像ファイル名と分割数
 // 後々、分割数をファイルから読み込む
-#define FILENAME "../pic_data/8.ppm"
-#define PIECE_X 9
-#define PIECE_Y 8
+#define FILENAME "../pic_data/5.ppm"
+#define PIECE_X 2
+#define PIECE_Y 3
 
 #define ORIGIN_IMG 0
 #define LINE_IMG 1
@@ -115,8 +115,10 @@ class PPMFILE{
 
 		// cost配列(3次元)
 		vector< vector< vector< pair<int,int> > > > cost;
+		vector< vector< vector< pair<int,int> > > > cost_maru;
 		// cost_t配列(1次元)
 		vector<COST_TUPLE> cost_t;
+		vector<COST_TUPLE> cost_t_maru;
 		// 配置の位置を示す配列
 		map<int,pair<int,int> > placement_pos;
 
@@ -216,6 +218,67 @@ class PPMFILE{
 					for(int k=0; k < 4; ++k){
 						cost_t.push_back(make_tuple( cost_tmp[k], abs_xy, xy, k));
 						cost[abs_xy][k][xy] = make_pair( cost_tmp[k], xy);
+					}
+				}
+			}
+
+			cout << "start_sort" << endl;
+			// 独自のルールでCOST_TUPLEをソート
+			sort( cost_t.begin(), cost_t.end(), my_compare);
+			cout << "end calc" << endl;
+		}
+
+		// まるさん方式　
+		void calc_cost_maru(void){
+			// costのサイズ変更
+			cost_maru.resize( part_size_x*part_size_y);
+			for(int i=0; i<part_size_x*part_size_y; i++){
+				cost_maru[i].resize(4);
+				for(int j=0; j<4; j++){
+					cost_maru[i][j].resize(part_size_x*part_size_y);
+				}
+			}
+
+			cout << "start_calc_maru" << endl;
+
+			int cost_tmp[4];
+			// 差分積算量は数が少ない方から多い方にじゃないと調べられない
+			for(int abs_xy=0; abs_xy < part_size_x * part_size_y; ++abs_xy){
+				for(int xy=abs_xy+1; xy < part_size_x * part_size_y; ++xy){
+					//コスト初期化
+					for(int i=0; i<4; i++){
+						cost_tmp[i] = 0;
+					}
+					//カラーの数だけ繰り返す
+					for(int c=1; c < part_img[abs_xy].channels(); ++c){
+						//各ピクセル上下
+						for(int px_x=0; px_x < part_img[0].cols; ++px_x){
+							cost_tmp[DIRE_U] += abs(part_img[abs_xy].at<cv::Vec3b>( 0, px_x)[c] - (part_img[abs_xy].at<cv::Vec3b>( 1, px_x)[c] - part_img[xy].at<cv::Vec3b>( part_img[0].rows-1, px_x)[c])/2);
+							cost_tmp[DIRE_D] += abs(part_img[abs_xy].at<cv::Vec3b>( part_img[0].rows-1, px_x)[c] - (part_img[abs_xy].at<cv::Vec3b>( 0, px_x)[c] - part_img[xy].at<cv::Vec3b>( part_img[0].rows-2, px_x)[c])/2);
+						}
+						//各ピクセル左右
+						for(int px_y=0; px_y < part_img[0].rows; ++px_y){
+							// cost_tmp[DIRE_R] += abs(part_img[abs_xy].at<cv::Vec3b>( px_y, part_img[0].cols-1)[c] - (part_img[abs_xy].at<cv::Vec3b>( px_y, 0)[c] - part_img[xy].at<cv::Vec3b>( px_y, part_img[0].cols-2)[c])/2);
+
+
+							// 	abs(part_img[abs_xy].at<cv::Vec3b>( px_y, part_img[0].cols-1)[c] - (part_img[xy].at<cv::Vec3b>( px_y, 0)[c]);
+							// cost_tmp[DIRE_L] += abs(part_img[abs_xy].at<cv::Vec3b>( px_y, 0)[c] - part_img[xy].at<cv::Vec3b>( px_y, part_img[0].cols-1)[c]);
+						}
+					}
+
+					// 上下に対しては縦のピクセル数、左右に対しては横のピクセル数
+					// を×る事によって、結合度の重みを長さに依存させない
+					// ワンちゃんオーバーフローが恐い(たぶん大丈夫)
+					cost_tmp[DIRE_U] *= part_img[0].rows;
+					cost_tmp[DIRE_D] *= part_img[0].rows;
+					cost_tmp[DIRE_R] *= part_img[0].cols;
+					cost_tmp[DIRE_L] *= part_img[0].cols;
+
+					// cost_t [ コスト, 自分の座標, 相手の座標, 方向]
+					// cost [自分の座標][方向][相手の座標]
+					for(int k=0; k < 4; ++k){
+						cost_t_maru.push_back(make_tuple( cost_tmp[k], abs_xy, xy, k));
+						cost_maru[abs_xy][k][xy] = make_pair( cost_tmp[k], xy);
 					}
 				}
 			}
@@ -516,6 +579,7 @@ int main(void){
 	img1->calc_cost();
 	img1->disp_cost_list();  // こいつを消すと結構時間が良くなる
 
+	img1->calc_cost_maru();
 	// 指定した座標のcostを取得する
 	// cout << "get (3,1),(1,1),2 : " << img1->get_cost( CONV_XY(3,1), CONV_XY(1,1), 2) << endl;
 
