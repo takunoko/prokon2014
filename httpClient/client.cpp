@@ -38,7 +38,7 @@ string ProkonClient::getProblem(int problemNo,QuestionHeader & data){
  // 現在操作するポインタ
  vector<unsigned int *>::iterator now;
  // フラグ
- bool enable,endNum;
+ bool enable;
 
  // 代入するデータを順に入れる
  dataPointer.push_back(& data.splitX);
