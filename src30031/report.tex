@@ -47,39 +47,26 @@
 
   \makeatletter
   \@tfor\xx@t:=
-  {../main.cpp}
-  {../httpClient/QuestionHeader.hpp}
-  {../httpClient/client.cpp}
-  {../httpClient/client.h}
-  {../placement/PPMFILE.cpp}
-  {../placement/PPMFILE.hpp}
-  {../placement/cv_disp_img_tuple.cpp}
-  {../placement/placement.cpp}
-  {../sort/Dataset.cpp}
-  {../sort/Dataset.h}
-  {../sort/Pos.cpp}
-  {../sort/Pos.h}
-  {../sort/PosData.cpp}
-  {../sort/PosData.h}
-  {../sort/Process1.cpp}
-  {../sort/Process1.h}
-  {../sort/Process2.cpp}
-  {../sort/Process2.h}
-  {../sort/Process3.cpp}
-  {../sort/Process3.h}
-  {../sort/Process4.cpp}
-  {../sort/Process4.h}
-  {../sort/Process5.cpp}
-  {../sort/Process5.h}
-  {../sort/ProcessBase.cpp}
-  {../sort/ProcessBase.h}
-  {../sort/old.cpp}
-  {../sort/sort.cpp}
-  {../sort/util.cpp}
-  {../sort/util.h}
+  {main.cpp}
+  {httpClient/QuestionHeader.hpp}
+  {httpClient/client.cpp}
+  {httpClient/client.h}
+  {placement/PPMFILE.cpp}
+  {placement/PPMFILE.hpp}
+  {placement/placement.cpp}
+  {sort/Pos.cpp}
+  {sort/Pos.h}
+  {sort/PosData.cpp}
+  {sort/PosData.h}
+  {sort/Process5.cpp}
+  {sort/Process5.h}
+  {sort/ProcessBase.cpp}
+  {sort/ProcessBase.h}
+  {sort/util.cpp}
+  {sort/util.h}
   \do{%
    \lstinputlisting[breaklines=true,caption=\xx@t]
-   {\xx@t}
+   {../\xx@t}
   }
   \makeatother
  \end{multicols}

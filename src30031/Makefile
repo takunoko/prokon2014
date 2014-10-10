@@ -5,7 +5,7 @@ TEX=platex --shell-escape
 
 all:pdf
 
-pdf:$(FILENAME).pdf test.pdf
+pdf:$(FILENAME).pdf
 dvi:$(FILENAME).dvi
 
 $(FILENAME).pdf: $(FILENAME).dvi
