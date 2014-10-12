@@ -35,6 +35,20 @@ pair<int,int> make_direction_pair(int direction){
 	return dire_pair;
 }
 
+// スクラップサイズの更新(1:1の場合)
+void convert_scrap_size(int *width, int *height, int direction){
+	switch(direction){
+		case DIRE_U:
+		case DIRE_D:
+			height += 1;
+			break;
+		case DIRE_R:
+		case DIRE_L:
+			width += 1;
+			break;
+	}
+}
+
 // 方向を逆にする
 int inverse_direction(int dire){
 	int inv_dire = -1;
@@ -194,20 +208,11 @@ void PPMFILE::calc_cost_maru(void){
 			// 上下に対しては縦のピクセル数、左右に対しては横のピクセル数
 			// を×る事によって、結合度の重みを長さに依存させない
 			// ワンちゃんオーバーフローが恐い(たぶん大丈夫)
-			cout << "test_1_U : " << cost_tmp[DIRE_U] << endl;
-			cout << "test_1_D : " << cost_tmp[DIRE_D] << endl;
-			cout << "test_1_R : " << cost_tmp[DIRE_R] << endl;
-			cout << "test_1_L : " << cost_tmp[DIRE_L] << endl;
 
 			cost_tmp[DIRE_U] *= part_img[0].rows;
 			cost_tmp[DIRE_D] *= part_img[0].rows;
 			cost_tmp[DIRE_R] *= part_img[0].cols;
 			cost_tmp[DIRE_L] *= part_img[0].cols;
-
-			cout << "test_2_U : " << cost_tmp[DIRE_U] << endl;
-			cout << "test_2_D : " << cost_tmp[DIRE_D] << endl;
-			cout << "test_2_R : " << cost_tmp[DIRE_R] << endl;
-			cout << "test_2_L : " << cost_tmp[DIRE_L] << endl;
 
 			// cost_t [ コスト, 自分の座標, 相手の座標, 方向]
 			// cost [自分の座標][方向][相手の座標]
@@ -218,7 +223,7 @@ void PPMFILE::calc_cost_maru(void){
 		}
 	}
 
-	cout << "start_sort" << endl;
+	cout << "start_sort_maru" << endl;
 	// 独自のルールでCOST_TUPLEをソート
 	sort( cost_t.begin(), cost_t.end(), my_compare);
 	cout << "end calc" << endl;
@@ -232,9 +237,10 @@ void PPMFILE::disp_cost_list(void){
 	}
 }
 
+// 画像を配置していく
 void PPMFILE::placement(void){
-	// 使われたかどうかのフラグ
 	vector<SCRAP> scraps;
+	// 使われたかどうかのフラグ
 	vector<int> used_part(part_size_x*part_size_y, -1);
 	// 目的の場所への差分
 	int dif_x, dif_y;
@@ -244,23 +250,30 @@ void PPMFILE::placement(void){
 	int part_1, part_2;
 	int part_1_x, part_1_y;
 	int part_2_x, part_2_y;
+
 	// 再配置の時に使う
 	int pos_x_min = 0;
 	int pos_y_min = 0;
 
+	// どちらのスコアの方が優れているか？
+	int sc_def = 0;
+	int sc_new = 0;
+
+	// すべてのコストについて実行
 	for(int i=0; i < cost_t.size(); i++){
 		SCRAP scrap_tmp;
 		part_1 = used_part[get<1>(cost_t[i])];
 		part_2 = used_part[get<2>(cost_t[i])];
 
 		if(part_1 == -1){
-			if(part_2 == -1){ // まだ使われてなかったら
-				// どちらもまだ使われていない
+			if(part_2 == -1){ // どちらも使われていない
+				scrap_tmp.width = scrap_tmp.height = 0;
 				used_part[get<1>(cost_t[i])] = used_part[get<2>(cost_t[i])] = scraps.size();	// 追加したscrap番号を保持
 				scrap_tmp.elements[get<1>(cost_t[i])] = make_pair( 0, 0);
 				scrap_tmp.used_p[make_pair(0,0)] = get<1>(cost_t[i]);
 				scrap_tmp.elements[get<2>(cost_t[i])] = make_direction_pair(get<3>(cost_t[i]));
 				scrap_tmp.used_p[make_direction_pair(get<3>(cost_t[i]))] = get<2>(cost_t[i]);
+				convert_scrap_size( &scrap_tmp.width, &scrap_tmp.height, get<3>(cost_t[i]));
 				scraps.push_back(scrap_tmp);
 			}
 			else{						// 2だけつかわれてる
@@ -285,8 +298,34 @@ void PPMFILE::placement(void){
 					used_part[get<1>(cost_t[i])] = part_2;
 					scraps[part_2].elements[get<1>(cost_t[i])] = make_pair( part_2_x, part_2_y);
 					scraps[part_2].used_p[make_pair( part_2_x, part_2_y)] = get<1>(cost_t[i]);
+					convert_scrap_size( &scrap_tmp.width, &scrap_tmp.height, get<3>(cost_t[i]));
 				}else{
 					// すでに要素が入っていた場合
+					// すでに入っている要素よりも周りとの比較で良いと判断したら、それを使う
+					sc_def = 0;
+					sc_new = 0;
+					if(scraps[part_2].used_p.find(make_pair(part_2_x,part_2_y+1)) == scraps[part_2].used_p.end()){
+						sc_def += get_cost( part_2, scraps[part_2].used_p[make_pair( part_2_x, part_2_y+1)], DIRE_D);
+						sc_new += get_cost( part_1, scraps[part_2].used_p[make_pair( part_2_x, part_2_y+1)], DIRE_D);
+					}
+					if(scraps[part_2].used_p.find(make_pair(part_2_x,part_2_y-1)) == scraps[part_2].used_p.end()){
+						sc_def += get_cost( part_2, scraps[part_2].used_p[make_pair( part_2_x, part_2_y-1)], DIRE_U);
+						sc_new += get_cost( part_1, scraps[part_2].used_p[make_pair( part_2_x, part_2_y-1)], DIRE_U);
+					}
+					if(scraps[part_2].used_p.find(make_pair(part_2_x+1,part_2_y)) != scraps[part_2].used_p.end()){
+						sc_def += get_cost( part_2, scraps[part_2].used_p[make_pair( part_2_x+1, part_2_y)], DIRE_R);
+						sc_new += get_cost( part_1, scraps[part_2].used_p[make_pair( part_2_x+1, part_2_y)], DIRE_R);
+					}
+					if(scraps[part_2].used_p.find(make_pair(part_2_x-1,part_2_y)) == scraps[part_2].used_p.end()){
+						sc_def += get_cost( part_2, scraps[part_2].used_p[make_pair( part_2_x-1, part_2_y)], DIRE_L);
+						sc_new += get_cost( part_1, scraps[part_2].used_p[make_pair( part_2_x-1, part_2_y)], DIRE_L);
+					}
+					if(sc_def > sc_new){ // sc_new の方がスコアが小さかった場合 入れ替え
+						used_part[get<1>(cost_t[i])] = part_2;
+						used_part[get<2>(cost_t[i])] = -1; // 使われていないフラグを立てる
+						scraps[part_2].elements[get<1>(cost_t[i])] = make_pair( part_2_x, part_2_y);
+						scraps[part_2].used_p[make_pair( part_2_x, part_2_y)] = get<1>(cost_t[i]);
+					}
 				}
 			}
 		}else{
@@ -313,8 +352,35 @@ void PPMFILE::placement(void){
 					used_part[get<2>(cost_t[i])] = part_1;
 					scraps[part_1].elements[get<2>(cost_t[i])] = make_pair( part_1_x, part_1_y);
 					scraps[part_1].used_p[make_pair( part_1_x, part_1_y)] = get<2>(cost_t[i]);
+					convert_scrap_size( &scrap_tmp.width, &scrap_tmp.height, get<3>(cost_t[i]));
 				}else{
 					// 既に要素が入っていた場合
+					// すでに要素が入っていた場合
+					// すでに入っている要素よりも周りとの比較で良いと判断したら、それを使う
+					sc_def = 0;
+					sc_new = 0;
+					if(scraps[part_1].used_p.find(make_pair(part_1_x,part_1_y+1)) == scraps[part_1].used_p.end()){
+						sc_def += get_cost( part_1, scraps[part_1].used_p[make_pair( part_1_x, part_1_y+1)], DIRE_D);
+						sc_new += get_cost( part_1, scraps[part_1].used_p[make_pair( part_1_x, part_1_y+1)], DIRE_D);
+					}
+					if(scraps[part_1].used_p.find(make_pair(part_1_x,part_1_y-1)) == scraps[part_1].used_p.end()){
+						sc_def += get_cost( part_1, scraps[part_1].used_p[make_pair( part_1_x, part_1_y-1)], DIRE_U);
+						sc_new += get_cost( part_1, scraps[part_1].used_p[make_pair( part_1_x, part_1_y-1)], DIRE_U);
+					}
+					if(scraps[part_1].used_p.find(make_pair(part_1_x+1,part_1_y)) != scraps[part_1].used_p.end()){
+						sc_def += get_cost( part_1, scraps[part_1].used_p[make_pair( part_1_x+1, part_1_y)], DIRE_R);
+						sc_new += get_cost( part_1, scraps[part_1].used_p[make_pair( part_1_x+1, part_1_y)], DIRE_R);
+					}
+					if(scraps[part_1].used_p.find(make_pair(part_1_x-1,part_1_y)) == scraps[part_1].used_p.end()){
+						sc_def += get_cost( part_1, scraps[part_1].used_p[make_pair( part_1_x-1, part_1_y)], DIRE_L);
+						sc_new += get_cost( part_1, scraps[part_1].used_p[make_pair( part_1_x-1, part_1_y)], DIRE_L);
+					}
+					if(sc_def > sc_new){ // sc_new の方がスコアが小さかった場合 入れ替え
+						used_part[get<1>(cost_t[i])] = part_1;
+						used_part[get<2>(cost_t[i])] = -1; // 使われていないフラグを立てる
+						scraps[part_1].elements[get<1>(cost_t[i])] = make_pair( part_1_x, part_1_y);
+						scraps[part_1].used_p[make_pair( part_1_x, part_1_y)] = get<1>(cost_t[i]);
+					}
 				}
 			}else{	// 両方ともつかわれている -> スクラップの添字が小さい方に大きい方をくっつける
 				if( part_1 != part_2){  // 同じスクラップでない場合

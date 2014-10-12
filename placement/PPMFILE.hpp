@@ -25,6 +25,7 @@ typedef tuple< int, int, int, int> COST_TUPLE;
 
 // スクラップ(いくつかのパーツの集まり)
 typedef struct{
+	int width, height;
 	map<int,pair<int,int> > elements;	// パーツidから、それが使われているか?
 	map<pair<int, int>, int> used_p;// ポジションから、そこに何があるか？
 }SCRAP;
