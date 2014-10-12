@@ -15,6 +15,10 @@
 #define DIRE_R 2
 #define DIRE_L 3
 
+#define COST_DEF 0
+#define COST_MARU 1
+#define COST_ALL 2
+
 
 #define MIN_2( A, B) ((A) < (B) ? (A) : (B))
 #define BIG_2( A, B) ((A) > (B) ? (A) : (B))
@@ -44,9 +48,11 @@ class PPMFILE{
 		// cost配列(3次元)
 		vector< vector< vector< pair<int,int> > > > cost;
 		vector< vector< vector< pair<int,int> > > > cost_maru;
+		vector< vector< vector< pair<int,int> > > > cost_all;
 		// cost_t配列(1次元)
 		vector<COST_TUPLE> cost_t;
 		vector<COST_TUPLE> cost_t_maru;
+		vector<COST_TUPLE> cost_t_all;
 		// 配置の位置を示す配列
 		map<int,pair<int,int> > placement_pos;
 
@@ -75,7 +81,8 @@ class PPMFILE{
 		// まるさん方式　
 		void calc_cost_maru(void);
 
-		void disp_cost_list(void);
+		// コストリストの中身を表示(引数にどのリストを表示するか選択)
+		void disp_cost_list(int);
 
 		// 配置
 		void placement(void);
@@ -89,4 +96,10 @@ class PPMFILE{
 
 		// xy_1のdire方向のxy_2とのcost
 		int get_cost(int xy_1, int xy_2, int dire);
+
+		// 左上を取得してみる
+		void get_left_top();
+
+		// すべての方向に対してコストを計算する
+		void calc_cost_all();
 };

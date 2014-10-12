@@ -31,17 +31,19 @@ int main(void){
 	// 本番環境では、PPMFILE( cv::Mat オリジナルのイメージ, int 分割数X, int 分割数Y, PosData);
 	PPMFILE *img1 = new PPMFILE( origin_img_tmp, PIECE_X, PIECE_Y);
 
-	//img1->calc_cost();
+	img1->calc_cost();
 	img1->calc_cost_maru();
-	img1->disp_cost_list();  // 消すと結構時間が良くなる
+	img1->calc_cost_all();
+	// img1->disp_cost_list();  // 消すと結構時間が良くなる
 
-	//img1->calc_cost();
-	img1->calc_cost_maru();
+	img1->get_left_top();
+	img1->disp_cost_list(COST_ALL);
+	img1->get_left_top();
 
 	// 指定した座標のcostを取得する
 	// cout << "get (3,1),(1,1),2 : " << img1->get_cost( CONV_XY(3,1), CONV_XY(1,1), 2) << endl;
 
-	img1->placement();
+	// img1->placement();
 
 	// img1->write_line();
 	// img1->disp_img(LINE_IMG);
@@ -50,10 +52,11 @@ int main(void){
 
 	// img1->disp_placement();
 
-	img1->create_result_img();
-	img1->disp_img(RESULT_IMG);
+	// 画像をcv::Mat上に配置する
+	// img1->create_result_img();
+	// img1->disp_img(RESULT_IMG);
 
-	cv::waitKey(0);	//waitKey(0)で何か入力するまで処理を停止
+	// cv::waitKey(0);	//waitKey(0)で何か入力するまで処理を停止
 
 	return 0;
 }

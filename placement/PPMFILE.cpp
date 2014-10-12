@@ -11,7 +11,8 @@ bool my_compare( const COST_TUPLE &lhs, const COST_TUPLE &rhs){
 	if (std::get<0>(lhs) != std::get<0>(rhs)) return std::get<0>(lhs) < std::get<0>(rhs);
 	if (std::get<1>(lhs) != std::get<1>(rhs)) return std::get<1>(lhs) < std::get<1>(rhs);
 	if (std::get<2>(lhs) != std::get<2>(rhs)) return std::get<2>(lhs) < std::get<2>(rhs);
-	return std::get<2>(lhs) < std::get<2>(rhs);
+	if (std::get<3>(lhs) != std::get<3>(rhs)) return std::get<3>(lhs) < std::get<3>(rhs);
+	return std::get<3>(lhs) < std::get<3>(rhs);
 }
 
 // 方向に対するpairを作る
@@ -153,7 +154,7 @@ void PPMFILE::calc_cost(void){
 			// 上下に対しては縦のピクセル数、左右に対しては横のピクセル数
 			// を×る事によって、結合度の重みを長さに依存させない
 			// ワンちゃんオーバーフローが恐い(たぶん大丈夫)
-		cost_tmp[DIRE_U] *= part_img[0].rows;
+			cost_tmp[DIRE_U] *= part_img[0].rows;
 			cost_tmp[DIRE_D] *= part_img[0].rows;
 			cost_tmp[DIRE_R] *= part_img[0].cols;
 			cost_tmp[DIRE_L] *= part_img[0].cols;
@@ -173,11 +174,11 @@ void PPMFILE::calc_cost(void){
 
 void PPMFILE::calc_cost_maru(void){
 	// costのサイズ変更
-	cost.resize( part_size_x*part_size_y);
+	cost_maru.resize( part_size_x*part_size_y);
 	for(int i=0; i<part_size_x*part_size_y; i++){
-		cost[i].resize(4);
+		cost_maru[i].resize(4);
 		for(int j=0; j<4; j++){
-			cost[i][j].resize(part_size_x*part_size_y);
+			cost_maru[i][j].resize(part_size_x*part_size_y);
 		}
 	}
 
@@ -225,15 +226,34 @@ void PPMFILE::calc_cost_maru(void){
 
 	cout << "start_sort_maru" << endl;
 	// 独自のルールでCOST_TUPLEをソート
-	sort( cost_t.begin(), cost_t.end(), my_compare);
+	sort( cost_t_maru.begin(), cost_t_maru.end(), my_compare);
 	cout << "end calc" << endl;
 }
 
-void PPMFILE::disp_cost_list(void){
+void PPMFILE::disp_cost_list(int cost_select){
 	// 表示
 	cout << "score : my_pos : pair_pos : direction " << endl;
-	for(int i=0; i < cost_t.size(); i++){
-		cout << i << " |cost: " << get<0>(cost_t[i]) << ", (" << CONV_X( get<1>(cost_t[i])) << "," << CONV_Y( get<1>(cost_t[i])) << "), (" << CONV_X(get<2>(cost_t[i])) << "," << CONV_Y(get<2>(cost_t[i])) << "), " << get<3>(cost_t[i]) << ", " << endl;
+	switch( cost_select){
+		case COST_DEF:
+			cout << "-----cost_def-----" << endl;
+			for(int i=0; i < cost_t.size(); i++){
+				cout << i << " |cost: " << get<0>(cost_t[i]) << ", (" << CONV_X( get<1>(cost_t[i])) << "," << CONV_Y( get<1>(cost_t[i])) << "), (" << CONV_X(get<2>(cost_t[i])) << "," << CONV_Y(get<2>(cost_t[i])) << "), " << get<3>(cost_t[i]) << ", " << endl;
+			}
+			break;
+
+		case COST_MARU:
+			cout << "-----cost_maru-----" << endl;
+			for(int i=0; i < cost_t_maru.size(); i++){
+				cout << i << " |cost: " << get<0>(cost_t_maru[i]) << ", (" << CONV_X( get<1>(cost_t_maru[i])) << "," << CONV_Y( get<1>(cost_t_maru[i])) << "), (" << CONV_X(get<2>(cost_t_maru[i])) << "," << CONV_Y(get<2>(cost_t_maru[i])) << "), " << get<3>(cost_t_maru[i]) << ", " << endl;
+			}
+			break;
+
+		case COST_ALL:
+			cout << "-----cost_all-----" << endl;
+			for(int i=0; i < cost_t_all.size(); i++){
+				cout << i << " |cost: " << get<0>(cost_t_all[i]) << ", (" << CONV_X( get<1>(cost_t_all[i])) << "," << CONV_Y( get<1>(cost_t_all[i])) << "), (" << CONV_X(get<2>(cost_t_all[i])) << "," << CONV_Y(get<2>(cost_t_all[i])) << "), " << get<3>(cost_t_all[i]) << ", " << endl;
+			}
+			break;
 	}
 }
 
@@ -558,3 +578,89 @@ void PPMFILE::set_PosData(PosData *data){
 	}
 }
 
+
+// tupleを比較するときのルール
+bool my_compare_2( const COST_TUPLE &lhs, const COST_TUPLE &rhs){
+	if (std::get<3>(lhs) != std::get<3>(rhs)) return std::get<3>(lhs) > std::get<3>(rhs);
+	if (std::get<0>(lhs) != std::get<0>(rhs)) return std::get<0>(lhs) < std::get<0>(rhs);
+	if (std::get<1>(lhs) != std::get<1>(rhs)) return std::get<1>(lhs) < std::get<1>(rhs);
+	if (std::get<2>(lhs) != std::get<2>(rhs)) return std::get<2>(lhs) < std::get<2>(rhs);
+	return std::get<2>(lhs) < std::get<2>(rhs);
+}
+
+// 左上のピースを取得してみる
+void PPMFILE::get_left_top(){
+	vector< pair<int,int> > bad_up( part_size_x * part_size_y);
+	vector<bool> used_flg( part_size_x * part_size_y, false);
+
+	cout << " get left top " << endl << endl ;
+	sort( cost_t_all.begin(), cost_t_all.end(), my_compare_2);
+
+	int i2=0;
+	for(int i=0; i < cost_t_all.size(); i++){
+		// 後半のイコールの数字をいじっていい感じのところを持ってくる
+		if(used_flg[get<1>(cost_t_all[i])] == false && get<3>(cost_t_all[i]) == 2){
+			used_flg[get<1>(cost_t_all[i])] = true;
+			cout << " in  :(" << CONV_X(get<1>(cost_t_all[i]))  << "," << CONV_Y(get<1>(cost_t_all[i])) << ") cost" << get<0>(cost_t_all[i]) << endl;
+			bad_up[i2] = (make_pair(get<0>(cost_t_all[i]), get<1>(cost_t_all[i])));
+			i2++;
+		}
+	}
+	sort(bad_up.begin(), bad_up.end());
+
+	for(int i=0; i < bad_up.size(); i++){
+		cout << "score : " << bad_up[i].first << " pos(" << CONV_X(bad_up[i].second) << "," << CONV_Y(bad_up[i].second) << ")" << endl;
+	}
+}
+
+void PPMFILE::calc_cost_all(void){
+	// costのサイズ変更
+	cost_all.resize( part_size_x*part_size_y);
+	for(int i=0; i<part_size_x*part_size_y; i++){
+		cost_all[i].resize(4);
+		for(int j=0; j<4; j++){
+			cost_all[i][j].resize(part_size_x*part_size_y);
+		}
+	}
+	cout << "start_calc" << endl;
+	int cost_tmp[4];
+	// すべての方向についてコストの計算を行なう(全てについて反対方向の計算も含んでいる)
+	for(int abs_xy=0; abs_xy < part_size_x * part_size_y; ++abs_xy){
+		for(int xy=0; xy < part_size_x * part_size_y; ++xy){
+			//コスト初期化
+			for(int i=0; i<4; i++){
+				cost_tmp[i] = 0;
+			}
+			//カラーの数だけ繰り返す
+			for(int c=0; c < part_img[abs_xy].channels(); ++c){
+				//各ピクセル上下
+				for(int px_x=0; px_x < part_img[0].cols; ++px_x){
+					cost_tmp[DIRE_U] += abs(part_img[abs_xy].at<cv::Vec3b>( 0, px_x)[c] - part_img[xy].at<cv::Vec3b>( part_img[0].rows-1, px_x)[c]);
+					cost_tmp[DIRE_D] += abs(part_img[abs_xy].at<cv::Vec3b>( part_img[0].rows-1, px_x)[c] - part_img[xy].at<cv::Vec3b>( 0, px_x)[c]);
+				}
+				//各ピクセル左右
+				for(int px_y=0; px_y < part_img[0].rows; ++px_y){
+					cost_tmp[DIRE_R] += abs(part_img[abs_xy].at<cv::Vec3b>( px_y, part_img[0].cols-1)[c] - part_img[xy].at<cv::Vec3b>( px_y, 0)[c]);
+					cost_tmp[DIRE_L] += abs(part_img[abs_xy].at<cv::Vec3b>( px_y, 0)[c] - part_img[xy].at<cv::Vec3b>( px_y, part_img[0].cols-1)[c]);
+				}
+			}
+			// 上下に対しては縦のピクセル数、左右に対しては横のピクセル数
+			// を×る事によって、結合度の重みを長さに依存させない
+			// ワンちゃんオーバーフローが恐い(たぶん大丈夫)
+			cost_tmp[DIRE_U] *= part_img[0].rows;
+			cost_tmp[DIRE_D] *= part_img[0].rows;
+			cost_tmp[DIRE_R] *= part_img[0].cols;
+			cost_tmp[DIRE_L] *= part_img[0].cols;
+			// cost_t [ コスト, 自分の座標, 相手の座標, 方向]
+			// cost [自分の座標][方向][相手の座標]
+			for(int k=0; k < 4; ++k){
+				cost_t_all.push_back(make_tuple( cost_tmp[k], abs_xy, xy, k));
+				cost_all[abs_xy][k][xy] = make_pair( cost_tmp[k], xy);
+			}
+		}
+	}
+	cout << "start_sort" << endl;
+	// 独自のルールでCOST_TUPLEをソート
+	sort( cost_t_all.begin(), cost_t_all.end(), my_compare);
+	cout << "end calc" << endl;
+}
