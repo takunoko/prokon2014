@@ -19,7 +19,7 @@
 // 画像ファイル名と分割数
 // 後々、分割数をファイルから読み込む
 
-#define FILENAME "../pic_data/5.ppm"
+#define FILENAME "../pic_data/prob05.ppm"
 using namespace std;
 #define PIECE_X 2
 #define PIECE_Y 3
