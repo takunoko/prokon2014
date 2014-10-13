@@ -73,11 +73,20 @@ int inverse_direction(int dire){
 	return inv_dire;
 }
 
+string IntToString(int num){
+	stringstream ss;
+	ss << num;
+	return ss.str();
+}
+
 // コンストラクタ　いろいろと初期化
 PPMFILE::PPMFILE(cv::Mat origin_img_tmp, int piece_x, int piece_y){
 	origin_img = origin_img_tmp.clone();
 	part_size_x = piece_x;
 	part_size_y = piece_y;
+
+	part_px_x = origin_img.cols / part_size_x;
+	part_px_y = origin_img.rows / part_size_y;
 
 	//それぞれのピースに分割
 	this->create_partition();
@@ -94,6 +103,8 @@ void PPMFILE::disp_img(int type){
 					   break;
 		case RESULT_IMG:	cv::imshow("image", result_img);
 							break;
+		case NUM_IMG:	cv::imshow("image", num_img);
+							break;
 		default:
 							break;
 	}
@@ -109,6 +120,16 @@ void PPMFILE::write_line(void){
 	//横向きの線
 	for(int y=1; y < part_size_y; y++){
 		cv::line( line_img, cv::Point( 0, y*(line_img.rows/part_size_y)), cv::Point( line_img.cols, y*(line_img.rows/part_size_y)), cv::Scalar( 0, 0, 200), 2, 0);
+	}
+}
+
+// 画像に番号を入れる
+void PPMFILE::create_num_img(void){
+	num_img = origin_img.clone(); // origin_img をコピー　
+	for(int y=0; y < part_size_y; y++){
+		for(int x=0; x < part_size_x; x++){
+			cv::putText(num_img, IntToString((y*part_size_x)+x), cv::Point( (x * part_px_x) + (part_px_x/2) - 0, part_px_y + part_px_y*y - 5), cv::FONT_HERSHEY_SIMPLEX, 2, cv::Scalar(0,0,200), 4, CV_AA);
+		}
 	}
 }
 
@@ -314,10 +335,6 @@ void PPMFILE::placement(void){
 	int pos_x_min = 0;
 	int pos_y_min = 0;
 
-	// どちらのスコアの方が優れているか？
-	int sc_def = 0;
-	int sc_new = 0;
-
 	// すべてのコストについて実行
 	for(int i=0; i < cost_t.size(); i++){
 		SCRAP scrap_tmp;
@@ -380,31 +397,6 @@ void PPMFILE::placement(void){
 					convert_scrap_size( &scrap_tmp.width, &scrap_tmp.height, get<3>(cost_t[i]));
 				}else{
 					// すでに要素が入っていた場合
-					// すでに入っている要素よりも周りとの比較で良いと判断したら、それを使う
-					sc_def = 0;
-					sc_new = 0;
-					if(scraps[part_2].used_p.find(make_pair(part_2_x,part_2_y+1)) == scraps[part_2].used_p.end()){
-						sc_def += get_cost( part_2, scraps[part_2].used_p[make_pair( part_2_x, part_2_y+1)], DIRE_D);
-						sc_new += get_cost( part_1, scraps[part_2].used_p[make_pair( part_2_x, part_2_y+1)], DIRE_D);
-					}
-					if(scraps[part_2].used_p.find(make_pair(part_2_x,part_2_y-1)) == scraps[part_2].used_p.end()){
-						sc_def += get_cost( part_2, scraps[part_2].used_p[make_pair( part_2_x, part_2_y-1)], DIRE_U);
-						sc_new += get_cost( part_1, scraps[part_2].used_p[make_pair( part_2_x, part_2_y-1)], DIRE_U);
-					}
-					if(scraps[part_2].used_p.find(make_pair(part_2_x+1,part_2_y)) == scraps[part_2].used_p.end()){
-						sc_def += get_cost( part_2, scraps[part_2].used_p[make_pair( part_2_x+1, part_2_y)], DIRE_R);
-						sc_new += get_cost( part_1, scraps[part_2].used_p[make_pair( part_2_x+1, part_2_y)], DIRE_R);
-					}
-					if(scraps[part_2].used_p.find(make_pair(part_2_x-1,part_2_y)) == scraps[part_2].used_p.end()){
-						sc_def += get_cost( part_2, scraps[part_2].used_p[make_pair( part_2_x-1, part_2_y)], DIRE_L);
-						sc_new += get_cost( part_1, scraps[part_2].used_p[make_pair( part_2_x-1, part_2_y)], DIRE_L);
-					}
-					if(sc_def > sc_new){ // sc_new の方がスコアが小さかった場合 入れ替え
-						used_part[get<1>(cost_t[i])] = part_2;
-						used_part[get<2>(cost_t[i])] = -1; // 使われていないフラグを立てる
-						scraps[part_2].elements[get<1>(cost_t[i])] = make_pair( part_2_x, part_2_y);
-						scraps[part_2].used_p[make_pair( part_2_x, part_2_y)] = get<1>(cost_t[i]);
-					}
 				}
 			}
 		}else{
@@ -434,32 +426,6 @@ void PPMFILE::placement(void){
 					convert_scrap_size( &scrap_tmp.width, &scrap_tmp.height, get<3>(cost_t[i]));
 				}else{
 					// 既に要素が入っていた場合
-					// すでに要素が入っていた場合
-					// すでに入っている要素よりも周りとの比較で良いと判断したら、それを使う
-					sc_def = 0;
-					sc_new = 0;
-					if(scraps[part_1].used_p.find(make_pair(part_1_x,part_1_y+1)) == scraps[part_1].used_p.end()){
-						sc_def += get_cost( part_1, scraps[part_1].used_p[make_pair( part_1_x, part_1_y+1)], DIRE_D);
-						sc_new += get_cost( part_1, scraps[part_1].used_p[make_pair( part_1_x, part_1_y+1)], DIRE_D);
-					}
-					if(scraps[part_1].used_p.find(make_pair(part_1_x,part_1_y-1)) == scraps[part_1].used_p.end()){
-						sc_def += get_cost( part_1, scraps[part_1].used_p[make_pair( part_1_x, part_1_y-1)], DIRE_U);
-						sc_new += get_cost( part_1, scraps[part_1].used_p[make_pair( part_1_x, part_1_y-1)], DIRE_U);
-					}
-					if(scraps[part_1].used_p.find(make_pair(part_1_x+1,part_1_y)) == scraps[part_1].used_p.end()){
-						sc_def += get_cost( part_1, scraps[part_1].used_p[make_pair( part_1_x+1, part_1_y)], DIRE_R);
-						sc_new += get_cost( part_1, scraps[part_1].used_p[make_pair( part_1_x+1, part_1_y)], DIRE_R);
-					}
-					if(scraps[part_1].used_p.find(make_pair(part_1_x-1,part_1_y)) == scraps[part_1].used_p.end()){
-						sc_def += get_cost( part_1, scraps[part_1].used_p[make_pair( part_1_x-1, part_1_y)], DIRE_L);
-						sc_new += get_cost( part_1, scraps[part_1].used_p[make_pair( part_1_x-1, part_1_y)], DIRE_L);
-					}
-					if(sc_def > sc_new){ // sc_new の方がスコアが小さかった場合 入れ替え
-						used_part[get<1>(cost_t[i])] = part_1;
-						used_part[get<2>(cost_t[i])] = -1; // 使われていないフラグを立てる
-						scraps[part_1].elements[get<1>(cost_t[i])] = make_pair( part_1_x, part_1_y);
-						scraps[part_1].used_p[make_pair( part_1_x, part_1_y)] = get<1>(cost_t[i]);
-					}
 				}
 			}else{	// 両方ともつかわれている -> スクラップの添字が小さい方に大きい方をくっつける
 				if( part_1 != part_2){  // 同じスクラップでない場合
@@ -569,7 +535,6 @@ void PPMFILE::placement(void){
 	placement_pos = scraps[0].elements;
 }
 
-// ある一部からどんどん形を広げていく
 // 最初に、確実にあってると思われる4ピースを検出する
 void PPMFILE::new_placement(void){
 	vector<int> used_part(part_size_x * part_size_y, -1);
@@ -629,7 +594,118 @@ void PPMFILE::new_placement(void){
 		}
 	}
 	used_part[p1] = used_part[p2] = 1;
+}
 
+// 4ピースセット作戦
+// 戦略としては、すべてのピースに対して自分の近くの4ピースを検索する。
+// 自分付近の4ピースは計4つあるが、これについては最も良い物を作成する
+// 1*n n*1 の場合には正しく動作しない
+void PPMFILE::placement_4(void){
+	// <コスト, ルート, 自分の座標, 遷移1, 遷移2, 遷移3>
+	// ルートは 0: URDL / 1: RDLU / 2: DLUR / 3:LURD
+	vector<tuple< int, int, int, int, int, int>> less_route_pos(part_size_x*part_size_y);
+
+	int p1_pos, p1_cost;
+	int p2_pos, p2_cost;
+	int p3_pos, p3_cost;
+	int p4_cost; // これは、1周回ってきたときのコスト
+
+	// tuple配列の初期化
+	for(int i=0; i<part_size_x * part_size_y; i++){
+		// 2^31-1 = 2147483647
+		less_route_pos[i] = make_tuple( 2147483647, 0, 0, 0, 0, 0);
+		cout << "i :" << get<0>(less_route_pos[i]) << endl;
+	}
+
+	// すべてのピースに対して
+	for(int i=0; i<part_size_x * part_size_y; i++){
+		// 上右下左
+		for(int j=0; j<5; j++){
+			p1_cost = cost_all[i][DIRE_U][j].first;
+			p1_pos = cost_all[i][DIRE_U][j].second;
+			for(int k=0; k<5; k++){
+				p2_cost = cost_all[p1_pos][DIRE_R][k].first;
+				p2_pos = cost_all[p1_pos][DIRE_R][k].second;
+				for(int l=0; l<5; l++){
+					p3_cost = cost_all[p2_pos][DIRE_D][l].first;
+					p3_pos = cost_all[p2_pos][DIRE_D][l].second;
+					p4_cost = cost_all_def[p3_pos][DIRE_L][i].second;
+					// コストが小さかったら更新
+					if((p1_cost + p2_cost + p3_cost + p4_cost) < get<0>(less_route_pos[i]))
+						less_route_pos[i] = make_tuple( p1_cost + p2_cost + p3_cost + p4_cost, 0, i, p1_pos, p2_pos, p3_pos);
+				}
+			}
+		}
+		// 右下左上
+		for(int j=0; j<5; j++){
+			p1_cost = cost_all[i][DIRE_R][j].first;
+			p1_pos = cost_all[i][DIRE_R][j].second;
+			for(int k=0; k<5; k++){
+				p2_cost = cost_all[p1_pos][DIRE_D][k].first;
+				p2_pos = cost_all[p1_pos][DIRE_D][k].second;
+				for(int l=0; l<5; l++){
+					p3_cost = cost_all[p2_pos][DIRE_L][l].first;
+					p3_pos = cost_all[p2_pos][DIRE_L][l].second;
+					p4_cost = cost_all_def[p3_pos][DIRE_U][i].second;
+					// コストが小さかったら更新
+					if((p1_cost + p2_cost + p3_cost + p4_cost) < get<0>(less_route_pos[i]))
+						less_route_pos[i] = make_tuple( p1_cost + p2_cost + p3_cost + p4_cost, 1, i, p1_pos, p2_pos, p3_pos);
+				}
+			}
+		}
+		// 下左上右
+		for(int j=0; j<5; j++){
+			p1_cost = cost_all[i][DIRE_D][j].first;
+			p1_pos = cost_all[i][DIRE_D][j].second;
+			for(int k=0; k<5; k++){
+				p2_cost = cost_all[p1_pos][DIRE_L][k].first;
+				p2_pos = cost_all[p1_pos][DIRE_L][k].second;
+				for(int l=0; l<5; l++){
+					p3_cost = cost_all[p2_pos][DIRE_U][l].first;
+					p3_pos = cost_all[p2_pos][DIRE_U][l].second;
+					p4_cost = cost_all_def[p3_pos][DIRE_R][i].second;
+					// コストが小さかったら更新
+					if((p1_cost + p2_cost + p3_cost + p4_cost) < get<0>(less_route_pos[i]))
+						less_route_pos[i] = make_tuple( p1_cost + p2_cost + p3_cost + p4_cost, 2, i, p1_pos, p2_pos, p3_pos);
+				}
+			}
+		}
+		// 左上右下
+		for(int j=0; j<5; j++){
+			p1_cost = cost_all[i][DIRE_L][j].first;
+			p1_pos = cost_all[i][DIRE_L][j].second;
+			for(int k=0; k<5; k++){
+				p2_cost = cost_all[p1_pos][DIRE_U][k].first;
+				p2_pos = cost_all[p1_pos][DIRE_U][k].second;
+				for(int l=0; l<5; l++){
+					p3_cost = cost_all[p2_pos][DIRE_R][l].first;
+					p3_pos = cost_all[p2_pos][DIRE_R][l].second;
+					p4_cost = cost_all_def[p3_pos][DIRE_D][i].second;
+					// コストが小さかったら更新
+					if((p1_cost + p2_cost + p3_cost + p4_cost) < get<0>(less_route_pos[i]))
+						less_route_pos[i] = make_tuple( p1_cost + p2_cost + p3_cost + p4_cost, 3, i, p1_pos, p2_pos, p3_pos);
+				}
+			}
+		}
+	}
+
+	int cos, rou, my_pos, pos_1, pos_2, pos_3;
+	for(int i=0; i<part_size_x * part_size_y; i++){
+		cos = get<0>(less_route_pos[i]);
+		rou = get<1>(less_route_pos[i]);
+		my_pos = get<2>(less_route_pos[i]);
+		pos_1 = get<3>(less_route_pos[i]);
+		pos_2 = get<4>(less_route_pos[i]);
+		pos_3 = get<5>(less_route_pos[i]);
+
+		/* cout << "id :" << i << " route :" << rou << \
+			" my :(" << CONV_X(my_pos) << "," << CONV_Y(my_pos) << ")" << \
+			" p1 :(" << CONV_X(pos_1) << "," << CONV_Y(pos_1) << ")" << \
+			" p2 :(" << CONV_X(pos_2) << "," << CONV_Y(pos_2) << ")" << \
+			" p3 :(" << CONV_X(pos_3) << "," << CONV_Y(pos_3) << ")" << endl;
+			*/
+			cout << "id :" << i << " route :" << rou << "my :" << my_pos << " p1 :" << pos_1 << " p2 :" << pos_2 << " p3 :" << pos_3 << endl;
+	}
 }
 
 // 　placementした結果を表示する
@@ -677,21 +753,6 @@ void PPMFILE::create_result_img(void){
 		cout << "s_x :" << pos.first*part_width << " s_y :" <<	pos.second*part_height << " CopyTo:" << key << endl;
 	}
 	result_img = tmp_result_img.clone();
-}
-
-// 指定された座標同士の指定された方向へのコストを取得する
-int PPMFILE::get_cost(int xy_1, int xy_2, int dire){
-	int pair_cost;
-	if(xy_1 < xy_2){
-		pair_cost = cost[xy_1][dire][xy_2].first;
-	}else if(xy_1 > xy_2){
-		// 比較順が変わると上下左右が変わる
-		dire = inverse_direction(dire);
-		pair_cost = cost[xy_2][dire][xy_1].first;
-	}else{
-		pair_cost = -1;
-	}
-	return pair_cost;
 }
 
 // ソートに渡すためのデータ変換ｎ
@@ -742,10 +803,13 @@ void PPMFILE::get_left_top(){
 void PPMFILE::calc_cost_all(void){
 	// costのサイズ変更
 	cost_all.resize( part_size_x*part_size_y);
+	cost_all_def.resize( part_size_x*part_size_y);
 	for(int i=0; i<part_size_x*part_size_y; i++){
 		cost_all[i].resize(4);
+		cost_all_def[i].resize(4);
 		for(int j=0; j<4; j++){
 			cost_all[i][j].resize(part_size_x*part_size_y);
+			cost_all_def[i][j].resize(part_size_x*part_size_y);
 		}
 	}
 	cout << "start_calc" << endl;
@@ -782,6 +846,7 @@ void PPMFILE::calc_cost_all(void){
 			for(int k=0; k < 4; ++k){
 				cost_t_all.push_back(make_tuple( cost_tmp[k], abs_xy, xy, k));
 				cost_all[abs_xy][k][xy] = make_pair( cost_tmp[k], xy);
+				cost_all_def[abs_xy][k][xy] = make_pair( cost_tmp[k], xy);
 			}
 		}
 	}

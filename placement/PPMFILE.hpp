@@ -1,5 +1,7 @@
 #include <vector>
 #include <tuple>
+#include <string> // 文字列の変換に使う
+#include <sstream>
 
 #include <opencv2/core/core.hpp>
 
@@ -9,6 +11,7 @@
 #define ORIGIN_IMG 0
 #define LINE_IMG 1
 #define RESULT_IMG 2
+#define NUM_IMG 3
 
 #define DIRE_U 0
 #define DIRE_D 1
@@ -44,9 +47,11 @@ typedef struct{
 class PPMFILE{
 	private:
 		int part_size_x, part_size_y;	//左右どれだけのピース数があるか?
+		int part_px_x, part_px_y;
 
 		cv::Mat origin_img;
 		cv::Mat	line_img;
+		cv::Mat num_img;
 		cv::Mat	result_img;
 
 		vector<cv::Mat>	part_img;
@@ -55,6 +60,7 @@ class PPMFILE{
 		vector< vector< vector< pair<int,int> > > > cost;
 		vector< vector< vector< pair<int,int> > > > cost_maru;
 		vector< vector< vector< pair<int,int> > > > cost_all;
+		vector< vector< vector< pair<int,int> > > > cost_all_def; // 絶対にソートしない
 		// cost_t配列(1次元)
 		vector<COST_TUPLE> cost_t;
 		vector<COST_TUPLE> cost_t_maru;
@@ -80,6 +86,8 @@ class PPMFILE{
 		void disp_img(int type);
 		//境界線を引く
 		void write_line(void);
+		// 番号を画像にいれる
+		void create_num_img(void);
 		// それぞれのピースに分割
 		void create_partition(void);
 		// 配列の近似値を計算ｎする。
@@ -95,8 +103,11 @@ class PPMFILE{
 
 		// 配置(バージョン2)
 		void new_placement(void);
-
 		void disp_placement(void);
+
+		// 配置(4ピース集合バージョン)
+		void placement_4(void);
+
 		//PosDataにデータを挿入
 		void set_PosData(PosData *data);
 
