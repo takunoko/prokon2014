@@ -24,8 +24,19 @@ using namespace std;
 // 問題解答関数
 int solveProbrem(int id);
 
-int main(){
- int id=1;
+int main(int argc,char *argv[]){
+ vector<int> ids;
+ int id;
+
+ if(argc==1){
+  cout << "$ prokon25 id1" << endl;
+  exit(EXIT_SUCCESS);
+ }
+
+ for(int i=1;i<argc;i++){
+  ids.push_back(atoi(argv[i]));
+ }
+ id=ids.at(0);
 
  // マルチプロセスとかしたい時のために
  solveProbrem(id);
@@ -80,15 +91,19 @@ int solveProbrem(int id){
  // どこかでPosData設定が必要
  img= new PPMFILE(recievedData,header.splitX,header.splitY);
  img->calc_cost();
+ img->calc_cost_maru();
+ img->calc_cost_all();
  // img->calc_cost_maru(); // まだこのコスト計算は実装されていない
- img->placement();
+ img->get_left_top();
+ img->disp_cost_list(COST_ALL);
+ img->get_left_top();
  // img->create_result_img(); //画像を表示しないなら使わないでOK
 
 #ifdef VERBOSE
  cout << "sort" << endl;
 #endif
  // ここにソート処理
- sort->importData(*data);
+ //sort->importData(*data);
 
 #ifdef VERBOSE
  cout <<"(not sort done)Answer And Send" << endl;
