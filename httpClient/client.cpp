@@ -85,11 +85,12 @@ string ProkonClient::getProblem(int problemNo,QuestionHeader & data){
     **now= (**now) * 10+(c-'0');
    }else if(**now!=0){
     now++;
-    **now=0;
+    if(now == dataPointer.end()){
+     break;
+    }else{
+     **now=0;
+    }
    }
-  }
-  if(now == dataPointer.end()){
-   break;
   }
  }
  return chunk;
