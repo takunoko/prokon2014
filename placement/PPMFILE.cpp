@@ -73,6 +73,7 @@ int inverse_direction(int dire){
 	return inv_dire;
 }
 
+// コンストラクタ　いろいろと初期化
 PPMFILE::PPMFILE(cv::Mat origin_img_tmp, int piece_x, int piece_y){
 	origin_img = origin_img_tmp.clone();
 	part_size_x = piece_x;
@@ -82,6 +83,8 @@ PPMFILE::PPMFILE(cv::Mat origin_img_tmp, int piece_x, int piece_y){
 	this->create_partition();
 }
 
+// 画像を表示するための関数　引数によって画像が変わる
+// 予めcv::Mat形式のデータを入れておく必要がある
 void PPMFILE::disp_img(int type){
 	cv::namedWindow("image", CV_WINDOW_AUTOSIZE | CV_WINDOW_FREERATIO);
 	switch (type){
@@ -96,6 +99,7 @@ void PPMFILE::disp_img(int type){
 	}
 }
 
+// 画像に境界線のラインを引く
 void PPMFILE::write_line(void){
 	line_img = origin_img.clone(); // origin_img をコピー　
 	//縦向きの線
@@ -108,6 +112,7 @@ void PPMFILE::write_line(void){
 	}
 }
 
+// 画像をサイズによって分割する
 void PPMFILE::create_partition(void){
 	int part_width = origin_img.cols/part_size_x;
 	int part_height = origin_img.rows/part_size_y;
@@ -120,6 +125,7 @@ void PPMFILE::create_partition(void){
 	}
 }
 
+// コスト計算法(ただの差分)
 void PPMFILE::calc_cost(void){
 	// costのサイズ変更
 	cost.resize( part_size_x*part_size_y);
@@ -172,6 +178,7 @@ void PPMFILE::calc_cost(void){
 	cout << "end calc" << endl;
 }
 
+// まるさん方式のコスト計算法(横方向のみ)
 void PPMFILE::calc_cost_maru(void){
 	// costのサイズ変更
 	cost_maru.resize( part_size_x*part_size_y);
@@ -230,6 +237,7 @@ void PPMFILE::calc_cost_maru(void){
 	cout << "end calc" << endl;
 }
 
+// コストの一覧を表示していく
 void PPMFILE::disp_cost_list(int cost_select){
 	// 表示
 	cout << "score : my_pos : pair_pos : direction " << endl;
@@ -257,6 +265,34 @@ void PPMFILE::disp_cost_list(int cost_select){
 	}
 }
 
+// 横方向に要素を結合していく
+void PPMFILE::add_side( SCRAP &scrap_tmp, int p1_x, int p1_y, int p2_x, int p2_y){
+	int p1, p2;
+	int p1_r, p2_r;
+	pair<int,int> p1_p, p2_p;
+
+	p1_p = make_pair( p1_x, p1_y);
+	p2_p = make_pair( p2_x, p2_y);
+	p1 = scrap_tmp.used_p[p1_p]; // 上にあるピース
+	p2 = scrap_tmp.used_p[p2_p]; // 下にあるピース
+	cout << "add side" << endl;
+	cout << "p1 : " << p1 << " p2 : " << p2 << endl;
+	// それぞれの右側の確率が一番高いピース
+	p1_r = cost_all[p1][DIRE_R][0].second ;
+	p2_r = cost_all[p2][DIRE_R][0].second ;
+	// p1_rの下に来る確率が一番高いのがp2_rだったらそいつらは決定
+	if(cost_all[p1_r][DIRE_D][0].second == p2_r){
+	}
+
+	scrap_tmp.used_p[p1_p] = 100;
+
+	// 左側に ,,
+	p1_r = cost_all[p1][3][0].second ;
+	p2_r = cost_all[p2][3][0].second ;
+}
+
+// 上下方向に結合していく
+
 // 画像を配置していく
 void PPMFILE::placement(void){
 	vector<SCRAP> scraps;
@@ -270,6 +306,9 @@ void PPMFILE::placement(void){
 	int part_1, part_2;
 	int part_1_x, part_1_y;
 	int part_2_x, part_2_y;
+
+	// 方向を表すペア
+	pair<int,int> dire_pair;
 
 	// 再配置の時に使う
 	int pos_x_min = 0;
@@ -288,12 +327,32 @@ void PPMFILE::placement(void){
 		if(part_1 == -1){
 			if(part_2 == -1){ // どちらも使われていない
 				scrap_tmp.width = scrap_tmp.height = 0;
-				used_part[get<1>(cost_t[i])] = used_part[get<2>(cost_t[i])] = scraps.size();	// 追加したscrap番号を保持
+				// 追加したscrap番号を保持
+				used_part[get<1>(cost_t[i])] = used_part[get<2>(cost_t[i])] = scraps.size();
 				scrap_tmp.elements[get<1>(cost_t[i])] = make_pair( 0, 0);
 				scrap_tmp.used_p[make_pair(0,0)] = get<1>(cost_t[i]);
-				scrap_tmp.elements[get<2>(cost_t[i])] = make_direction_pair(get<3>(cost_t[i]));
-				scrap_tmp.used_p[make_direction_pair(get<3>(cost_t[i]))] = get<2>(cost_t[i]);
+				dire_pair = make_direction_pair(get<3>(cost_t[i]));
+				scrap_tmp.elements[get<2>(cost_t[i])] = dire_pair;
+				scrap_tmp.used_p[dire_pair] = get<2>(cost_t[i]);
 				convert_scrap_size( &scrap_tmp.width, &scrap_tmp.height, get<3>(cost_t[i]));
+
+				// 上下か左右によって条件分岐 (とりあえず、追加方式はナシで)
+				// switch(get<3>(cost_t[i])){
+				// 	case DIRE_U:
+				// 		add_side( scrap_tmp, 0,0, 0,-1);
+				// 		break;
+				// 	case DIRE_D:
+				// 		add_side( scrap_tmp, 0,0, 0,1);
+				// 		break;
+				// 	case DIRE_R:
+				// 		// add_up( scrap_tmp, 0,0, 1,0);
+				// 		break;
+				// 	case DIRE_L:
+				// 		// add_up( scrap_tmp, 0,0, -1,0);
+				// 		break;
+				// }
+				// cout << "scrap_tmp used_p change ? " << scrap_tmp.used_p[make_pair(0,0)] << endl;
+
 				scraps.push_back(scrap_tmp);
 			}
 			else{						// 2だけつかわれてる
@@ -332,7 +391,7 @@ void PPMFILE::placement(void){
 						sc_def += get_cost( part_2, scraps[part_2].used_p[make_pair( part_2_x, part_2_y-1)], DIRE_U);
 						sc_new += get_cost( part_1, scraps[part_2].used_p[make_pair( part_2_x, part_2_y-1)], DIRE_U);
 					}
-					if(scraps[part_2].used_p.find(make_pair(part_2_x+1,part_2_y)) != scraps[part_2].used_p.end()){
+					if(scraps[part_2].used_p.find(make_pair(part_2_x+1,part_2_y)) == scraps[part_2].used_p.end()){
 						sc_def += get_cost( part_2, scraps[part_2].used_p[make_pair( part_2_x+1, part_2_y)], DIRE_R);
 						sc_new += get_cost( part_1, scraps[part_2].used_p[make_pair( part_2_x+1, part_2_y)], DIRE_R);
 					}
@@ -387,7 +446,7 @@ void PPMFILE::placement(void){
 						sc_def += get_cost( part_1, scraps[part_1].used_p[make_pair( part_1_x, part_1_y-1)], DIRE_U);
 						sc_new += get_cost( part_1, scraps[part_1].used_p[make_pair( part_1_x, part_1_y-1)], DIRE_U);
 					}
-					if(scraps[part_1].used_p.find(make_pair(part_1_x+1,part_1_y)) != scraps[part_1].used_p.end()){
+					if(scraps[part_1].used_p.find(make_pair(part_1_x+1,part_1_y)) == scraps[part_1].used_p.end()){
 						sc_def += get_cost( part_1, scraps[part_1].used_p[make_pair( part_1_x+1, part_1_y)], DIRE_R);
 						sc_new += get_cost( part_1, scraps[part_1].used_p[make_pair( part_1_x+1, part_1_y)], DIRE_R);
 					}
@@ -510,6 +569,70 @@ void PPMFILE::placement(void){
 	placement_pos = scraps[0].elements;
 }
 
+// ある一部からどんどん形を広げていく
+// 最初に、確実にあってると思われる4ピースを検出する
+void PPMFILE::new_placement(void){
+	vector<int> used_part(part_size_x * part_size_y, -1);
+	CORE_SCRAP core_tmp;
+
+	int p1, p2;
+
+	int core_flg = 0;
+
+	// 最初にある２つのペアからつなげて4つにする
+	for(int i=0; i< cost_t.size() && core_flg == 0; i++){
+		p1 = get<1>(cost_t[i]); // p1,p2はそれぞれもとの場所を指す
+		p2 = get<2>(cost_t[i]);
+
+		int p1_right = cost_all[p1][DIRE_R][0].second;
+		int p2_right = cost_all[p2][DIRE_R][0].second;
+		int p1_right_up = cost_all[p1_right][DIRE_U][0].second;
+		int p1_right_down = cost_all[p1_right][DIRE_D][0].second;
+
+		int p1_up = cost_all[p1][DIRE_U][0].second;
+		int p2_up = cost_all[p2][DIRE_U][0].second;
+		int p1_up_right = cost_all[p1_up][DIRE_R][0].second;
+		int p1_up_left = cost_all[p1_up][DIRE_L][0].second;
+
+		// とりあえず、それらのピースに対して右側と上側しかみてないけどたぶんヒットする
+		// というか、必ず同じ場所を回ってくるはず。
+		switch(get<3>(cost_t[i])){
+			case DIRE_U:
+				if(p1_right_up == p2_right){
+					cout << "sucsess U" << endl;
+					used_part[p1_right] = used_part[p2_right] = 1;
+					core_flg = 1;
+				}
+				break;
+			case DIRE_D:
+				if(p1_right_down == p2_right){
+					cout << "sucsess D" << endl;
+					used_part[p1_right] = used_part[p2_right] = 1;
+					core_flg = 1;
+				}
+				break;
+			case DIRE_R:
+				if(p1_up_right == p2_up){
+					cout << "sucsess R" << endl;
+					cout << "p1 : " << p1 << " p2 : " << p2 << " p1_up : " << p1_up << " p2_up : " << p2_up << " p1_up_right : " << p1_up_right << endl;
+					used_part[p1_up] = used_part[p2_up] = 1;
+					core_flg = 1;
+				}
+				break;
+			case DIRE_L:
+				if(p1_up_left == p2_up){
+					cout << "sucsess L" << endl;
+					used_part[p1_up] = used_part[p2_up] = 1;
+					core_flg = 1;
+				}
+				break;
+		}
+	}
+	used_part[p1] = used_part[p2] = 1;
+
+}
+
+// 　placementした結果を表示する
 void PPMFILE::disp_placement(void){
 	cout << "----------" << endl;
 	cout << "placement " << endl;
@@ -520,6 +643,7 @@ void PPMFILE::disp_placement(void){
 	}
 }
 
+// 完成した画像を表示するためのcv::Mat形式の画像を作成する
 void PPMFILE::create_result_img(void){
 	int part_width = origin_img.cols/part_size_x;
 	int part_height = origin_img.rows/part_size_y;
@@ -555,6 +679,7 @@ void PPMFILE::create_result_img(void){
 	result_img = tmp_result_img.clone();
 }
 
+// 指定された座標同士の指定された方向へのコストを取得する
 int PPMFILE::get_cost(int xy_1, int xy_2, int dire){
 	int pair_cost;
 	if(xy_1 < xy_2){
@@ -569,6 +694,7 @@ int PPMFILE::get_cost(int xy_1, int xy_2, int dire){
 	return pair_cost;
 }
 
+// ソートに渡すためのデータ変換ｎ
 void PPMFILE::set_PosData(PosData *data){
 	for(map<int, pair<int,int> >::iterator j = placement_pos.begin(); j != placement_pos.end(); j++){
 		int key = j->first;
@@ -577,7 +703,6 @@ void PPMFILE::set_PosData(PosData *data){
 		data->setData( CONV_X(key), CONV_Y(key), pos.first, pos.second);
 	}
 }
-
 
 // tupleを比較するときのルール
 bool my_compare_2( const COST_TUPLE &lhs, const COST_TUPLE &rhs){
@@ -613,6 +738,7 @@ void PPMFILE::get_left_top(){
 	}
 }
 
+// コストをムダも含めてすべて計算する
 void PPMFILE::calc_cost_all(void){
 	// costのサイズ変更
 	cost_all.resize( part_size_x*part_size_y);
@@ -659,6 +785,22 @@ void PPMFILE::calc_cost_all(void){
 			}
 		}
 	}
+
+	// すべてのコスト計算が終わったら、並び替え
+	for(int i=0; i<part_size_x * part_size_y; i++){
+		for(int j=0; j<4; j++){
+			sort(cost_all[i][j].begin(), cost_all[i][j].end());
+		}
+	}
+	// ちょっと表示してみる たぶんあってそう
+	// for(int i=0; i<part_size_x * part_size_y; i++){
+	// 	for(int j=0; j<4; j++){
+	// 		for(int k=0; k<part_size_x * part_size_y; k++){
+	// 			cout << "xy : " << i << " " << j << " cost :" << cost_all[i][j][k].first << endl;
+	// 		}
+	// 	}
+	// }
+
 	cout << "start_sort" << endl;
 	// 独自のルールでCOST_TUPLEをソート
 	sort( cost_t_all.begin(), cost_t_all.end(), my_compare);

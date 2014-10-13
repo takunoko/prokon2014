@@ -34,6 +34,12 @@ typedef struct{
 	map<pair<int, int>, int> used_p;// ポジションから、そこに何があるか？
 }SCRAP;
 
+typedef struct{
+	int width, height;
+	map<int,pair<int,int> > elements;	// パーツidから、それが使われているか?
+	map<pair<int, int>, int> used_p;// ポジションから、そこに何があるか？
+}CORE_SCRAP;
+
 
 class PPMFILE{
 	private:
@@ -87,6 +93,9 @@ class PPMFILE{
 		// 配置
 		void placement(void);
 
+		// 配置(バージョン2)
+		void new_placement(void);
+
 		void disp_placement(void);
 		//PosDataにデータを挿入
 		void set_PosData(PosData *data);
@@ -102,4 +111,9 @@ class PPMFILE{
 
 		// すべての方向に対してコストを計算する
 		void calc_cost_all();
+
+		// 横方向に画像を追加
+		void add_side( SCRAP &scrap, int, int, int, int);
+		// 縦方向に画像を追加
+		void add_ud( SCRAP &scrap, int, int, int, int);
 };
