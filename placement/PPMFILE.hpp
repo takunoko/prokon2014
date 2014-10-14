@@ -22,6 +22,7 @@
 #define COST_MARU 1
 #define COST_ALL 2
 
+#define DEEP_SERACH 30
 
 #define MIN_2( A, B) ((A) < (B) ? (A) : (B))
 #define BIG_2( A, B) ((A) > (B) ? (A) : (B))
@@ -42,6 +43,11 @@ typedef struct{
 	map<int,pair<int,int> > elements;	// パーツidから、それが使われているか?
 	map<pair<int, int>, int> used_p;// ポジションから、そこに何があるか？
 }CORE_SCRAP;
+
+typedef struct{
+	map<int,pair<int,int> > elements;
+	map<pair<int, int>,int> used;
+}SCRAP_4;
 
 
 class PPMFILE{

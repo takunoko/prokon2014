@@ -19,7 +19,7 @@
 // 画像ファイル名と分割数
 // 後々、分割数をファイルから読み込む
 
-#define FILENAME "../pic_data/prob02.ppm"
+#define FILENAME "../pic_data/problem/prob02.ppm"
 using namespace std;
 #define PIECE_X 4
 #define PIECE_Y 8
@@ -42,9 +42,9 @@ int main(void){
 	// img1->get_left_top();
 
 	// ----- この編並び替え -----
-	// img1->placement();
+	img1->placement();
 	// img1->new_placement();
-	img1->placement_4();
+	// img1->placement_4();
 
 	// ----- このへん描画 -----
 	// img1->write_line();
@@ -53,10 +53,11 @@ int main(void){
 	// img1->disp_placement();
 
 	// ナンバー入り画像
-	img1->create_num_img();
-	img1->disp_img(NUM_IMG);
-	// img1->create_result_img();
-	// img1->disp_img(RESULT_IMG);
+	// img1->create_num_img();
+	// img1->disp_img(NUM_IMG);
+	// 回答画像
+	img1->create_result_img();
+	img1->disp_img(RESULT_IMG);
 
 	cv::waitKey(0);	//waitKey(0)で何か入力するまで処理を停止
 

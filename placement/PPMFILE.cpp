@@ -15,6 +15,22 @@ bool my_compare( const COST_TUPLE &lhs, const COST_TUPLE &rhs){
 	return std::get<3>(lhs) < std::get<3>(rhs);
 }
 
+// tupleを比較するときのルール
+bool my_compare_2( const COST_TUPLE &lhs, const COST_TUPLE &rhs){
+	if (std::get<3>(lhs) != std::get<3>(rhs)) return std::get<3>(lhs) > std::get<3>(rhs);
+	if (std::get<0>(lhs) != std::get<0>(rhs)) return std::get<0>(lhs) < std::get<0>(rhs);
+	if (std::get<1>(lhs) != std::get<1>(rhs)) return std::get<1>(lhs) < std::get<1>(rhs);
+	if (std::get<2>(lhs) != std::get<2>(rhs)) return std::get<2>(lhs) < std::get<2>(rhs);
+	return std::get<2>(lhs) < std::get<2>(rhs);
+}
+
+// scrap_4をソートするためのルール
+bool sort_scrap_4( const tuple<int,int,int> &lhs, const tuple<int,int,int> &rhs){
+	if (std::get<0>(lhs) != std::get<0>(rhs)) return std::get<0>(lhs) < std::get<0>(rhs);
+	if (std::get<1>(lhs) != std::get<1>(rhs)) return std::get<1>(lhs) < std::get<1>(rhs);
+	if (std::get<2>(lhs) != std::get<2>(rhs)) return std::get<2>(lhs) < std::get<2>(rhs);
+	return std::get<2>(lhs) < std::get<2>(rhs);
+}
 // 方向に対するpairを作る
 pair<int,int> make_direction_pair(int direction){
 	pair<int,int> dire_pair;
@@ -538,7 +554,6 @@ void PPMFILE::placement(void){
 // 最初に、確実にあってると思われる4ピースを検出する
 void PPMFILE::new_placement(void){
 	vector<int> used_part(part_size_x * part_size_y, -1);
-	CORE_SCRAP core_tmp;
 
 	int p1, p2;
 
@@ -596,6 +611,7 @@ void PPMFILE::new_placement(void){
 	used_part[p1] = used_part[p2] = 1;
 }
 
+
 // 4ピースセット作戦
 // 戦略としては、すべてのピースに対して自分の近くの4ピースを検索する。
 // 自分付近の4ピースは計4つあるが、これについては最も良い物を作成する
@@ -604,6 +620,12 @@ void PPMFILE::placement_4(void){
 	// <コスト, ルート, 自分の座標, 遷移1, 遷移2, 遷移3>
 	// ルートは 0: URDL / 1: RDLU / 2: DLUR / 3:LURD
 	vector<tuple< int, int, int, int, int, int>> less_route_pos(part_size_x*part_size_y);
+
+	// ピースNo, 相対X, 相対Y
+	//vector<vector<tuple< int, int, int> > > scrap_4(part_size_x*part_size_y);
+	vector< SCRAP_4> scrap_4(part_size_x*part_size_y);
+
+	SCRAP_4 scrap_4_tmp;
 
 	int p1_pos, p1_cost;
 	int p2_pos, p2_cost;
@@ -614,19 +636,19 @@ void PPMFILE::placement_4(void){
 	for(int i=0; i<part_size_x * part_size_y; i++){
 		// 2^31-1 = 2147483647
 		less_route_pos[i] = make_tuple( 2147483647, 0, 0, 0, 0, 0);
-		cout << "i :" << get<0>(less_route_pos[i]) << endl;
 	}
 
 	// すべてのピースに対して
+	// この中のj,k,lの値をいじると、深さが変えられる
 	for(int i=0; i<part_size_x * part_size_y; i++){
 		// 上右下左
-		for(int j=0; j<5; j++){
+		for(int j=0; j<DEEP_SERACH; j++){
 			p1_cost = cost_all[i][DIRE_U][j].first;
 			p1_pos = cost_all[i][DIRE_U][j].second;
-			for(int k=0; k<5; k++){
+			for(int k=0; k<DEEP_SERACH; k++){
 				p2_cost = cost_all[p1_pos][DIRE_R][k].first;
 				p2_pos = cost_all[p1_pos][DIRE_R][k].second;
-				for(int l=0; l<5; l++){
+				for(int l=0; l<DEEP_SERACH; l++){
 					p3_cost = cost_all[p2_pos][DIRE_D][l].first;
 					p3_pos = cost_all[p2_pos][DIRE_D][l].second;
 					p4_cost = cost_all_def[p3_pos][DIRE_L][i].second;
@@ -637,13 +659,13 @@ void PPMFILE::placement_4(void){
 			}
 		}
 		// 右下左上
-		for(int j=0; j<5; j++){
+		for(int j=0; j<DEEP_SERACH; j++){
 			p1_cost = cost_all[i][DIRE_R][j].first;
 			p1_pos = cost_all[i][DIRE_R][j].second;
-			for(int k=0; k<5; k++){
+			for(int k=0; k<DEEP_SERACH; k++){
 				p2_cost = cost_all[p1_pos][DIRE_D][k].first;
 				p2_pos = cost_all[p1_pos][DIRE_D][k].second;
-				for(int l=0; l<5; l++){
+				for(int l=0; l<DEEP_SERACH; l++){
 					p3_cost = cost_all[p2_pos][DIRE_L][l].first;
 					p3_pos = cost_all[p2_pos][DIRE_L][l].second;
 					p4_cost = cost_all_def[p3_pos][DIRE_U][i].second;
@@ -654,13 +676,13 @@ void PPMFILE::placement_4(void){
 			}
 		}
 		// 下左上右
-		for(int j=0; j<5; j++){
+		for(int j=0; j<DEEP_SERACH; j++){
 			p1_cost = cost_all[i][DIRE_D][j].first;
 			p1_pos = cost_all[i][DIRE_D][j].second;
-			for(int k=0; k<5; k++){
+			for(int k=0; k<DEEP_SERACH; k++){
 				p2_cost = cost_all[p1_pos][DIRE_L][k].first;
 				p2_pos = cost_all[p1_pos][DIRE_L][k].second;
-				for(int l=0; l<5; l++){
+				for(int l=0; l<DEEP_SERACH; l++){
 					p3_cost = cost_all[p2_pos][DIRE_U][l].first;
 					p3_pos = cost_all[p2_pos][DIRE_U][l].second;
 					p4_cost = cost_all_def[p3_pos][DIRE_R][i].second;
@@ -671,13 +693,13 @@ void PPMFILE::placement_4(void){
 			}
 		}
 		// 左上右下
-		for(int j=0; j<5; j++){
+		for(int j=0; j<DEEP_SERACH; j++){
 			p1_cost = cost_all[i][DIRE_L][j].first;
 			p1_pos = cost_all[i][DIRE_L][j].second;
-			for(int k=0; k<5; k++){
+			for(int k=0; k<DEEP_SERACH; k++){
 				p2_cost = cost_all[p1_pos][DIRE_U][k].first;
 				p2_pos = cost_all[p1_pos][DIRE_U][k].second;
-				for(int l=0; l<5; l++){
+				for(int l=0; l<DEEP_SERACH; l++){
 					p3_cost = cost_all[p2_pos][DIRE_R][l].first;
 					p3_pos = cost_all[p2_pos][DIRE_R][l].second;
 					p4_cost = cost_all_def[p3_pos][DIRE_D][i].second;
@@ -689,22 +711,137 @@ void PPMFILE::placement_4(void){
 		}
 	}
 
-	int cos, rou, my_pos, pos_1, pos_2, pos_3;
+	// コストを相対座標に変換
+	int cos, route, my_pos, pos_1, pos_2, pos_3;
 	for(int i=0; i<part_size_x * part_size_y; i++){
 		cos = get<0>(less_route_pos[i]);
-		rou = get<1>(less_route_pos[i]);
+		route = get<1>(less_route_pos[i]);
 		my_pos = get<2>(less_route_pos[i]);
 		pos_1 = get<3>(less_route_pos[i]);
 		pos_2 = get<4>(less_route_pos[i]);
 		pos_3 = get<5>(less_route_pos[i]);
 
-		/* cout << "id :" << i << " route :" << rou << \
-			" my :(" << CONV_X(my_pos) << "," << CONV_Y(my_pos) << ")" << \
-			" p1 :(" << CONV_X(pos_1) << "," << CONV_Y(pos_1) << ")" << \
-			" p2 :(" << CONV_X(pos_2) << "," << CONV_Y(pos_2) << ")" << \
-			" p3 :(" << CONV_X(pos_3) << "," << CONV_Y(pos_3) << ")" << endl;
-			*/
-			cout << "id :" << i << " route :" << rou << "my :" << my_pos << " p1 :" << pos_1 << " p2 :" << pos_2 << " p3 :" << pos_3 << endl;
+		// 要素の初期化
+		scrap_4_tmp.elements.clear();
+		scrap_4_tmp.used.clear();
+		// 相対座標系に保存
+		switch(route){
+			case 0:
+				scrap_4_tmp.elements[pos_1] = make_pair( 0, 0);
+				scrap_4_tmp.elements[pos_2]  = make_pair( 1, 0);
+				scrap_4_tmp.elements[my_pos] = make_pair( 0, 1);
+				scrap_4_tmp.elements[pos_3]  = make_pair( 1, 1);
+				scrap_4_tmp.used[make_pair( 0, 0)] = pos_1;
+				scrap_4_tmp.used[make_pair( 1, 0)] = pos_2;
+				scrap_4_tmp.used[make_pair( 0, 1)] = my_pos;
+				scrap_4_tmp.used[make_pair( 1, 1)] = pos_3;
+				break;
+			case 1:
+				scrap_4_tmp.elements[my_pos] = make_pair(0, 0);
+				scrap_4_tmp.elements[pos_1]  = make_pair(1, 0);
+				scrap_4_tmp.elements[pos_3]  = make_pair(0, 1);
+				scrap_4_tmp.elements[pos_2]  = make_pair(1, 1);
+				scrap_4_tmp.used[make_pair( 0, 0)] = my_pos;
+				scrap_4_tmp.used[make_pair( 1, 0)] = pos_1;
+				scrap_4_tmp.used[make_pair( 0, 1)] = pos_3;
+				scrap_4_tmp.used[make_pair( 1, 1)] = pos_2;
+				break;
+			case 2:
+				scrap_4_tmp.elements[pos_3]  = make_pair(0, 0);
+				scrap_4_tmp.elements[my_pos] = make_pair(1, 0);
+				scrap_4_tmp.elements[pos_2]  = make_pair(0, 1);
+				scrap_4_tmp.elements[pos_1]  = make_pair(1, 1);
+				scrap_4_tmp.used[make_pair( 0, 0)] = pos_3;
+				scrap_4_tmp.used[make_pair( 1, 0)] = my_pos;
+				scrap_4_tmp.used[make_pair( 0, 1)] = pos_2;
+				scrap_4_tmp.used[make_pair( 1, 1)] = pos_1;
+				break;
+			case 3:
+				scrap_4_tmp.elements[pos_2]  = make_pair(0, 0);
+				scrap_4_tmp.elements[pos_3]  = make_pair(1, 0);
+				scrap_4_tmp.elements[pos_1]  = make_pair(0, 1);
+				scrap_4_tmp.elements[my_pos] = make_pair(1, 1);
+				scrap_4_tmp.used[make_pair( 0, 0)] = pos_2;
+				scrap_4_tmp.used[make_pair( 1, 0)] = pos_3;
+				scrap_4_tmp.used[make_pair( 0, 1)] = pos_1;
+				scrap_4_tmp.used[make_pair( 1, 1)] = my_pos;
+				break;
+		}
+		scrap_4[i] = scrap_4_tmp;
+		cout << "id :" << i << " route :" << route << "my :" << my_pos << " p1 :" << pos_1 << " p2 :" << pos_2 << " p3 :" << pos_3 << endl;
+	}
+
+	// 2つor3つかぶっているものは結合
+	int conf_cnt;
+	int diff_x, diff_y;
+	for(int i=0; i<scrap_4.size()-1; i++){
+		for(int j=i+1; j<scrap_4.size(); j++){
+			conf_cnt = 0;
+			for(map<int, pair<int,int> >::iterator k = scrap_4[i].elements.begin(); k != scrap_4[i].elements.end(); k++){
+				int key = k->first;
+				if(scrap_4[j].elements.find(key) == scrap_4[j].elements.end()){
+					// かぶっていない
+				}else{
+					// 共有しているピースの数をカウントする
+					conf_cnt++;
+				}
+			}
+			// どちらかにすべて含まれていたら
+			if(conf_cnt == MIN_2( scrap_4[j].elements.size(), scrap_4[i].elements.size()) && conf_cnt >= 4){
+				if(scrap_4[i].elements.size() >= scrap_4[j].elements.size()){
+					// scrap_4[j]のほうを消す
+					scrap_4[j].used.clear();
+					scrap_4[j].elements.clear();
+				}else{
+					// これが正しく動作するのかわからない
+					scrap_4[i] = scrap_4[j];
+
+					scrap_4[j].used.clear();
+					scrap_4[j].elements.clear();
+				}
+			}else if(conf_cnt >= 2){ // 2つ以上かぶっていたら
+				// diffを検索
+				for(map<int, pair<int,int> >::iterator k = scrap_4[i].elements.begin(); k != scrap_4[i].elements.end(); k++){
+					int key = k->first;
+					pair<int, int> pos = k->second;
+					if(scrap_4[j].elements.find(key) == scrap_4[j].elements.end()){
+					}else{
+						// 一致している要素
+						diff_x = scrap_4[i].elements[key].first - scrap_4[j].elements[key].first;
+						diff_y = scrap_4[i].elements[key].second - scrap_4[j].elements[key].second;
+						break;
+					}
+				}
+				// diffを用いて結合
+				for(map<int, pair<int,int> >::iterator k = scrap_4[j].elements.begin(); k != scrap_4[j].elements.end(); k++){
+					int key = k->first;
+					pair<int, int> pos = k->second;
+					if(scrap_4[i].elements.find(key) == scrap_4[i].elements.end()){
+						// 追加
+						scrap_4[i].elements[key] = make_pair( pos.first + diff_x, pos.second + diff_y);
+						scrap_4[i].used[make_pair( pos.first + diff_x, pos.second + diff_y)] = key;
+					}else{
+						// すでにある -> 無視
+					}
+				}
+				cout << "diff_x : " << diff_x << " diff_y : " << diff_y << endl;
+				scrap_4[j].elements.clear();
+				scrap_4[j].used.clear();
+			}
+		}
+	}
+
+	cout << "scrap_4_len :" << scrap_4.size() << endl;
+
+	//// 正しく削除できているか
+	for(int i=0; i<scrap_4.size(); i++){
+		cout << "---- new  ----" << endl;
+		for(map<int, pair<int,int> >::iterator j = scrap_4[i].elements.begin(); j != scrap_4[i].elements.end(); j++){
+			int key = j->first;
+			pair<int, int> pos = j->second;
+			cout << key << " (" << pos.first << "," << pos.second << ")" << endl;
+			//cout << get<0>(scrap_4[i].elements[j]) << " : (" << get<1>(scrap_4[i].elements[j]) << "," << get<2>(scrap_4[i].elements[j]) << ")" << endl;
+		}
 	}
 }
 
@@ -765,14 +902,6 @@ void PPMFILE::set_PosData(PosData *data){
 	}
 }
 
-// tupleを比較するときのルール
-bool my_compare_2( const COST_TUPLE &lhs, const COST_TUPLE &rhs){
-	if (std::get<3>(lhs) != std::get<3>(rhs)) return std::get<3>(lhs) > std::get<3>(rhs);
-	if (std::get<0>(lhs) != std::get<0>(rhs)) return std::get<0>(lhs) < std::get<0>(rhs);
-	if (std::get<1>(lhs) != std::get<1>(rhs)) return std::get<1>(lhs) < std::get<1>(rhs);
-	if (std::get<2>(lhs) != std::get<2>(rhs)) return std::get<2>(lhs) < std::get<2>(rhs);
-	return std::get<2>(lhs) < std::get<2>(rhs);
-}
 
 // 左上のピースを取得してみる
 void PPMFILE::get_left_top(){
