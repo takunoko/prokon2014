@@ -111,16 +111,23 @@ PPMFILE::PPMFILE(cv::Mat origin_img_tmp, int piece_x, int piece_y){
 // 画像を表示するための関数　引数によって画像が変わる
 // 予めcv::Mat形式のデータを入れておく必要がある
 void PPMFILE::disp_img(int type){
-	cv::namedWindow("image", CV_WINDOW_AUTOSIZE | CV_WINDOW_FREERATIO);
 	switch (type){
-		case ORIGIN_IMG:	cv::imshow("image", origin_img);
-							break;
-		case LINE_IMG: cv::imshow("image", line_img);
-					   break;
-		case RESULT_IMG:	cv::imshow("image", result_img);
-							break;
-		case NUM_IMG:	cv::imshow("image", num_img);
-							break;
+		case ORIGIN_IMG:
+			cv::namedWindow("origin_image", CV_WINDOW_AUTOSIZE | CV_WINDOW_FREERATIO);
+			cv::imshow("origin_image", origin_img);
+			break;
+		case LINE_IMG:
+			cv::namedWindow("line_image", CV_WINDOW_AUTOSIZE | CV_WINDOW_FREERATIO);
+			cv::imshow("line_image", line_img);
+			break;
+		case RESULT_IMG:
+			cv::namedWindow("result_image", CV_WINDOW_AUTOSIZE | CV_WINDOW_FREERATIO);
+			cv::imshow("result_image", result_img);
+			break;
+		case NUM_IMG:
+			cv::namedWindow("num_image", CV_WINDOW_AUTOSIZE | CV_WINDOW_FREERATIO);
+			cv::imshow("num_image", num_img);
+			break;
 		default:
 							break;
 	}
@@ -653,8 +660,8 @@ void PPMFILE::placement_4(void){
 					p3_pos = cost_all[p2_pos][DIRE_D][l].second;
 					p4_cost = cost_all_def[p3_pos][DIRE_L][i].second;
 					// コストが小さかったら更新
-					if((p1_cost + p2_cost + p3_cost + p4_cost) < get<0>(less_route_pos[i]))
-						less_route_pos[i] = make_tuple( p1_cost + p2_cost + p3_cost + p4_cost, 0, i, p1_pos, p2_pos, p3_pos);
+					if((p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT) < get<0>(less_route_pos[i]))
+						less_route_pos[i] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 0, i, p1_pos, p2_pos, p3_pos);
 				}
 			}
 		}
@@ -670,8 +677,8 @@ void PPMFILE::placement_4(void){
 					p3_pos = cost_all[p2_pos][DIRE_L][l].second;
 					p4_cost = cost_all_def[p3_pos][DIRE_U][i].second;
 					// コストが小さかったら更新
-					if((p1_cost + p2_cost + p3_cost + p4_cost) < get<0>(less_route_pos[i]))
-						less_route_pos[i] = make_tuple( p1_cost + p2_cost + p3_cost + p4_cost, 1, i, p1_pos, p2_pos, p3_pos);
+					if((p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT) < get<0>(less_route_pos[i]))
+						less_route_pos[i] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 1, i, p1_pos, p2_pos, p3_pos);
 				}
 			}
 		}
@@ -687,8 +694,8 @@ void PPMFILE::placement_4(void){
 					p3_pos = cost_all[p2_pos][DIRE_U][l].second;
 					p4_cost = cost_all_def[p3_pos][DIRE_R][i].second;
 					// コストが小さかったら更新
-					if((p1_cost + p2_cost + p3_cost + p4_cost) < get<0>(less_route_pos[i]))
-						less_route_pos[i] = make_tuple( p1_cost + p2_cost + p3_cost + p4_cost, 2, i, p1_pos, p2_pos, p3_pos);
+					if((p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT) < get<0>(less_route_pos[i]))
+						less_route_pos[i] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 2, i, p1_pos, p2_pos, p3_pos);
 				}
 			}
 		}
@@ -704,8 +711,8 @@ void PPMFILE::placement_4(void){
 					p3_pos = cost_all[p2_pos][DIRE_R][l].second;
 					p4_cost = cost_all_def[p3_pos][DIRE_D][i].second;
 					// コストが小さかったら更新
-					if((p1_cost + p2_cost + p3_cost + p4_cost) < get<0>(less_route_pos[i]))
-						less_route_pos[i] = make_tuple( p1_cost + p2_cost + p3_cost + p4_cost, 3, i, p1_pos, p2_pos, p3_pos);
+					if((p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT) < get<0>(less_route_pos[i]))
+						less_route_pos[i] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 3, i, p1_pos, p2_pos, p3_pos);
 				}
 			}
 		}
@@ -768,12 +775,28 @@ void PPMFILE::placement_4(void){
 				break;
 		}
 		scrap_4[i] = scrap_4_tmp;
-		cout << "id :" << i << " route :" << route << "my :" << my_pos << " p1 :" << pos_1 << " p2 :" << pos_2 << " p3 :" << pos_3 << endl;
+		cout << " route :" << route << \
+			"my :[" << CONV_X(my_pos) << "," << CONV_Y(my_pos) << \
+			"] p1 :[" << CONV_X(pos_1) << "," << CONV_Y(pos_1) << \
+			"] p2 :[" << CONV_X(pos_2) << "," << CONV_Y(pos_2) << \
+			"] p3 :[" << CONV_X(pos_3) << "," << CONV_Y(pos_3) << "]" << endl;
+	}
+	// とりあえず現状表示
+	for(int i=0; i<scrap_4.size(); i++){
+		cout << "---- now " << i << " ----" << endl;
+		for(map<int, pair<int,int> >::iterator j = scrap_4[i].elements.begin(); j != scrap_4[i].elements.end(); j++){
+			int key = j->first;
+			pair<int, int> pos = j->second;
+			// cout << "(" << CONV_X(key) << "," << CONV_Y(key) << ") " << " (" << pos.first << "," << pos.second << ")" << endl;
+			cout << "(" << key << ") " << " (" << pos.first << "," << pos.second << ")" << endl;
+		}
 	}
 
 	// 2つor3つかぶっているものは結合
 	int conf_cnt;
 	int diff_x, diff_y;
+	// 適当に4回ぐらい繰り返せば全部繋がるっしょwww
+	for(int ii=0; ii<4; ii++){
 	for(int i=0; i<scrap_4.size()-1; i++){
 		for(int j=i+1; j<scrap_4.size(); j++){
 			conf_cnt = 0;
@@ -830,10 +853,31 @@ void PPMFILE::placement_4(void){
 			}
 		}
 	}
+	}
 
 	cout << "scrap_4_len :" << scrap_4.size() << endl;
 
-	//// 正しく削除できているか
+	// １つにまとまっていなかったら
+	if(scrap_4.size() != 1){
+
+	}
+
+	// 座標の変換
+	int small_x=0, small_y=0;
+	for(map<int, pair<int,int> >::iterator j = scrap_4[0].elements.begin(); j != scrap_4[0].elements.end(); j++){
+		pair<int, int> pos = j->second;
+		if(pos.first < small_x)
+			small_x = pos.first;
+		if(pos.second < small_y)
+			small_y = pos.second;
+	}
+	//座標の再配置
+	for(map<int, pair<int,int> >::iterator j = scrap_4[0].elements.begin(); j != scrap_4[0].elements.end(); j++){
+		int key = j->first;
+		pair<int, int> pos = j->second;
+		scrap_4[0].elements[key] = make_pair( (pos.first - small_x), (pos.second - small_y));
+	}
+	// 正しく削除できているか
 	for(int i=0; i<scrap_4.size(); i++){
 		cout << "---- new  ----" << endl;
 		for(map<int, pair<int,int> >::iterator j = scrap_4[i].elements.begin(); j != scrap_4[i].elements.end(); j++){
@@ -843,6 +887,8 @@ void PPMFILE::placement_4(void){
 			//cout << get<0>(scrap_4[i].elements[j]) << " : (" << get<1>(scrap_4[i].elements[j]) << "," << get<2>(scrap_4[i].elements[j]) << ")" << endl;
 		}
 	}
+	// グローバルにコピー
+	placement_pos = scrap_4[0].elements;
 }
 
 // 　placementした結果を表示する
@@ -901,7 +947,6 @@ void PPMFILE::set_PosData(PosData *data){
 		data->setData( CONV_X(key), CONV_Y(key), pos.first, pos.second);
 	}
 }
-
 
 // 左上のピースを取得してみる
 void PPMFILE::get_left_top(){
