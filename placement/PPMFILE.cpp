@@ -658,7 +658,7 @@ void PPMFILE::placement_4(void){
 				for(int l=0; l<DEEP_SERACH; l++){
 					p3_cost = cost_all[p2_pos][DIRE_D][l].first;
 					p3_pos = cost_all[p2_pos][DIRE_D][l].second;
-					p4_cost = cost_all_def[p3_pos][DIRE_L][i].second;
+					p4_cost = cost_all_def[p3_pos][DIRE_L][i].first;
 					// コストが小さかったら更新
 					if((p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT) < get<0>(less_route_pos[i]))
 						less_route_pos[i] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 0, i, p1_pos, p2_pos, p3_pos);
@@ -675,7 +675,7 @@ void PPMFILE::placement_4(void){
 				for(int l=0; l<DEEP_SERACH; l++){
 					p3_cost = cost_all[p2_pos][DIRE_L][l].first;
 					p3_pos = cost_all[p2_pos][DIRE_L][l].second;
-					p4_cost = cost_all_def[p3_pos][DIRE_U][i].second;
+					p4_cost = cost_all_def[p3_pos][DIRE_U][i].first;
 					// コストが小さかったら更新
 					if((p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT) < get<0>(less_route_pos[i]))
 						less_route_pos[i] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 1, i, p1_pos, p2_pos, p3_pos);
@@ -692,7 +692,7 @@ void PPMFILE::placement_4(void){
 				for(int l=0; l<DEEP_SERACH; l++){
 					p3_cost = cost_all[p2_pos][DIRE_U][l].first;
 					p3_pos = cost_all[p2_pos][DIRE_U][l].second;
-					p4_cost = cost_all_def[p3_pos][DIRE_R][i].second;
+					p4_cost = cost_all_def[p3_pos][DIRE_R][i].first;
 					// コストが小さかったら更新
 					if((p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT) < get<0>(less_route_pos[i]))
 						less_route_pos[i] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 2, i, p1_pos, p2_pos, p3_pos);
@@ -709,7 +709,7 @@ void PPMFILE::placement_4(void){
 				for(int l=0; l<DEEP_SERACH; l++){
 					p3_cost = cost_all[p2_pos][DIRE_R][l].first;
 					p3_pos = cost_all[p2_pos][DIRE_R][l].second;
-					p4_cost = cost_all_def[p3_pos][DIRE_D][i].second;
+					p4_cost = cost_all_def[p3_pos][DIRE_D][i].first;
 					// コストが小さかったら更新
 					if((p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT) < get<0>(less_route_pos[i]))
 						less_route_pos[i] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 3, i, p1_pos, p2_pos, p3_pos);
