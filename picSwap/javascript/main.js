@@ -27,10 +27,11 @@ $(function(){
  $("#execute").on("click",function(e){
   var width=$("#widthSprit").val();
   var height=$("#heightSprit").val();
-  swap(width,height);
+  swap(parseInt(width),parseInt(height));
  });
 });
 
+// 画像読み込み
 function readPicture(file){
  var reader;
 
@@ -60,40 +61,62 @@ function readPicture(file){
  reader.readAsDataURL(file);
 }
 
+// width,height: 分割数
 function swap(width,height){
+ // 対象画像
  var target=$("#template")[0];
  var targetContext=target.getContext('2d');
 
+ // 元画像
  var origCanvas=$("#display")[0];
  var origCtx=origCanvas.getContext('2d');
+
+ // 解答用配列
+ var answer=new Array(height);
+ console.log(answer);
+ for(var i=0;i<answer.length;i++){
+  answer[i]=new Array(width);
+ }
+ console.log(answer);
 
  target.width=origCanvas.width;
  target.height=origCanvas.height;
 
  var len=width*height;
+ // 乱数用配列
  var arr=new Array(len);
+ // パーツの大きさ
  var partWidth=Math.floor(origCanvas.width/width);
  var partHeight=Math.floor(origCanvas.height/height);
 
  for(var i=0;i<len;i++){
   arr[i]=i;
  }
-
+ // ランダムに並び替え
  for(var i=0;i<len;i++){
-  var j=Math.floor(Math.random()*((width*height-1)-i))+i;
-  console.log(j);
+  // iから最後までの中から1つ選択する
+  var j=Math.floor( Math.random()*((len-1)-i) )+i;
+  // 交換する
   var tmp=arr[j];
   arr[j]=arr[i];
   arr[i]=tmp;
  }
 
+ console.log(answer);
+
+ // 画像
  for(i=0;i<len;i++){
-  var x=(i%width)*partWidth;
-  var y=Math.floor(i/width)*partHeight;
+  console.log("x:" + (i%width) + "\ny:" + Math.floor(i/width));
+  console.log("x:" + (arr[i]%width) + "\ny:" + Math.floor(arr[i]/width));
   // get And Put and Output;
-  var part=origCtx.getImageData(x,y,partWidth,partHeight);
-  targetContext.putImageData(part,(arr[i]%width)*partWidth,Math.floor(arr[i]/width)*partHeight);
+  // arr[x][y]を抜き出して
+  var part=origCtx.getImageData((arr[i]%width)*partWidth,Math.floor(arr[i]/width)*partHeight,partWidth,partHeight);
+  // [i%width][i/width]に
+  targetContext.putImageData(part,(i%width)*partWidth,Math.floor(i/width)*partHeight);
+  // 正解指定 (answer:y,x);
+  answer[Math.floor(i/width)][i%width]=[arr[i]%width,Math.floor(arr[i]/width)];
  }
 
  $("#converted").attr("src",target.toDataURL());
+ $("#answer").text(JSON.stringify(answer,null," "));
 }
