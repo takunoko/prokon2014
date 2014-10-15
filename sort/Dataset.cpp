@@ -6,7 +6,7 @@
 #include "Dataset.h"
 #include "PosData.h"
 #include "util.h"
-#define PRINT 1
+#define PRINT 0
 
 using namespace std;
 

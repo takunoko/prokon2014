@@ -19,9 +19,7 @@ void Pro5::dispSorted() {
   list<Pos>::iterator p;
 
   for(p = sorted.begin(); p != sorted.end(); p++) {
-    printf("%d, %d\n", p->x, p->y);
   }
-  puts("");
 }
 
 void Pro5::dispSortedData() {
@@ -37,12 +35,9 @@ void Pro5::dispSortedData() {
       }
       if(checkPosEqual(j, i, table->getSelected().x, table->getSelected().y))
         changeWordColor(GREEN);
-      printf("%X%X ", table->getData(j, i).x, table->getData(j, i).y);
       defaultWordColor();
     }
-    puts("");
   }
-  puts("");
 }
 
 // 安全
@@ -73,8 +68,6 @@ void Pro5::moveSelected(Pos destination) {
   int move_flag = 0;
   int half;
   int old_direction = -1;
-
-  puts("-------moveSelected-------");
 
   while(!checkPosEqual(destination, s)) {
     s = table->getSelected();
@@ -141,12 +134,10 @@ void Pro5::moveSelected(Pos destination) {
     if(old_direction == move_dir) {
       move_dir = getReversedDirection(move_dir);
     }*/
-    printf("move_dir = %d\n", move_dir);
     table->swapSelected(move_dir);
     table->dispData(target.x, target.y);
     old_direction = getReversedDirection(move_dir);
   }
-  puts("========moveSelected end=======");
 }
 
 void Pro5::moveSelectedNextTarget() {
@@ -160,7 +151,6 @@ void Pro5::moveSelectedNextTarget() {
   int half = 1;
   int old_direction = -1;
 
-  puts("-------moveSelectedNextTarget-------");
   table->dispData(target.x, target.y);
 
   while(!isSelectedNextToTarget()) {
@@ -255,7 +245,6 @@ void Pro5::moveSelectedNextTarget() {
     table->dispData(target.x, target.y);
     old_direction = getReversedDirection(move_dir);
   }
-  puts("=======moveSelectedNextTarget=======");
 }
 
 int Pro5::moveTarget(Pos pos) {
@@ -269,7 +258,6 @@ int Pro5::moveTarget(Pos pos) {
   int old_direction = -1;
   int old_flag = -1;
 
-  puts("-------moveTarget-------");
 
   while(!checkPosEqual(target, pos)) {
     target = table->findData(target_data);
@@ -322,7 +310,6 @@ int Pro5::moveTarget(Pos pos) {
         }
       }
     }
-    printf("directionaaaaa%d, %d, %d\n", directionLR, directionUD, move_dir);
     moveSelectedNextTarget();
     rotateSelected(move_dir);
     table->swapSelected(getReversedDirection(move_dir));
@@ -330,7 +317,6 @@ int Pro5::moveTarget(Pos pos) {
     old_direction = getReversedDirection(move_dir);
     old_flag = move_flag;
   }
-  puts("=======moveTarget end========");
   return 0;
 }
 
@@ -344,21 +330,15 @@ void Pro5::rotateSelected(int direction) {
   //-----------------------------直すところ
   int move_direction = (dir_selected > direction) ? -1 : 1;
 
-  puts("-------rotateSelected-------");
-  printf("direction = %d\n", direction);
-  printf("target = %d, %d\n", target.x, target.y);
   if(direction == EQUAL) return;
   if(checkPosEqual(table->getSelected(), surroundings(target, direction)))  {
-    puts("selected dont need to rotate");
     return;
   }
   if(!checkInScope(table->getWidth(), table->getHeight(), surroundings(target, direction).x, surroundings(target, direction).y)) {
-    puts("cant rotate(move target)...");
     return;
   }
 
   if(move_distance > DIRECTION_NUM / 2) {
-    puts("rotate distance is too long");
     move_distance = DIRECTION_NUM - move_distance;
     move_direction *= -1;
   }
@@ -385,18 +365,13 @@ void Pro5::rotateSelected(int direction) {
 
   int move_dir;
   int j = dir_selected;
-  printf("move_direction = %d\n", move_direction);
-  printf("move_distance = %d\n", move_distance);
   for(i = 0; i < move_distance; i++) {
     // 目的地についたら止めたほうがいいかも
     j = (j + move_direction + DIRECTION_NUM) % DIRECTION_NUM;
     move_dir = getDirection(table->getSelected(), surroundings(target, j));
-    printf("j = %d\n", j);
-    printf("move_dir = %d\n", move_dir);
     table->swapSelected(move_dir);
     table->dispData(target.x, target.y);
   }
-  puts("======rotate end========");
 }
 
 string Pro5::sort() {
@@ -476,7 +451,6 @@ void Pro5::sortUp() {
   for(i = 0; i < table->getHeight()-2; i++) {
     // 端以外の
     if(isSorted(i)) {
-      puts("continue1");
       for(j = 0; j < table->getWidth(); j++) {
         sorted.push_back(Pos(j, i));
       }
@@ -493,7 +467,6 @@ void Pro5::sortUp() {
     }
     // もし、1列全部揃ってたらcontinue
     if(isSorted(i)) {
-      puts("continue2");
       sorted.push_back(Pos(table->getWidth()-2, i));
       sorted.push_back(Pos(table->getWidth()-1, i));
       continue;
