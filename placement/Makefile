@@ -1,6 +1,8 @@
 
 CC = g++
 TARGET = cv_disp_img_tuple
+OBJECT = PPMFILE.o cv_disp_img_tuple.o ../sort/PosData.o ../sort/Pos.o ../sort/util.o
+HEADER = PPMFILE.hpp
 
 # OpenCVまでのパス
 # プログラム上では<opencv2/core/core.hpp>のように書く
@@ -25,8 +27,8 @@ OPTION = -O3 -std=c++11 -stdlib=libc++
 
 all : cv_disp_img_tuple
 
-cv_disp_img_tuple : PPMFILE.o cv_disp_img_tuple.o ../sort/PosData.o ../sort/Pos.o ../sort/util.o
-	${CC} ${LDFLAGS} -o $@ $^
+cv_disp_img_tuple : ${OBJECT} ${HEADER}
+	${CC} ${LDFLAGS} -o $@ ${OBJECT}
 
 clean:
 	rm -vf ${TARGET}
