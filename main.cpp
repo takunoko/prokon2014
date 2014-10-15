@@ -93,21 +93,27 @@ int solveProbrem(int id){
  img->calc_cost();
  img->calc_cost_maru();
  img->calc_cost_all();
- // img->calc_cost_maru(); // まだこのコスト計算は実装されていない
  img->get_left_top();
  img->disp_cost_list(COST_ALL);
- img->get_left_top();
- // img->create_result_img(); //画像を表示しないなら使わないでOK
+ // newはplacement_posが生成されない
+ img->placement();
+
+ img->disp_placement();
+
+ img->set_PosData(data);
+ data->dispData();
 
 #ifdef VERBOSE
  cout << "sort" << endl;
 #endif
  // ここにソート処理
- //sort->importData(*data);
+ sort->importData(*data);
 
 #ifdef VERBOSE
  cout <<"(not sort done)Answer And Send" << endl;
 #endif
+
+ res="";
 
  try {
   // 引数に問題番号を指定して画像のバイナリstringを返す(cv::Mat形式にするかも)
@@ -117,6 +123,15 @@ int solveProbrem(int id){
   cerr << "Exception: " << exception << endl;
   exit(EXIT_FAILURE);
  }
+ // ACCEPTED XXかERRORがかえってくる
+ // http://www.procon.gr.jp/modules/smartfaq/category.php?categoryid=23
+
+ if(res=="ERROR"){
+  cout << "ERROR OCCURED" << endl;
+ }else if(res.substr(0,8)=="ACCEPTED"){
+  cout << atoi(res.substr(8).c_str()) << endl;
+ }
+
  cout << res << endl;
 
  return EXIT_SUCCESS;
