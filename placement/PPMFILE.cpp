@@ -626,7 +626,7 @@ void PPMFILE::new_placement(void){
 void PPMFILE::placement_4(void){
 	// <コスト, ルート, 自分の座標, 遷移1, 遷移2, 遷移3>
 	// ルートは 0: URDL / 1: RDLU / 2: DLUR / 3:LURD
-	vector<tuple< int, int, int, int, int, int>> less_route_pos(part_size_x*part_size_y);
+	vector<vector<tuple< int, int, int, int, int, int> > > less_route_pos;
 
 	// ピースNo, 相対X, 相対Y
 	//vector<vector<tuple< int, int, int> > > scrap_4(part_size_x*part_size_y);
@@ -640,9 +640,13 @@ void PPMFILE::placement_4(void){
 	int p4_cost; // これは、1周回ってきたときのコスト
 
 	// tuple配列の初期化
+	less_route_pos.resize( part_size_x * part_size_y);
 	for(int i=0; i<part_size_x * part_size_y; i++){
 		// 2^31-1 = 2147483647
-		less_route_pos[i] = make_tuple( 2147483647, 0, 0, 0, 0, 0);
+		less_route_pos[i].resize(4);
+		for(int j=0; j<4; j++){
+			less_route_pos[i][j] = make_tuple( 2147483647, 0, 0, 0, 0, 0);
+		}
 	}
 
 	// すべてのピースに対して
@@ -659,8 +663,8 @@ void PPMFILE::placement_4(void){
 					p3_cost = cost_all[p2_pos][DIRE_D][l].first;
 					p3_pos = cost_all[p2_pos][DIRE_D][l].second;
 					p4_cost = cost_all_def[p3_pos][DIRE_L][i].first;
-					if((p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT) < get<0>(less_route_pos[i])){
-						less_route_pos[i] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 0, i, p1_pos, p2_pos, p3_pos);
+					if((p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT) < get<0>(less_route_pos[i][0])){
+						less_route_pos[i][0] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 0, i, p1_pos, p2_pos, p3_pos);
 					}
 				}
 			}
@@ -676,8 +680,8 @@ void PPMFILE::placement_4(void){
 					p3_cost = cost_all[p2_pos][DIRE_L][l].first;
 					p3_pos = cost_all[p2_pos][DIRE_L][l].second;
 					p4_cost = cost_all_def[p3_pos][DIRE_U][i].first;
-					if((p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT) < get<0>(less_route_pos[i]))
-						less_route_pos[i] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 1, i, p1_pos, p2_pos, p3_pos);
+					if((p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT) < get<0>(less_route_pos[i][1]))
+						less_route_pos[i][1] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 1, i, p1_pos, p2_pos, p3_pos);
 				}
 			}
 		}
@@ -692,8 +696,8 @@ void PPMFILE::placement_4(void){
 					p3_cost = cost_all[p2_pos][DIRE_U][l].first;
 					p3_pos = cost_all[p2_pos][DIRE_U][l].second;
 					p4_cost = cost_all_def[p3_pos][DIRE_R][i].first;
-					if((p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT) < get<0>(less_route_pos[i]))
-						less_route_pos[i] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 2, i, p1_pos, p2_pos, p3_pos);
+					if((p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT) < get<0>(less_route_pos[i][2]))
+						less_route_pos[i][2] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 2, i, p1_pos, p2_pos, p3_pos);
 				}
 			}
 		}
@@ -708,75 +712,78 @@ void PPMFILE::placement_4(void){
 					p3_cost = cost_all[p2_pos][DIRE_R][l].first;
 					p3_pos = cost_all[p2_pos][DIRE_R][l].second;
 					p4_cost = cost_all_def[p3_pos][DIRE_D][i].first;
-					if((p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT) < get<0>(less_route_pos[i]))
-						less_route_pos[i] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 3, i, p1_pos, p2_pos, p3_pos);
+					if((p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT) < get<0>(less_route_pos[i][3]))
+						less_route_pos[i][3] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 3, i, p1_pos, p2_pos, p3_pos);
 				}
 			}
 		}
+		sort(less_route_pos[i].begin(), less_route_pos[i].end());
 	}
 
 	// コストを相対座標に変換
 	int cos, route, my_pos, pos_1, pos_2, pos_3;
 	for(int i=0; i<part_size_x * part_size_y; i++){
-		cos = get<0>(less_route_pos[i]);
-		route = get<1>(less_route_pos[i]);
-		my_pos = get<2>(less_route_pos[i]);
-		pos_1 = get<3>(less_route_pos[i]);
-		pos_2 = get<4>(less_route_pos[i]);
-		pos_3 = get<5>(less_route_pos[i]);
+		for(int j=0; j<4; j++){
+			cos = get<0>(less_route_pos[i][j]);
+			route = get<1>(less_route_pos[i][j]);
+			my_pos = get<2>(less_route_pos[i][j]);
+			pos_1 = get<3>(less_route_pos[i][j]);
+			pos_2 = get<4>(less_route_pos[i][j]);
+			pos_3 = get<5>(less_route_pos[i][j]);
 
-		// 要素の初期化
-		scrap_4_tmp.elements.clear();
-		scrap_4_tmp.used.clear();
-		// 相対座標系に保存
-		switch(route){
-			case 0:
-				scrap_4_tmp.elements[pos_1] = make_pair( 0, 0);
-				scrap_4_tmp.elements[pos_2]  = make_pair( 1, 0);
-				scrap_4_tmp.elements[my_pos] = make_pair( 0, 1);
-				scrap_4_tmp.elements[pos_3]  = make_pair( 1, 1);
-				scrap_4_tmp.used[make_pair( 0, 0)] = pos_1;
-				scrap_4_tmp.used[make_pair( 1, 0)] = pos_2;
-				scrap_4_tmp.used[make_pair( 0, 1)] = my_pos;
-				scrap_4_tmp.used[make_pair( 1, 1)] = pos_3;
-				break;
-			case 1:
-				scrap_4_tmp.elements[my_pos] = make_pair(0, 0);
-				scrap_4_tmp.elements[pos_1]  = make_pair(1, 0);
-				scrap_4_tmp.elements[pos_3]  = make_pair(0, 1);
-				scrap_4_tmp.elements[pos_2]  = make_pair(1, 1);
-				scrap_4_tmp.used[make_pair( 0, 0)] = my_pos;
-				scrap_4_tmp.used[make_pair( 1, 0)] = pos_1;
-				scrap_4_tmp.used[make_pair( 0, 1)] = pos_3;
-				scrap_4_tmp.used[make_pair( 1, 1)] = pos_2;
-				break;
-			case 2:
-				scrap_4_tmp.elements[pos_3]  = make_pair(0, 0);
-				scrap_4_tmp.elements[my_pos] = make_pair(1, 0);
-				scrap_4_tmp.elements[pos_2]  = make_pair(0, 1);
-				scrap_4_tmp.elements[pos_1]  = make_pair(1, 1);
-				scrap_4_tmp.used[make_pair( 0, 0)] = pos_3;
-				scrap_4_tmp.used[make_pair( 1, 0)] = my_pos;
-				scrap_4_tmp.used[make_pair( 0, 1)] = pos_2;
-				scrap_4_tmp.used[make_pair( 1, 1)] = pos_1;
-				break;
-			case 3:
-				scrap_4_tmp.elements[pos_2]  = make_pair(0, 0);
-				scrap_4_tmp.elements[pos_3]  = make_pair(1, 0);
-				scrap_4_tmp.elements[pos_1]  = make_pair(0, 1);
-				scrap_4_tmp.elements[my_pos] = make_pair(1, 1);
-				scrap_4_tmp.used[make_pair( 0, 0)] = pos_2;
-				scrap_4_tmp.used[make_pair( 1, 0)] = pos_3;
-				scrap_4_tmp.used[make_pair( 0, 1)] = pos_1;
-				scrap_4_tmp.used[make_pair( 1, 1)] = my_pos;
-				break;
+			// 要素の初期化
+			scrap_4_tmp.elements.clear();
+			scrap_4_tmp.used.clear();
+			// 相対座標系に保存
+			switch(route){
+				case 0:
+					scrap_4_tmp.elements[pos_1] = make_pair( 0, 0);
+					scrap_4_tmp.elements[pos_2]  = make_pair( 1, 0);
+					scrap_4_tmp.elements[my_pos] = make_pair( 0, 1);
+					scrap_4_tmp.elements[pos_3]  = make_pair( 1, 1);
+					scrap_4_tmp.used[make_pair( 0, 0)] = pos_1;
+					scrap_4_tmp.used[make_pair( 1, 0)] = pos_2;
+					scrap_4_tmp.used[make_pair( 0, 1)] = my_pos;
+					scrap_4_tmp.used[make_pair( 1, 1)] = pos_3;
+					break;
+				case 1:
+					scrap_4_tmp.elements[my_pos] = make_pair(0, 0);
+					scrap_4_tmp.elements[pos_1]  = make_pair(1, 0);
+					scrap_4_tmp.elements[pos_3]  = make_pair(0, 1);
+					scrap_4_tmp.elements[pos_2]  = make_pair(1, 1);
+					scrap_4_tmp.used[make_pair( 0, 0)] = my_pos;
+					scrap_4_tmp.used[make_pair( 1, 0)] = pos_1;
+					scrap_4_tmp.used[make_pair( 0, 1)] = pos_3;
+					scrap_4_tmp.used[make_pair( 1, 1)] = pos_2;
+					break;
+				case 2:
+					scrap_4_tmp.elements[pos_3]  = make_pair(0, 0);
+					scrap_4_tmp.elements[my_pos] = make_pair(1, 0);
+					scrap_4_tmp.elements[pos_2]  = make_pair(0, 1);
+					scrap_4_tmp.elements[pos_1]  = make_pair(1, 1);
+					scrap_4_tmp.used[make_pair( 0, 0)] = pos_3;
+					scrap_4_tmp.used[make_pair( 1, 0)] = my_pos;
+					scrap_4_tmp.used[make_pair( 0, 1)] = pos_2;
+					scrap_4_tmp.used[make_pair( 1, 1)] = pos_1;
+					break;
+				case 3:
+					scrap_4_tmp.elements[pos_2]  = make_pair(0, 0);
+					scrap_4_tmp.elements[pos_3]  = make_pair(1, 0);
+					scrap_4_tmp.elements[pos_1]  = make_pair(0, 1);
+					scrap_4_tmp.elements[my_pos] = make_pair(1, 1);
+					scrap_4_tmp.used[make_pair( 0, 0)] = pos_2;
+					scrap_4_tmp.used[make_pair( 1, 0)] = pos_3;
+					scrap_4_tmp.used[make_pair( 0, 1)] = pos_1;
+					scrap_4_tmp.used[make_pair( 1, 1)] = my_pos;
+					break;
+			}
+			scrap_4[i] = scrap_4_tmp;
+			cout << " route :" << route << \
+				"my :[" << CONV_X(my_pos) << "," << CONV_Y(my_pos) << \
+				"] p1 :[" << CONV_X(pos_1) << "," << CONV_Y(pos_1) << \
+				"] p2 :[" << CONV_X(pos_2) << "," << CONV_Y(pos_2) << \
+				"] p3 :[" << CONV_X(pos_3) << "," << CONV_Y(pos_3) << "]" << endl;
 		}
-		scrap_4[i] = scrap_4_tmp;
-		cout << " route :" << route << \
-			"my :[" << CONV_X(my_pos) << "," << CONV_Y(my_pos) << \
-			"] p1 :[" << CONV_X(pos_1) << "," << CONV_Y(pos_1) << \
-			"] p2 :[" << CONV_X(pos_2) << "," << CONV_Y(pos_2) << \
-			"] p3 :[" << CONV_X(pos_3) << "," << CONV_Y(pos_3) << "]" << endl;
 	}
 	// とりあえず現状表示
 	for(int i=0; i<scrap_4.size(); i++){
