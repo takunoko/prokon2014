@@ -23,7 +23,7 @@
 #define COST_ALL 2
 
 #define BORDER_WEIGHT 1 // 境界線の重要度
-#define DEEP_SERACH 1	// たどる近似度(n^3の情報量になっていくため注意)
+#define DEEP_SERACH 5 // たどる近似度(n^3の情報量になっていくため注意)
 
 #define MIN_2( A, B) ((A) < (B) ? (A) : (B))
 #define BIG_2( A, B) ((A) > (B) ? (A) : (B))

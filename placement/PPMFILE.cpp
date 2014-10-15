@@ -659,9 +659,9 @@ void PPMFILE::placement_4(void){
 					p3_cost = cost_all[p2_pos][DIRE_D][l].first;
 					p3_pos = cost_all[p2_pos][DIRE_D][l].second;
 					p4_cost = cost_all_def[p3_pos][DIRE_L][i].first;
-					// コストが小さかったら更新
-					if((p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT) < get<0>(less_route_pos[i]))
+					if((p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT) < get<0>(less_route_pos[i])){
 						less_route_pos[i] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 0, i, p1_pos, p2_pos, p3_pos);
+					}
 				}
 			}
 		}
@@ -676,7 +676,6 @@ void PPMFILE::placement_4(void){
 					p3_cost = cost_all[p2_pos][DIRE_L][l].first;
 					p3_pos = cost_all[p2_pos][DIRE_L][l].second;
 					p4_cost = cost_all_def[p3_pos][DIRE_U][i].first;
-					// コストが小さかったら更新
 					if((p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT) < get<0>(less_route_pos[i]))
 						less_route_pos[i] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 1, i, p1_pos, p2_pos, p3_pos);
 				}
@@ -693,7 +692,6 @@ void PPMFILE::placement_4(void){
 					p3_cost = cost_all[p2_pos][DIRE_U][l].first;
 					p3_pos = cost_all[p2_pos][DIRE_U][l].second;
 					p4_cost = cost_all_def[p3_pos][DIRE_R][i].first;
-					// コストが小さかったら更新
 					if((p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT) < get<0>(less_route_pos[i]))
 						less_route_pos[i] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 2, i, p1_pos, p2_pos, p3_pos);
 				}
@@ -710,7 +708,6 @@ void PPMFILE::placement_4(void){
 					p3_cost = cost_all[p2_pos][DIRE_R][l].first;
 					p3_pos = cost_all[p2_pos][DIRE_R][l].second;
 					p4_cost = cost_all_def[p3_pos][DIRE_D][i].first;
-					// コストが小さかったら更新
 					if((p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT) < get<0>(less_route_pos[i]))
 						less_route_pos[i] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 3, i, p1_pos, p2_pos, p3_pos);
 				}
@@ -877,9 +874,10 @@ void PPMFILE::placement_4(void){
 		pair<int, int> pos = j->second;
 		scrap_4[0].elements[key] = make_pair( (pos.first - small_x), (pos.second - small_y));
 	}
+
 	// 正しく削除できているか
 	for(int i=0; i<scrap_4.size(); i++){
-		cout << "---- new  ----" << endl;
+		cout << "---- new "<< i << " ----" << endl;
 		for(map<int, pair<int,int> >::iterator j = scrap_4[i].elements.begin(); j != scrap_4[i].elements.end(); j++){
 			int key = j->first;
 			pair<int, int> pos = j->second;
