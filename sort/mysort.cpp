@@ -32,7 +32,7 @@ int main(void) {
   */
 
   // ソート
-  Process5 *test = new Process5(WIDTH, HEIGHT);
+  Process4 *test = new Process4(WIDTH, HEIGHT);
   //test->importData(*data);
   data_send = test->sort();
   delete test;
