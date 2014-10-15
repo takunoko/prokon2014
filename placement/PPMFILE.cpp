@@ -624,13 +624,14 @@ void PPMFILE::new_placement(void){
 // 自分付近の4ピースは計4つあるが、これについては最も良い物を作成する
 // 1*n n*1 の場合には正しく動作しない
 void PPMFILE::placement_4(void){
-	// <コスト, ルート, 自分の座標, 遷移1, 遷移2, 遷移3>
+	// <コスト, ルート, 自分の座標, 遷移1, 遷移2, 遷移3, 最強点の数>
 	// ルートは 0: URDL / 1: RDLU / 2: DLUR / 3:LURD
-	vector<vector<tuple< int, int, int, int, int, int> > > less_route_pos;
+	vector<vector<tuple< int, int, int, int, int, int, int> > > less_route_pos;
 
 	// ピースNo, 相対X, 相対Y
 	//vector<vector<tuple< int, int, int> > > scrap_4(part_size_x*part_size_y);
-	vector< SCRAP_4> scrap_4(part_size_x*part_size_y);
+	// scrap_4[ピースNo][組み合わせベスト4]
+	vector<vector< SCRAP_4> > scrap_4;
 
 	SCRAP_4 scrap_4_tmp;
 
@@ -645,8 +646,14 @@ void PPMFILE::placement_4(void){
 		// 2^31-1 = 2147483647
 		less_route_pos[i].resize(4);
 		for(int j=0; j<4; j++){
-			less_route_pos[i][j] = make_tuple( 2147483647, 0, 0, 0, 0, 0);
+			less_route_pos[i][j] = make_tuple( 2147483647, 0, 0, 0, 0, 0, 0);
 		}
+	}
+
+	// scrap_4の初期化
+	scrap_4.resize( part_size_x * part_size_y);
+	for(int i=0; i<part_size_x * part_size_y; i++){
+		scrap_4[i].resize(4);
 	}
 
 	// すべてのピースに対して
@@ -664,7 +671,7 @@ void PPMFILE::placement_4(void){
 					p3_pos = cost_all[p2_pos][DIRE_D][l].second;
 					p4_cost = cost_all_def[p3_pos][DIRE_L][i].first;
 					if((p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT) < get<0>(less_route_pos[i][0])){
-						less_route_pos[i][0] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 0, i, p1_pos, p2_pos, p3_pos);
+						less_route_pos[i][0] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 0, i, p1_pos, p2_pos, p3_pos, 0);
 					}
 				}
 			}
@@ -681,7 +688,7 @@ void PPMFILE::placement_4(void){
 					p3_pos = cost_all[p2_pos][DIRE_L][l].second;
 					p4_cost = cost_all_def[p3_pos][DIRE_U][i].first;
 					if((p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT) < get<0>(less_route_pos[i][1]))
-						less_route_pos[i][1] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 1, i, p1_pos, p2_pos, p3_pos);
+						less_route_pos[i][1] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 1, i, p1_pos, p2_pos, p3_pos, 0);
 				}
 			}
 		}
@@ -697,7 +704,7 @@ void PPMFILE::placement_4(void){
 					p3_pos = cost_all[p2_pos][DIRE_U][l].second;
 					p4_cost = cost_all_def[p3_pos][DIRE_R][i].first;
 					if((p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT) < get<0>(less_route_pos[i][2]))
-						less_route_pos[i][2] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 2, i, p1_pos, p2_pos, p3_pos);
+						less_route_pos[i][2] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 2, i, p1_pos, p2_pos, p3_pos, 0);
 				}
 			}
 		}
@@ -713,11 +720,11 @@ void PPMFILE::placement_4(void){
 					p3_pos = cost_all[p2_pos][DIRE_R][l].second;
 					p4_cost = cost_all_def[p3_pos][DIRE_D][i].first;
 					if((p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT) < get<0>(less_route_pos[i][3]))
-						less_route_pos[i][3] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 3, i, p1_pos, p2_pos, p3_pos);
+						less_route_pos[i][3] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 3, i, p1_pos, p2_pos, p3_pos, 0);
 				}
 			}
 		}
-		sort(less_route_pos[i].begin(), less_route_pos[i].end());
+		// sort(less_route_pos[i].begin(), less_route_pos[i].end());
 	}
 
 	// コストを相対座標に変換
@@ -777,7 +784,7 @@ void PPMFILE::placement_4(void){
 					scrap_4_tmp.used[make_pair( 1, 1)] = my_pos;
 					break;
 			}
-			scrap_4[i] = scrap_4_tmp;
+			scrap_4[i][j] = scrap_4_tmp;
 			cout << " route :" << route << \
 				"my :[" << CONV_X(my_pos) << "," << CONV_Y(my_pos) << \
 				"] p1 :[" << CONV_X(pos_1) << "," << CONV_Y(pos_1) << \
@@ -788,7 +795,7 @@ void PPMFILE::placement_4(void){
 	// とりあえず現状表示
 	for(int i=0; i<scrap_4.size(); i++){
 		cout << "---- now " << i << " ----" << endl;
-		for(map<int, pair<int,int> >::iterator j = scrap_4[i].elements.begin(); j != scrap_4[i].elements.end(); j++){
+		for(map<int, pair<int,int> >::iterator j = scrap_4[i][0].elements.begin(); j != scrap_4[i][0].elements.end(); j++){
 			int key = j->first;
 			pair<int, int> pos = j->second;
 			// cout << "(" << CONV_X(key) << "," << CONV_Y(key) << ") " << " (" << pos.first << "," << pos.second << ")" << endl;
@@ -804,9 +811,9 @@ void PPMFILE::placement_4(void){
 	for(int i=0; i<scrap_4.size()-1; i++){
 		for(int j=i+1; j<scrap_4.size(); j++){
 			conf_cnt = 0;
-			for(map<int, pair<int,int> >::iterator k = scrap_4[i].elements.begin(); k != scrap_4[i].elements.end(); k++){
+			for(map<int, pair<int,int> >::iterator k = scrap_4[i][0].elements.begin(); k != scrap_4[i][0].elements.end(); k++){
 				int key = k->first;
-				if(scrap_4[j].elements.find(key) == scrap_4[j].elements.end()){
+				if(scrap_4[j][0].elements.find(key) == scrap_4[j][0].elements.end()){
 					// かぶっていない
 				}else{
 					// 共有しているピースの数をカウントする
@@ -814,61 +821,116 @@ void PPMFILE::placement_4(void){
 				}
 			}
 			// どちらかにすべて含まれていたら
-			if(conf_cnt == MIN_2( scrap_4[j].elements.size(), scrap_4[i].elements.size()) && conf_cnt >= 4){
-				if(scrap_4[i].elements.size() >= scrap_4[j].elements.size()){
-					// scrap_4[j]のほうを消す
-					scrap_4[j].used.clear();
-					scrap_4[j].elements.clear();
+			if(conf_cnt == MIN_2( scrap_4[j][0].elements.size(), scrap_4[i][0].elements.size()) && conf_cnt >= 4){
+				if(scrap_4[i][0].elements.size() >= scrap_4[j][0].elements.size()){
+					// scrap_4[j][0]のほうを消す
+					scrap_4[j][0].used.clear();
+					scrap_4[j][0].elements.clear();
 				}else{
 					// これが正しく動作するのかわからない
-					scrap_4[i] = scrap_4[j];
+					scrap_4[i][0] = scrap_4[j][0];
 
-					scrap_4[j].used.clear();
-					scrap_4[j].elements.clear();
+					scrap_4[j][0].used.clear();
+					scrap_4[j][0].elements.clear();
 				}
 			}else if(conf_cnt >= 2){ // 2つ以上かぶっていたら
 				// diffを検索
-				for(map<int, pair<int,int> >::iterator k = scrap_4[i].elements.begin(); k != scrap_4[i].elements.end(); k++){
+				for(map<int, pair<int,int> >::iterator k = scrap_4[i][0].elements.begin(); k != scrap_4[i][0].elements.end(); k++){
 					int key = k->first;
 					pair<int, int> pos = k->second;
-					if(scrap_4[j].elements.find(key) == scrap_4[j].elements.end()){
+					if(scrap_4[j][0].elements.find(key) == scrap_4[j][0].elements.end()){
 					}else{
 						// 一致している要素
-						diff_x = scrap_4[i].elements[key].first - scrap_4[j].elements[key].first;
-						diff_y = scrap_4[i].elements[key].second - scrap_4[j].elements[key].second;
+						diff_x = scrap_4[i][0].elements[key].first - scrap_4[j][0].elements[key].first;
+						diff_y = scrap_4[i][0].elements[key].second - scrap_4[j][0].elements[key].second;
+						cout << "scr : " << j << ":" << i << "  conf : " << key << " ";
 						break;
 					}
 				}
 				// diffを用いて結合
-				for(map<int, pair<int,int> >::iterator k = scrap_4[j].elements.begin(); k != scrap_4[j].elements.end(); k++){
+				for(map<int, pair<int,int> >::iterator k = scrap_4[j][0].elements.begin(); k != scrap_4[j][0].elements.end(); k++){
 					int key = k->first;
 					pair<int, int> pos = k->second;
-					if(scrap_4[i].elements.find(key) == scrap_4[i].elements.end()){
+					if(scrap_4[i][0].elements.find(key) == scrap_4[i][0].elements.end()){
 						// 追加
-						scrap_4[i].elements[key] = make_pair( pos.first + diff_x, pos.second + diff_y);
-						scrap_4[i].used[make_pair( pos.first + diff_x, pos.second + diff_y)] = key;
+						scrap_4[i][0].elements[key] = make_pair( pos.first + diff_x, pos.second + diff_y);
+						scrap_4[i][0].used[make_pair( pos.first + diff_x, pos.second + diff_y)] = key;
+					}else{
+						// すでにある -> 無視
+						// 無視しないで、一応上書きする
+						scrap_4[i][0].elements[key] = make_pair( pos.first + diff_x, pos.second + diff_y);
+						scrap_4[i][0].used[make_pair( pos.first + diff_x, pos.second + diff_y)] = key;
+					}
+				}
+				cout << "diff_x : " << diff_x << " diff_y : " << diff_y << endl;
+				scrap_4[j][0].elements.clear();
+				scrap_4[j][0].used.clear();
+			}
+		}
+	}
+	}
+	for(int i=0; i<scrap_4.size()-1; i++){
+		for(int j=i+1; j<scrap_4.size(); j++){
+			conf_cnt = 0;
+			for(map<int, pair<int,int> >::iterator k = scrap_4[i][0].elements.begin(); k != scrap_4[i][0].elements.end(); k++){
+				int key = k->first;
+				if(scrap_4[j][0].elements.find(key) == scrap_4[j][0].elements.end()){
+					// かぶっていない
+				}else{
+					// 共有しているピースの数をカウントする
+					conf_cnt++;
+				}
+			}
+			// どちらかにすべて含まれていたら
+			if(conf_cnt == MIN_2( scrap_4[j][0].elements.size(), scrap_4[i][0].elements.size()) && conf_cnt >= 4){
+				if(scrap_4[i][0].elements.size() >= scrap_4[j][0].elements.size()){
+					// scrap_4[j][0]のほうを消す
+					scrap_4[j][0].used.clear();
+					scrap_4[j][0].elements.clear();
+				}else{
+					// これが正しく動作するのかわからない
+					scrap_4[i][0] = scrap_4[j][0];
+
+					scrap_4[j][0].used.clear();
+					scrap_4[j][0].elements.clear();
+				}
+			}else if(conf_cnt >= 1){ // 2つ以上かぶっていたら
+				// diffを検索
+				for(map<int, pair<int,int> >::iterator k = scrap_4[i][0].elements.begin(); k != scrap_4[i][0].elements.end(); k++){
+					int key = k->first;
+					pair<int, int> pos = k->second;
+					if(scrap_4[j][0].elements.find(key) == scrap_4[j][0].elements.end()){
+					}else{
+						// 一致している要素
+						diff_x = scrap_4[i][0].elements[key].first - scrap_4[j][0].elements[key].first;
+						diff_y = scrap_4[i][0].elements[key].second - scrap_4[j][0].elements[key].second;
+						break;
+					}
+				}
+				// diffを用いて結合
+				for(map<int, pair<int,int> >::iterator k = scrap_4[j][0].elements.begin(); k != scrap_4[j][0].elements.end(); k++){
+					int key = k->first;
+					pair<int, int> pos = k->second;
+					if(scrap_4[i][0].elements.find(key) == scrap_4[i][0].elements.end()){
+						// 追加
+						scrap_4[i][0].elements[key] = make_pair( pos.first + diff_x, pos.second + diff_y);
+						scrap_4[i][0].used[make_pair( pos.first + diff_x, pos.second + diff_y)] = key;
 					}else{
 						// すでにある -> 無視
 					}
 				}
 				cout << "diff_x : " << diff_x << " diff_y : " << diff_y << endl;
-				scrap_4[j].elements.clear();
-				scrap_4[j].used.clear();
+				scrap_4[j][0].elements.clear();
+				scrap_4[j][0].used.clear();
 			}
 		}
 	}
-	}
-
-	cout << "scrap_4_len :" << scrap_4.size() << endl;
 
 	// １つにまとまっていなかったら
-	if(scrap_4.size() != 1){
-
-	}
 
 	// 座標の変換
 	int small_x=0, small_y=0;
-	for(map<int, pair<int,int> >::iterator j = scrap_4[0].elements.begin(); j != scrap_4[0].elements.end(); j++){
+	for(map<int, pair<int,int> >::iterator j = scrap_4[0][0].elements.begin(); j != scrap_4[0][0].elements.end(); j++){
 		pair<int, int> pos = j->second;
 		if(pos.first < small_x)
 			small_x = pos.first;
@@ -876,24 +938,24 @@ void PPMFILE::placement_4(void){
 			small_y = pos.second;
 	}
 	//座標の再配置
-	for(map<int, pair<int,int> >::iterator j = scrap_4[0].elements.begin(); j != scrap_4[0].elements.end(); j++){
+	for(map<int, pair<int,int> >::iterator j = scrap_4[0][0].elements.begin(); j != scrap_4[0][0].elements.end(); j++){
 		int key = j->first;
 		pair<int, int> pos = j->second;
-		scrap_4[0].elements[key] = make_pair( (pos.first - small_x), (pos.second - small_y));
+		scrap_4[0][0].elements[key] = make_pair( (pos.first - small_x), (pos.second - small_y));
 	}
 
 	// 正しく削除できているか
 	for(int i=0; i<scrap_4.size(); i++){
 		cout << "---- new "<< i << " ----" << endl;
-		for(map<int, pair<int,int> >::iterator j = scrap_4[i].elements.begin(); j != scrap_4[i].elements.end(); j++){
+		for(map<int, pair<int,int> >::iterator j = scrap_4[i][0].elements.begin(); j != scrap_4[i][0].elements.end(); j++){
 			int key = j->first;
 			pair<int, int> pos = j->second;
 			cout << key << " (" << pos.first << "," << pos.second << ")" << endl;
-			//cout << get<0>(scrap_4[i].elements[j]) << " : (" << get<1>(scrap_4[i].elements[j]) << "," << get<2>(scrap_4[i].elements[j]) << ")" << endl;
+			//cout << get<0>(scrap_4[i][0].elements[j][0]) << " : (" << get<1>(scrap_4[i][0].elements[j][0]) << "," << get<2>(scrap_4[i][0].elements[j][0]) << ")" << endl;
 		}
 	}
 	// グローバルにコピー
-	placement_pos = scrap_4[0].elements;
+	placement_pos = scrap_4[0][0].elements;
 }
 
 // 　placementした結果を表示する
