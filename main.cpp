@@ -126,10 +126,38 @@ int solveProbrem(int id){
  // ACCEPTED XXかERRORがかえってくる
  // http://www.procon.gr.jp/modules/smartfaq/category.php?categoryid=23
 
+ int error_part = 0;
  if(res=="ERROR"){
   cout << "ERROR OCCURED" << endl;
  }else if(res.substr(0,8)=="ACCEPTED"){
+  error_part = atoi(res.substr(8).c_str());
   cout << atoi(res.substr(8).c_str()) << endl;
+  if(error_part > 0) {
+	 // ナンバー入り画像
+	 img->create_num_img();
+	 img->disp_img(NUM_IMG);
+	 // 回答画像
+	 img->create_result_img();
+	 img->disp_img(RESULT_IMG);
+   string change_place;
+   string d1, d2;
+   int p1, p2;
+   while(1) {
+    cin >> change_place;
+    if(change_place[0] == 'q') break;
+    for(int i = 0; change_place[i] != '\0'; i++) {
+      if((change_place[i] > '0' && change_place[i] < '9') || change_place[i] == ',');
+      else continue;
+    }
+    int j;
+    for(j = 0; change_place[j] != ','; j++);
+    p1 = atoi(change_place.c_str());
+    // j+1の位置から２つ目の番号が始まっててほしい
+    // j+1の位置から文字列をint型に変えたい
+    //p2 = atoi(change_place.c_str());
+    data->swapData(p1, p2);
+   }
+  }
  }
 
  cout << res << endl;

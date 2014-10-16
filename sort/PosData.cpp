@@ -81,3 +81,17 @@ void PosData::setData(int ox, int oy, int x, int y) {
   data[oy][ox].x = x;
   data[oy][ox].y = y;
 }
+
+void PosData::swapData(int x1, int y1, int x2, int y2) {
+  swapPos(&data[y1][x1], &data[y2][x2]);
+}
+
+void PosData::swapData(int p1, int p2) {
+  int x1, x2, y1, y2;
+
+  x1 = p1 % width;
+  x2 = p2 % width;
+  y1 = p1 / width;
+  y2 = p2 / width;
+  swapPos(&data[y1][x1], &data[y2][x2]);
+}

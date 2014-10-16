@@ -15,6 +15,7 @@ private:
 
 private:
   Process4();
+  int calcParity();
   void dispSorted();
   void dispSortedData();
   int isSelectedNextToTarget();
