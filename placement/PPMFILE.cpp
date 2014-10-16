@@ -31,6 +31,19 @@ bool sort_scrap_4( const tuple<int,int,int> &lhs, const tuple<int,int,int> &rhs)
 	if (std::get<2>(lhs) != std::get<2>(rhs)) return std::get<2>(lhs) < std::get<2>(rhs);
 	return std::get<2>(lhs) < std::get<2>(rhs);
 }
+
+// scrap_4をstrongを含めてソートするためのルール
+bool sort_scrap_4_strong( const tuple<int,int,int,int,int,int,int> &lhs, const tuple<int,int,int,int,int,int,int> &rhs){
+	if (std::get<6>(lhs) != std::get<6>(rhs)) return std::get<6>(lhs) > std::get<6>(rhs);
+	if (std::get<0>(lhs) != std::get<0>(rhs)) return std::get<0>(lhs) < std::get<0>(rhs);
+	if (std::get<1>(lhs) != std::get<1>(rhs)) return std::get<1>(lhs) < std::get<1>(rhs);
+	if (std::get<2>(lhs) != std::get<2>(rhs)) return std::get<2>(lhs) < std::get<2>(rhs);
+	if (std::get<3>(lhs) != std::get<3>(rhs)) return std::get<3>(lhs) < std::get<3>(rhs);
+	if (std::get<4>(lhs) != std::get<4>(rhs)) return std::get<4>(lhs) < std::get<4>(rhs);
+	if (std::get<5>(lhs) != std::get<5>(rhs)) return std::get<5>(lhs) < std::get<5>(rhs);
+	return std::get<5>(lhs) < std::get<5>(rhs);
+}
+
 // 方向に対するpairを作る
 pair<int,int> make_direction_pair(int direction){
 	pair<int,int> dire_pair;
@@ -663,12 +676,24 @@ void PPMFILE::placement_4(void){
 		for(int j=0; j<DEEP_SERACH; j++){
 			p1_cost = cost_all[i][DIRE_U][j].first;
 			p1_pos = cost_all[i][DIRE_U][j].second;
+			while(p1_pos == i){ // 同じものを選択した場合
+				p1_cost = cost_all[i][DIRE_U][++j].first;
+				p1_pos = cost_all[i][DIRE_U][++j].second;
+			}
 			for(int k=0; k<DEEP_SERACH; k++){
 				p2_cost = cost_all[p1_pos][DIRE_R][k].first;
 				p2_pos = cost_all[p1_pos][DIRE_R][k].second;
+				while(p2_pos == p1_pos || p2_pos == i){ // 同じのを選択した場合
+					p2_cost = cost_all[p1_pos][DIRE_R][++k].first;
+					p2_pos = cost_all[p1_pos][DIRE_R][++k].second;
+				}
 				for(int l=0; l<DEEP_SERACH; l++){
 					p3_cost = cost_all[p2_pos][DIRE_D][l].first;
 					p3_pos = cost_all[p2_pos][DIRE_D][l].second;
+					while(p3_pos == p2_pos || p3_pos == p1_pos || p3_pos == i){ // 同じのを選択した場合
+						p3_cost = cost_all[p2_pos][DIRE_R][++l].first;
+						p3_pos = cost_all[p2_pos][DIRE_R][++l].second;
+					}
 					p4_cost = cost_all_def[p3_pos][DIRE_L][i].first;
 					if((p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT) < get<0>(less_route_pos[i][0])){
 						less_route_pos[i][0] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 0, i, p1_pos, p2_pos, p3_pos, 0);
@@ -680,12 +705,24 @@ void PPMFILE::placement_4(void){
 		for(int j=0; j<DEEP_SERACH; j++){
 			p1_cost = cost_all[i][DIRE_R][j].first;
 			p1_pos = cost_all[i][DIRE_R][j].second;
+			while(p1_pos == i){ // 同じのを選択した場合
+				p1_cost = cost_all[i][DIRE_U][++j].first;
+				p1_pos = cost_all[i][DIRE_U][++j].second;
+			}
 			for(int k=0; k<DEEP_SERACH; k++){
 				p2_cost = cost_all[p1_pos][DIRE_D][k].first;
 				p2_pos = cost_all[p1_pos][DIRE_D][k].second;
+				while(p2_pos == p1_pos || p2_pos == i){ // 同じのを選択した場合
+					p2_cost = cost_all[p1_pos][DIRE_R][++k].first;
+					p2_pos = cost_all[p1_pos][DIRE_R][++k].second;
+				}
 				for(int l=0; l<DEEP_SERACH; l++){
 					p3_cost = cost_all[p2_pos][DIRE_L][l].first;
 					p3_pos = cost_all[p2_pos][DIRE_L][l].second;
+					while(p3_pos == p2_pos || p3_pos == p1_pos || p3_pos == i){ // 同じのを選択した場合
+						p3_cost = cost_all[p2_pos][DIRE_R][++l].first;
+						p3_pos = cost_all[p2_pos][DIRE_R][++l].second;
+					}
 					p4_cost = cost_all_def[p3_pos][DIRE_U][i].first;
 					if((p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT) < get<0>(less_route_pos[i][1]))
 						less_route_pos[i][1] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 1, i, p1_pos, p2_pos, p3_pos, 0);
@@ -696,12 +733,24 @@ void PPMFILE::placement_4(void){
 		for(int j=0; j<DEEP_SERACH; j++){
 			p1_cost = cost_all[i][DIRE_D][j].first;
 			p1_pos = cost_all[i][DIRE_D][j].second;
+			while(p1_pos == i){ // 同じのを選択した場合
+				p1_cost = cost_all[i][DIRE_U][++j].first;
+				p1_pos = cost_all[i][DIRE_U][++j].second;
+			}
 			for(int k=0; k<DEEP_SERACH; k++){
 				p2_cost = cost_all[p1_pos][DIRE_L][k].first;
 				p2_pos = cost_all[p1_pos][DIRE_L][k].second;
+				while(p2_pos == p1_pos || p2_pos == i){ // 同じのを選択した場合
+					p2_cost = cost_all[p1_pos][DIRE_R][++k].first;
+					p2_pos = cost_all[p1_pos][DIRE_R][++k].second;
+				}
 				for(int l=0; l<DEEP_SERACH; l++){
 					p3_cost = cost_all[p2_pos][DIRE_U][l].first;
 					p3_pos = cost_all[p2_pos][DIRE_U][l].second;
+					while(p3_pos == p2_pos || p3_pos == p1_pos || p3_pos == i){ // 同じのを選択した場合
+						p3_cost = cost_all[p2_pos][DIRE_R][++l].first;
+						p3_pos = cost_all[p2_pos][DIRE_R][++l].second;
+					}
 					p4_cost = cost_all_def[p3_pos][DIRE_R][i].first;
 					if((p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT) < get<0>(less_route_pos[i][2]))
 						less_route_pos[i][2] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 2, i, p1_pos, p2_pos, p3_pos, 0);
@@ -712,12 +761,24 @@ void PPMFILE::placement_4(void){
 		for(int j=0; j<DEEP_SERACH; j++){
 			p1_cost = cost_all[i][DIRE_L][j].first;
 			p1_pos = cost_all[i][DIRE_L][j].second;
+			while(p1_pos == i){ // 同じのを選択した場合
+				p1_cost = cost_all[i][DIRE_U][++j].first;
+				p1_pos = cost_all[i][DIRE_U][++j].second;
+			}
 			for(int k=0; k<DEEP_SERACH; k++){
 				p2_cost = cost_all[p1_pos][DIRE_U][k].first;
 				p2_pos = cost_all[p1_pos][DIRE_U][k].second;
+				while(p2_pos == p1_pos || p2_pos == i){ // 同じのを選択した場合
+					p2_cost = cost_all[p1_pos][DIRE_R][++k].first;
+					p2_pos = cost_all[p1_pos][DIRE_R][++k].second;
+				}
 				for(int l=0; l<DEEP_SERACH; l++){
 					p3_cost = cost_all[p2_pos][DIRE_R][l].first;
 					p3_pos = cost_all[p2_pos][DIRE_R][l].second;
+					while(p3_pos == p2_pos || p3_pos == p1_pos || p3_pos == i){ // 同じのを選択した場合
+						p3_cost = cost_all[p2_pos][DIRE_R][++l].first;
+						p3_pos = cost_all[p2_pos][DIRE_R][++l].second;
+					}
 					p4_cost = cost_all_def[p3_pos][DIRE_D][i].first;
 					if((p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT) < get<0>(less_route_pos[i][3]))
 						less_route_pos[i][3] = make_tuple( p1_cost*BORDER_WEIGHT + p2_cost + p3_cost + p4_cost*BORDER_WEIGHT, 3, i, p1_pos, p2_pos, p3_pos, 0);
@@ -726,6 +787,61 @@ void PPMFILE::placement_4(void){
 		}
 		// sort(less_route_pos[i].begin(), less_route_pos[i].end());
 	}
+
+	// とりあえず現状表示
+	for(int i=0; i<less_route_pos.size(); i++){
+		for(int j=0; j<less_route_pos[i].size(); j++){
+			cout << "---- first " << i << " ----" << endl;
+			cout << \
+				"0:" << get<0>(less_route_pos[i][j]) << ":" << endl << \
+				"1:" << get<1>(less_route_pos[i][j]) << ":" << endl << \
+				"2:" << get<2>(less_route_pos[i][j]) << ":" << endl << \
+				"3:" << get<3>(less_route_pos[i][j]) << ":" << endl << \
+				"4:" << get<4>(less_route_pos[i][j]) << ":" << endl << \
+				"5:" << get<5>(less_route_pos[i][j]) << ":" << endl << \
+				"6:" << get<6>(less_route_pos[i][j]) << endl;
+		}
+	}
+
+
+	// 最強の強さをさらに高める？
+	int strong_p;
+	for(int i=0; i< part_size_x * part_size_y; i++){
+		// ルート0
+		strong_p = 0;
+		if(get<3>(less_route_pos[i][0]) == get<5>(less_route_pos[i][3]))
+			strong_p++;
+		if(get<5>(less_route_pos[i][0]) == get<3>((less_route_pos[i][1])))
+			strong_p++;
+		less_route_pos[i][0] = make_tuple( get<0>(less_route_pos[i][0]), get<1>(less_route_pos[i][0]), get<2>(less_route_pos[i][0]), get<3>(less_route_pos[i][0]), get<4>(less_route_pos[i][0]), get<5>(less_route_pos[i][0]), strong_p);
+
+		// ルート1
+		strong_p = 0;
+		if(get<3>(less_route_pos[i][1]) == get<5>(less_route_pos[i][0]))
+			strong_p++;
+		if(get<5>(less_route_pos[i][1]) == get<3>((less_route_pos[i][2])))
+			strong_p++;
+		less_route_pos[i][1] = make_tuple( get<0>(less_route_pos[i][1]), get<1>(less_route_pos[i][1]), get<2>(less_route_pos[i][1]), get<3>(less_route_pos[i][1]), get<4>(less_route_pos[i][1]), get<5>(less_route_pos[i][1]), strong_p);
+
+		// ルート2
+		strong_p = 0;
+		if(get<3>(less_route_pos[i][2]) == get<5>(less_route_pos[i][1]))
+			strong_p++;
+		if(get<5>(less_route_pos[i][2]) == get<3>((less_route_pos[i][3])))
+			strong_p++;
+		less_route_pos[i][2] = make_tuple( get<0>(less_route_pos[i][2]), get<1>(less_route_pos[i][2]), get<2>(less_route_pos[i][2]), get<3>(less_route_pos[i][2]), get<4>(less_route_pos[i][2]), get<5>(less_route_pos[i][2]), strong_p);
+
+		// ルート3
+		strong_p = 0;
+		if(get<3>(less_route_pos[i][3]) == get<5>(less_route_pos[i][2]))
+			strong_p++;
+		if(get<5>(less_route_pos[i][3]) == get<3>((less_route_pos[i][0])))
+			strong_p++;
+		less_route_pos[i][3] = make_tuple( get<0>(less_route_pos[i][3]), get<1>(less_route_pos[i][3]), get<2>(less_route_pos[i][3]), get<3>(less_route_pos[i][3]), get<4>(less_route_pos[i][3]), get<5>(less_route_pos[i][3]), strong_p);
+
+		sort(less_route_pos[i].begin(), less_route_pos[i].end(), sort_scrap_4_strong);
+	}
+
 
 	// コストを相対座標に変換
 	int cos, route, my_pos, pos_1, pos_2, pos_3;
@@ -926,8 +1042,6 @@ void PPMFILE::placement_4(void){
 		}
 	}
 
-	// １つにまとまっていなかったら
-
 	// 座標の変換
 	int small_x=0, small_y=0;
 	for(map<int, pair<int,int> >::iterator j = scrap_4[0][0].elements.begin(); j != scrap_4[0][0].elements.end(); j++){
@@ -1048,46 +1162,49 @@ void PPMFILE::calc_cost_all(void){
 	for(int i=0; i<part_size_x*part_size_y; i++){
 		cost_all[i].resize(4);
 		cost_all_def[i].resize(4);
-		for(int j=0; j<4; j++){
-			cost_all[i][j].resize(part_size_x*part_size_y);
-			cost_all_def[i][j].resize(part_size_x*part_size_y);
-		}
+		// for(int j=0; j<4; j++){
+		// 	cost_all[i][j].resize(part_size_x*part_size_y);
+		// 	cost_all_def[i][j].resize(part_size_x*part_size_y);
+		// }
 	}
 	cout << "start_calc" << endl;
 	int cost_tmp[4];
 	// すべての方向についてコストの計算を行なう(全てについて反対方向の計算も含んでいる)
 	for(int abs_xy=0; abs_xy < part_size_x * part_size_y; ++abs_xy){
 		for(int xy=0; xy < part_size_x * part_size_y; ++xy){
-			//コスト初期化
-			for(int i=0; i<4; i++){
-				cost_tmp[i] = 0;
-			}
-			//カラーの数だけ繰り返す
-			for(int c=0; c < part_img[abs_xy].channels(); ++c){
-				//各ピクセル上下
-				for(int px_x=0; px_x < part_img[0].cols; ++px_x){
-					cost_tmp[DIRE_U] += abs(part_img[abs_xy].at<cv::Vec3b>( 0, px_x)[c] - part_img[xy].at<cv::Vec3b>( part_img[0].rows-1, px_x)[c]);
-					cost_tmp[DIRE_D] += abs(part_img[abs_xy].at<cv::Vec3b>( part_img[0].rows-1, px_x)[c] - part_img[xy].at<cv::Vec3b>( 0, px_x)[c]);
+			// 自分とのコストは計算しない
+			if(abs_xy != xy){
+				//コスト初期化
+				for(int i=0; i<4; i++){
+					cost_tmp[i] = 0;
 				}
-				//各ピクセル左右
-				for(int px_y=0; px_y < part_img[0].rows; ++px_y){
-					cost_tmp[DIRE_R] += abs(part_img[abs_xy].at<cv::Vec3b>( px_y, part_img[0].cols-1)[c] - part_img[xy].at<cv::Vec3b>( px_y, 0)[c]);
-					cost_tmp[DIRE_L] += abs(part_img[abs_xy].at<cv::Vec3b>( px_y, 0)[c] - part_img[xy].at<cv::Vec3b>( px_y, part_img[0].cols-1)[c]);
+				//カラーの数だけ繰り返す
+				for(int c=0; c < part_img[abs_xy].channels(); ++c){
+					//各ピクセル上下
+					for(int px_x=0; px_x < part_img[0].cols; ++px_x){
+						cost_tmp[DIRE_U] += abs(part_img[abs_xy].at<cv::Vec3b>( 0, px_x)[c] - part_img[xy].at<cv::Vec3b>( part_img[0].rows-1, px_x)[c]);
+						cost_tmp[DIRE_D] += abs(part_img[abs_xy].at<cv::Vec3b>( part_img[0].rows-1, px_x)[c] - part_img[xy].at<cv::Vec3b>( 0, px_x)[c]);
+					}
+					//各ピクセル左右
+					for(int px_y=0; px_y < part_img[0].rows; ++px_y){
+						cost_tmp[DIRE_R] += abs(part_img[abs_xy].at<cv::Vec3b>( px_y, part_img[0].cols-1)[c] - part_img[xy].at<cv::Vec3b>( px_y, 0)[c]);
+						cost_tmp[DIRE_L] += abs(part_img[abs_xy].at<cv::Vec3b>( px_y, 0)[c] - part_img[xy].at<cv::Vec3b>( px_y, part_img[0].cols-1)[c]);
+					}
 				}
-			}
-			// 上下に対しては縦のピクセル数、左右に対しては横のピクセル数
-			// を×る事によって、結合度の重みを長さに依存させない
-			// ワンちゃんオーバーフローが恐い(たぶん大丈夫)
-			cost_tmp[DIRE_U] *= part_img[0].rows;
-			cost_tmp[DIRE_D] *= part_img[0].rows;
-			cost_tmp[DIRE_R] *= part_img[0].cols;
-			cost_tmp[DIRE_L] *= part_img[0].cols;
-			// cost_t [ コスト, 自分の座標, 相手の座標, 方向]
-			// cost [自分の座標][方向][相手の座標]
-			for(int k=0; k < 4; ++k){
-				cost_t_all.push_back(make_tuple( cost_tmp[k], abs_xy, xy, k));
-				cost_all[abs_xy][k][xy] = make_pair( cost_tmp[k], xy);
-				cost_all_def[abs_xy][k][xy] = make_pair( cost_tmp[k], xy);
+				// 上下に対しては縦のピクセル数、左右に対しては横のピクセル数
+				// を×る事によって、結合度の重みを長さに依存させない
+				// ワンちゃんオーバーフローが恐い(たぶん大丈夫)
+				cost_tmp[DIRE_U] *= part_img[0].rows;
+				cost_tmp[DIRE_D] *= part_img[0].rows;
+				cost_tmp[DIRE_R] *= part_img[0].cols;
+				cost_tmp[DIRE_L] *= part_img[0].cols;
+				// cost_t [ コスト, 自分の座標, 相手の座標, 方向]
+				// cost [自分の座標][方向][相手の座標]
+				for(int k=0; k < 4; ++k){
+					cost_t_all.push_back(make_tuple( cost_tmp[k], abs_xy, xy, k));
+					cost_all[abs_xy][k].push_back(make_pair( cost_tmp[k], xy));
+					cost_all_def[abs_xy][k].push_back(make_pair( cost_tmp[k], xy));
+				}
 			}
 		}
 	}
