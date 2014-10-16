@@ -12,6 +12,8 @@ class Astar{
   inline bool isVisited(int hash){
    return !(visited.find(hash)==visited.end());
   }
+
+  priority_queue<Eval_list> openQue;
  public:
   Astar(PosData &data);
 };
