@@ -20,6 +20,10 @@ public:
   void setX(int ox, int oy, int x);
   void setY(int ox, int oy, int y);
   void setData(int ox, int oy, int x, int y);
+  // PosDataの中身をハッシュ化
+  int hash();
+  // ハッシュからsetDataする
+  void dehash(int hash);
 };
 
 #endif
