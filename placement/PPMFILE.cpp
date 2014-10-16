@@ -975,6 +975,7 @@ void PPMFILE::placement_4(void){
 							diff_x = scrap_4[i][0].elements[key].first - scrap_4[j][0].elements[key].first;
 							diff_y = scrap_4[i][0].elements[key].second - scrap_4[j][0].elements[key].second;
 							cout << "scr : " << j << ":" << i << "  conf : " << key << " ";
+							//break;
 						}
 					}
 					// すべての相対座標のズレが一致しているか?
@@ -1019,7 +1020,6 @@ void PPMFILE::placement_4(void){
 			for(int n=1; n<4; n++){
 				for(int i=1; i<scrap_4.size(); i++){
 					if(scrap_4[i][0].elements.size() != 0){
-						cout << "in" << endl;
 						conf_cnt = 0;
 						for(map<int, pair<int,int> >::iterator k = scrap_4[i][n].elements.begin(); k != scrap_4[i][n].elements.end(); k++){
 							int key = k->first;
@@ -1058,6 +1058,7 @@ void PPMFILE::placement_4(void){
 
 									diff_x = scrap_4[0][0].elements[key].first - scrap_4[i][n].elements[key].first;
 									diff_y = scrap_4[0][0].elements[key].second - scrap_4[i][n].elements[key].second;
+									//break;
 								}
 							}
 							int diff_x_2 = scrap_4[i][n].elements[i].first - scrap_4[i][0].elements[i].first;
@@ -1114,7 +1115,7 @@ void PPMFILE::placement_4(void){
 		}
 	}
 
-	// 正しく削除できているか
+	// 最後の状態を表示
 	for(int i=0; i<scrap_4.size(); i++){
 		cout << "---- new "<< i << " ----" << endl;
 		for(map<int, pair<int,int> >::iterator j = scrap_4[i][0].elements.begin(); j != scrap_4[i][0].elements.end(); j++){
