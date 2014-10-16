@@ -154,7 +154,7 @@ int solveProbrem(int id){
     p1 = atoi(change_place.c_str());
     // j+1の位置から２つ目の番号が始まっててほしい
     // j+1の位置から文字列をint型に変えたい
-    //p2 = atoi(change_place.c_str());
+    p2 = atoi(change_place.c_str()+j+1);
     data->swapData(p1, p2);
    }
   }
