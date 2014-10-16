@@ -1,7 +1,6 @@
-BIN :=cell_test\
-	test
+BIN :=cell_test
 CFLAGS :=-W -Wall -g -MMD -MP -std=c++11 -I../../sort/
-LDFLAGS= `pkg-config --libs libcurl` `pkg-config --libs opencv` -L../../sort/
+LDFLAGS= `pkg-config --libs libcurl` `pkg-config --libs opencv`
 CC=g++
 
 SRCS := Cells.cpp test_main.cpp BinaryTree.cpp BinaryTreeTest.cpp
@@ -25,8 +24,5 @@ remake:
 	make clean
 	make all
 
-cell_test:Cells.o
-	$(CC) -o $@ $^ $(LDFLAGS)
-
-test: test_main.o BinaryTreeTest.o BinaryTree.o
+cell_test:Cells.o ../../sort/PosData.o ../../sort/util.o ../../sort/Pos.o
 	$(CC) -o $@ $^ $(LDFLAGS)
