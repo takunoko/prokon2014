@@ -1,5 +1,8 @@
+#include <map>
+#include "PosData.h"
+#include "Astar.h"
+
 // Astarを用いた回答プログラム
-class Astar{
- public:
-  Astar();
+Astar::Astar(PosData &data){
 }
+
