@@ -35,7 +35,7 @@ int main(void){
 	// img1->calc_cost();
 	// img1->calc_cost_maru();
 	img1->calc_cost_all();
-	// img1->disp_cost_list(COST_DEF);  // 消すと結構時間が良くなる
+	// img1->disp_cost_list(COST_ALL);  // 消すと結構時間が良くなる
 
 	// img1->get_left_top();
 	// img1->disp_cost_list(COST_ALL);
