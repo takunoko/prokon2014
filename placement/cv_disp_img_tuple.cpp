@@ -19,36 +19,43 @@
 // 画像ファイル名と分割数
 // 後々、分割数をファイルから読み込む
 
-#define FILENAME "../pic_data/5.ppm"
+#define FILENAME "../pic_data/problem/prob02.ppm"
 using namespace std;
-#define PIECE_X 2
-#define PIECE_Y 3
+#define PIECE_X 4
+#define PIECE_Y 8
 
 int main(void){
-
-	PosData *tmp_pos = new PosData( PIECE_X, PIECE_Y);
-
 	// 引数で渡されるべき部分
 	cv::Mat origin_img_tmp = cv::imread(FILENAME, -1);
 
 	// 本番環境では、PPMFILE( cv::Mat オリジナルのイメージ, int 分割数X, int 分割数Y, PosData);
 	PPMFILE *img1 = new PPMFILE( origin_img_tmp, PIECE_X, PIECE_Y);
 
-	img1->calc_cost();
-	img1->disp_cost_list();  // 消すと結構時間が良くなる
+	// ----- このへん計算 -----
+	// img1->calc_cost();
+	// img1->calc_cost_maru();
+	img1->calc_cost_all();
+	// img1->disp_cost_list(COST_DEF);  // 消すと結構時間が良くなる
 
-	img1->calc_cost_maru();
-	// 指定した座標のcostを取得する
-	// cout << "get (3,1),(1,1),2 : " << img1->get_cost( CONV_XY(3,1), CONV_XY(1,1), 2) << endl;
+	// img1->get_left_top();
+	// img1->disp_cost_list(COST_ALL);
+	// img1->get_left_top();
 
-	img1->placement();
+	// ----- この編並び替え -----
+	// img1->placement();
+	// img1->new_placement();
+	img1->placement_4();
 
+	// ----- このへん描画 -----
 	// img1->write_line();
 	// img1->disp_img(LINE_IMG);
 	// img1->disp_img(ORIGIN_IMG);
+	// img1->disp_placement();
 
-	img1->disp_placement();
-
+	// ナンバー入り画像
+	img1->create_num_img();
+	img1->disp_img(NUM_IMG);
+	// 回答画像
 	img1->create_result_img();
 	img1->disp_img(RESULT_IMG);
 

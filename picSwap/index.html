@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+ <head>
+  <meta charset="UTF-8" />
+  <script type="text/javascript" src="./javascript/jquery-2.1.0.js"></script>
+  <script type="text/javascript" src="./javascript/main.js"></script>
+  <title>procon</title>
+ </head>
+ <body>
+  あまり大きいと機嫌悪くするから気をつけて<br />
+  右クリックして保存<br />
+  <canvas id="display">
+  </canvas>
+  <canvas id="template" style="display: none;"></canvas><br />
+  <img id="converted" alt="変換済み" />
+  <div id="filename"></div>
+  <div id="comments"></div>
+  横分割<input type="number" id="widthSprit" />
+  縦分割<input type="number" id="heightSprit" />
+  <button id="execute" type="button">Execute</button>
+  <br />
+  <textarea id="answer" name="readonly" cols="30" rows="10">
+   // 解答をこ↑こ↓に
+   // 読みづらいからvimでJ連打しておいて
+  </textarea>
+  
+ </body>
+</html>

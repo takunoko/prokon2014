@@ -4,4 +4,6 @@ a.out
 *.d
 *.aux
 *.log
+*.dvi
+*.pdf
 prokon25

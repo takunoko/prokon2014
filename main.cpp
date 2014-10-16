@@ -24,8 +24,19 @@ using namespace std;
 // 問題解答関数
 int solveProbrem(int id);
 
-int main(){
- int id=1;
+int main(int argc,char *argv[]){
+ vector<int> ids;
+ int id;
+
+ if(argc==1){
+  cout << "$ prokon25 id1" << endl;
+  exit(EXIT_SUCCESS);
+ }
+
+ for(int i=1;i<argc;i++){
+  ids.push_back(atoi(argv[i]));
+ }
+ id=ids.at(0);
 
  // マルチプロセスとかしたい時のために
  solveProbrem(id);
@@ -80,9 +91,17 @@ int solveProbrem(int id){
  // どこかでPosData設定が必要
  img= new PPMFILE(recievedData,header.splitX,header.splitY);
  img->calc_cost();
- // img->calc_cost_maru(); // まだこのコスト計算は実装されていない
+ img->calc_cost_maru();
+ img->calc_cost_all();
+ img->get_left_top();
+ img->disp_cost_list(COST_ALL);
+ // newはplacement_posが生成されない
  img->placement();
- // img->create_result_img(); //画像を表示しないなら使わないでOK
+
+ img->disp_placement();
+
+ img->set_PosData(data);
+ data->dispData();
 
 #ifdef VERBOSE
  cout << "sort" << endl;
@@ -94,6 +113,8 @@ int solveProbrem(int id){
  cout <<"(not sort done)Answer And Send" << endl;
 #endif
 
+ res="";
+
  try {
   // 引数に問題番号を指定して画像のバイナリstringを返す(cv::Mat形式にするかも)
   res=client.sendAnswer(id,sort->sort());
@@ -102,6 +123,15 @@ int solveProbrem(int id){
   cerr << "Exception: " << exception << endl;
   exit(EXIT_FAILURE);
  }
+ // ACCEPTED XXかERRORがかえってくる
+ // http://www.procon.gr.jp/modules/smartfaq/category.php?categoryid=23
+
+ if(res=="ERROR"){
+  cout << "ERROR OCCURED" << endl;
+ }else if(res.substr(0,8)=="ACCEPTED"){
+  cout << atoi(res.substr(8).c_str()) << endl;
+ }
+
  cout << res << endl;
 
  return EXIT_SUCCESS;

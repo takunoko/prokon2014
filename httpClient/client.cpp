@@ -76,15 +76,21 @@ string ProkonClient::getProblem(int problemNo,QuestionHeader & data){
   if(c=='\n'){
    enable=false;
   }
+  // コメント範囲内であれば
   if(enable){
+#ifdef VERBOSE
+   cerr << "c: " << c << endl << "enable:" << enable << endl;
+#endif
    if(isdigit(c)){
     **now= (**now) * 10+(c-'0');
    }else if(**now!=0){
     now++;
+    if(now == dataPointer.end()){
+     break;
+    }else{
+     **now=0;
+    }
    }
-  }
-  if(now == dataPointer.end()){
-   break;
   }
  }
  return chunk;
@@ -160,10 +166,10 @@ string ProkonClient::getData(string url){
 }
 
 size_t ProkonClient::callbackWrite(char *ptr,size_t size, size_t nmemb,string *stream){
-   // サイズ計算
-   int dataLength = size * nmemb;
-   // 書き込み
-   stream->append(ptr,dataLength);
-   // サイズを返す
-   return dataLength;
-  }
+ // サイズ計算
+ int dataLength = size * nmemb;
+ // 書き込み
+ stream->append(ptr,dataLength);
+ // サイズを返す
+ return dataLength;
+}
