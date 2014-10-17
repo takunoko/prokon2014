@@ -9,6 +9,7 @@
 #include "Process3.h"
 #include "Process4.h"
 #include "Process5.h"
+#include "Process6.h"
 #define WIDTH 8
 #define HEIGHT 8
 
