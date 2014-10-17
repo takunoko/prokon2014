@@ -60,6 +60,8 @@ class PPMFILE{
 		cv::Mat num_img;
 		cv::Mat	result_img;
 
+		cv::Mat	for_manual_img;
+
 		vector<cv::Mat>	part_img;
 
 		// cost配列(3次元)
@@ -134,4 +136,13 @@ class PPMFILE{
 		void add_ud( SCRAP &scrap, int, int, int, int);
 
 		bool chk_result(void);
+
+		// get piece_x,piece_y 
+		int get_piece_x();
+		int get_piece_y();
+
+		// 正しい領域のみの生成した画像作成
+		void create_correct_area_result_img();
+		void disp_for_manual(const string & winname);
+		void disp_wrong_pieces(const string & winname, int length);
 };
