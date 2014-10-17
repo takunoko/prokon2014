@@ -1130,6 +1130,7 @@ void PPMFILE::placement_4(void){
 										// すでにその場所が使われていたら
 										// もともと書かれているものをもとに戻す
 										pair<int,int> tmp_pair = make_pair( pos.first + diff_x + diff_x_2, pos.second + diff_y + diff_y_2);
+										pair<int,int> tmp_pair2;
 										int tmp_pos2;
 #ifdef USE_DONT_COICT
 										if(scrap_4[0][0].used.find(tmp_pair) == scrap_4[0][0].used.end()){
@@ -1140,6 +1141,15 @@ void PPMFILE::placement_4(void){
 												//scrap_4[tmp_pos] = scrap_4_backup[tmp_pos];
 											}else{
 												// 同じ座標を上書きなら無視
+											}
+										}
+										if(scrap_4[0][0].elements.find(key) == scrap_4[0][0].elements.end()){
+										}else{
+											tmp_pair2 = scrap_4[0][0].elements[key];
+											if(tmp_pair2 != tmp_pair){
+												scrap_4[0][0].used.erase(tmp_pair2);
+											}else{
+												// 同じ字座標を上書きなら無視
 											}
 										}
 #endif
@@ -1161,7 +1171,7 @@ void PPMFILE::placement_4(void){
 		}
 	}
 
-#if 1
+#if 0
 	// 使われていないピースの計算
  	for(map<int, pair<int,int> >::iterator k = scrap_4[0][0].elements.begin(); k != scrap_4[0][0].elements.end(); k++){
  		int key = k->first;
@@ -1252,6 +1262,83 @@ void PPMFILE::placement_4(void){
 
 	// 座標の変換
 	int small_x=0, small_y=0;
+	for(int i=0; i<scrap_4.size(); i++){
+		for(map<int, pair<int,int> >::iterator j = scrap_4[i][0].elements.begin(); j != scrap_4[i][0].elements.end(); j++){
+			pair<int, int> pos = j->second;
+			if(pos.first < small_x)
+				small_x = pos.first;
+			if(pos.second < small_y)
+				small_y = pos.second;
+		}
+		//座標の再配置
+		for(map<int, pair<int,int> >::iterator j = scrap_4[i][0].elements.begin(); j != scrap_4[i][0].elements.end(); j++){
+			int key = j->first;
+			pair<int, int> pos = j->second;
+			scrap_4[i][0].elements[key] = make_pair( (pos.first - small_x), (pos.second - small_y));
+			scrap_4[i][0].used[make_pair( (pos.first - small_x), (pos.second - small_y))] = key;
+		}
+	}
+
+	// 無理やりデータを直してる
+	cout << "chk part_2" << endl;
+	for(map<int, pair<int,int> >::iterator j = scrap_4[0][0].elements.begin(); j != scrap_4[0][0].elements.end(); j++){
+		int key = j->first;
+		pair<int, int> pos = j->second;
+		if(scrap_4[0][0].elements[key] == pos && scrap_4[0][0].used[pos] == key){
+			//cout << "OK" << endl;
+		}else{
+			scrap_4[0][0].elements.erase(key);
+			cout << "erace" << endl;
+			//cout << "ERROR used(" << scrap_4[0][0].used[pos] << ") key :" << key << endl;
+		}
+	}
+
+	// 現在の情報が正しいか
+	cout << "chk part_2" << endl;
+	for(map<int, pair<int,int> >::iterator j = scrap_4[0][0].elements.begin(); j != scrap_4[0][0].elements.end(); j++){
+		int key = j->first;
+		pair<int, int> pos = j->second;
+		if(scrap_4[0][0].elements[key] == pos && scrap_4[0][0].used[pos] == key){
+			cout << "OK" << endl;
+		}else{
+			cout << "ERROR used(" << scrap_4[0][0].used[pos] << ") key :" << key << endl;
+		}
+	}
+
+// 使われていないピースの計算
+	for(int i=0; i<part_size_x* part_size_y; i++){
+		used_part[i] = 0;
+	}
+ 	for(map<int, pair<int,int> >::iterator k = scrap_4[0][0].elements.begin(); k != scrap_4[0][0].elements.end(); k++){
+ 		int key = k->first;
+ 		used_part[key] = 1;
+ 	}
+
+	// 使われてないピースをとりあえず四角の中に入れる
+	int map_x=0, map_y=0;
+	int flg_loop = 1;
+	cout << "無理やり代入" << endl;
+	for(int i=0; i<part_size_x * part_size_y; i++){
+		if(used_part[i] == 1){
+			// 要素が入っていた場合
+		}else{
+			cout << "in Data" << endl;
+			for(;map_y < part_size_y && flg_loop == 1; map_y++){
+				for(;map_x < part_size_x && flg_loop == 1; map_x++){
+					// 順番に四角内で見つけた場所に入れていく
+					if(scrap_4[0][0].used.find( make_pair(map_x,map_y)) == scrap_4[0][0].used.begin()){
+						scrap_4[0][0].used[make_pair(map_x,map_y)] = i;
+						scrap_4[0][0].elements[i] = make_pair(map_x,map_y);
+						flg_loop = 0;
+						cout << "in Data" << endl;
+					}
+				}
+			}
+			flg_loop = 1;
+		}
+	}
+
+	// 座標の変換
 	for(int i=0; i<scrap_4.size(); i++){
 		for(map<int, pair<int,int> >::iterator j = scrap_4[i][0].elements.begin(); j != scrap_4[i][0].elements.end(); j++){
 			pair<int, int> pos = j->second;
