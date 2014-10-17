@@ -50,7 +50,6 @@ typedef struct{
 	map<pair<int, int>,int> used;
 }SCRAP_4;
 
-
 class PPMFILE{
 	private:
 		int part_size_x, part_size_y;	//左右どれだけのピース数があるか?
@@ -76,7 +75,6 @@ class PPMFILE{
 		map<int,pair<int,int> > placement_pos;
 
 	public:
-
 		// 2次元を1次元に
 		inline int CONV_XY(int x,int y){
 			return x+y * part_size_x;
@@ -134,4 +132,6 @@ class PPMFILE{
 		void add_side( SCRAP &scrap, int, int, int, int);
 		// 縦方向に画像を追加
 		void add_ud( SCRAP &scrap, int, int, int, int);
+
+		bool chk_result(void);
 };
