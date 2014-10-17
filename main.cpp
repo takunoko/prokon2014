@@ -93,14 +93,18 @@ int solveProbrem(int id){
 
  img->calc_cost_all();
  // newはplacement_posが生成されない
- img->placement_4();
 
+ //img->placement_4();
+ img->placement();
+
+ img->disp_placement();
  img->set_PosData(data);
  data->dispData();
 
 #ifdef VERBOSE
  cout << "sort" << endl;
 #endif
+
  // ここにソート処理
  sort->importData(*data);
 

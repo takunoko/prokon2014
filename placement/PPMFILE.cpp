@@ -856,13 +856,13 @@ void PPMFILE::placement_4(void){
 	for(int i=0; i<less_route_pos.size(); i++){
 		for(int j=0; j<less_route_pos[i].size(); j++){
 			cout << "---- first " << i << " ----" << endl;
-			cout << \
-				"0:" << get<0>(less_route_pos[i][j]) << ":" << endl << \
-				"1:" << get<1>(less_route_pos[i][j]) << ":" << endl << \
-				"2:" << get<2>(less_route_pos[i][j]) << ":" << endl << \
-				"3:" << get<3>(less_route_pos[i][j]) << ":" << endl << \
-				"4:" << get<4>(less_route_pos[i][j]) << ":" << endl << \
-				"5:" << get<5>(less_route_pos[i][j]) << ":" << endl << \
+			cout <<
+				"0:" << get<0>(less_route_pos[i][j]) << ":" << endl <<
+				"1:" << get<1>(less_route_pos[i][j]) << ":" << endl <<
+				"2:" << get<2>(less_route_pos[i][j]) << ":" << endl <<
+				"3:" << get<3>(less_route_pos[i][j]) << ":" << endl <<
+				"4:" << get<4>(less_route_pos[i][j]) << ":" << endl <<
+				"5:" << get<5>(less_route_pos[i][j]) << ":" << endl <<
 				"6:" << get<6>(less_route_pos[i][j]) << endl;
 		}
 	}
