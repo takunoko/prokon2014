@@ -19,10 +19,10 @@
 // 画像ファイル名と分割数
 // 後々、分割数をファイルから読み込む
 
-#define FILENAME "../pic_data/problem/prob02.ppm"
+#define FILENAME "../pic_data/problem/prob09.ppm"
 using namespace std;
 #define PIECE_X 4
-#define PIECE_Y 8
+#define PIECE_Y 2
 
 int main(void){
 	// 引数で渡されるべき部分
@@ -51,6 +51,11 @@ int main(void){
 	// img1->disp_img(LINE_IMG);
 	// img1->disp_img(ORIGIN_IMG);
 	// img1->disp_placement();
+	if(img1->chk_result() == true){
+		cout << "result img GOOD" << endl;
+	}else{
+		cout << "result img BAD" << endl;
+	}
 
 	// ナンバー入り画像
 	img1->create_num_img();

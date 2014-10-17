@@ -6,6 +6,10 @@
 #include "PPMFILE.hpp"
 #include "../sort/PosData.h"
 
+// すべて、宣言されていたらその機能を使う
+// #define USE_DONT_CONFRICT
+// #define MERGE_CHK_POS
+
 // tupleを比較するときのルール
 bool my_compare( const COST_TUPLE &lhs, const COST_TUPLE &rhs){
 	if (std::get<0>(lhs) != std::get<0>(rhs)) return std::get<0>(lhs) < std::get<0>(rhs);
@@ -42,6 +46,62 @@ bool sort_scrap_4_strong( const tuple<int,int,int,int,int,int,int> &lhs, const t
 	if (std::get<4>(lhs) != std::get<4>(rhs)) return std::get<4>(lhs) < std::get<4>(rhs);
 	if (std::get<5>(lhs) != std::get<5>(rhs)) return std::get<5>(lhs) < std::get<5>(rhs);
 	return std::get<5>(lhs) < std::get<5>(rhs);
+}
+
+SCRAP_4 create_scrap_4_element( tuple< int, int, int, int, int, int, int> route_pos){
+	SCRAP_4 scrap_4_tmp;
+
+	//int cos = get<0>(route_pos);
+	int route = get<1>(route_pos);
+	int my_pos = get<2>(route_pos);
+	int pos_1 = get<3>(route_pos);
+	int pos_2 = get<4>(route_pos);
+	int pos_3 = get<5>(route_pos);
+
+	switch(route){
+		case 0:
+			scrap_4_tmp.elements[pos_1] = make_pair( 0, 0);
+			scrap_4_tmp.elements[pos_2]  = make_pair( 1, 0);
+			scrap_4_tmp.elements[my_pos] = make_pair( 0, 1);
+			scrap_4_tmp.elements[pos_3]  = make_pair( 1, 1);
+			scrap_4_tmp.used[make_pair( 0, 0)] = pos_1;
+			scrap_4_tmp.used[make_pair( 1, 0)] = pos_2;
+			scrap_4_tmp.used[make_pair( 0, 1)] = my_pos;
+			scrap_4_tmp.used[make_pair( 1, 1)] = pos_3;
+			break;
+		case 1:
+			scrap_4_tmp.elements[my_pos] = make_pair(0, 0);
+			scrap_4_tmp.elements[pos_1]  = make_pair(1, 0);
+			scrap_4_tmp.elements[pos_3]  = make_pair(0, 1);
+			scrap_4_tmp.elements[pos_2]  = make_pair(1, 1);
+			scrap_4_tmp.used[make_pair( 0, 0)] = my_pos;
+			scrap_4_tmp.used[make_pair( 1, 0)] = pos_1;
+			scrap_4_tmp.used[make_pair( 0, 1)] = pos_3;
+			scrap_4_tmp.used[make_pair( 1, 1)] = pos_2;
+			break;
+		case 2:
+			scrap_4_tmp.elements[pos_3]  = make_pair(0, 0);
+			scrap_4_tmp.elements[my_pos] = make_pair(1, 0);
+			scrap_4_tmp.elements[pos_2]  = make_pair(0, 1);
+			scrap_4_tmp.elements[pos_1]  = make_pair(1, 1);
+			scrap_4_tmp.used[make_pair( 0, 0)] = pos_3;
+			scrap_4_tmp.used[make_pair( 1, 0)] = my_pos;
+			scrap_4_tmp.used[make_pair( 0, 1)] = pos_2;
+			scrap_4_tmp.used[make_pair( 1, 1)] = pos_1;
+			break;
+		case 3:
+			scrap_4_tmp.elements[pos_2]  = make_pair(0, 0);
+			scrap_4_tmp.elements[pos_3]  = make_pair(1, 0);
+			scrap_4_tmp.elements[pos_1]  = make_pair(0, 1);
+			scrap_4_tmp.elements[my_pos] = make_pair(1, 1);
+			scrap_4_tmp.used[make_pair( 0, 0)] = pos_2;
+			scrap_4_tmp.used[make_pair( 1, 0)] = pos_3;
+			scrap_4_tmp.used[make_pair( 0, 1)] = pos_1;
+			scrap_4_tmp.used[make_pair( 1, 1)] = my_pos;
+			break;
+	}
+
+	return scrap_4_tmp;
 }
 
 // 方向に対するpairを作る
@@ -645,6 +705,7 @@ void PPMFILE::placement_4(void){
 	//vector<vector<tuple< int, int, int> > > scrap_4(part_size_x*part_size_y);
 	// scrap_4[ピースNo][組み合わせベスト4]
 	vector<vector< SCRAP_4> > scrap_4;
+	vector<vector< SCRAP_4> > scrap_4_backup;
 
 	SCRAP_4 scrap_4_tmp;
 
@@ -665,8 +726,10 @@ void PPMFILE::placement_4(void){
 
 	// scrap_4の初期化
 	scrap_4.resize( part_size_x * part_size_y);
+	scrap_4_backup.resize( part_size_x * part_size_y);
 	for(int i=0; i<part_size_x * part_size_y; i++){
 		scrap_4[i].resize(4);
+		scrap_4_backup[i].resize(4);
 	}
 
 	// すべてのピースに対して
@@ -842,74 +905,10 @@ void PPMFILE::placement_4(void){
 	}
 
 	// コストを相対座標に変換
-	int cos, route, my_pos, pos_1, pos_2, pos_3;
 	for(int i=0; i<part_size_x * part_size_y; i++){
 		for(int j=0; j<4; j++){
-			cos = get<0>(less_route_pos[i][j]);
-			route = get<1>(less_route_pos[i][j]);
-			my_pos = get<2>(less_route_pos[i][j]);
-			pos_1 = get<3>(less_route_pos[i][j]);
-			pos_2 = get<4>(less_route_pos[i][j]);
-			pos_3 = get<5>(less_route_pos[i][j]);
-
-			// 要素の初期化
-			scrap_4_tmp.elements.clear();
-			scrap_4_tmp.used.clear();
-			// 相対座標系に保存
-			switch(route){
-				case 0:
-					scrap_4_tmp.elements[pos_1] = make_pair( 0, 0);
-					scrap_4_tmp.elements[pos_2]  = make_pair( 1, 0);
-					scrap_4_tmp.elements[my_pos] = make_pair( 0, 1);
-					scrap_4_tmp.elements[pos_3]  = make_pair( 1, 1);
-					scrap_4_tmp.used[make_pair( 0, 0)] = pos_1;
-					scrap_4_tmp.used[make_pair( 1, 0)] = pos_2;
-					scrap_4_tmp.used[make_pair( 0, 1)] = my_pos;
-					scrap_4_tmp.used[make_pair( 1, 1)] = pos_3;
-					break;
-				case 1:
-					scrap_4_tmp.elements[my_pos] = make_pair(0, 0);
-					scrap_4_tmp.elements[pos_1]  = make_pair(1, 0);
-					scrap_4_tmp.elements[pos_3]  = make_pair(0, 1);
-					scrap_4_tmp.elements[pos_2]  = make_pair(1, 1);
-					scrap_4_tmp.used[make_pair( 0, 0)] = my_pos;
-					scrap_4_tmp.used[make_pair( 1, 0)] = pos_1;
-					scrap_4_tmp.used[make_pair( 0, 1)] = pos_3;
-					scrap_4_tmp.used[make_pair( 1, 1)] = pos_2;
-					break;
-				case 2:
-					scrap_4_tmp.elements[pos_3]  = make_pair(0, 0);
-					scrap_4_tmp.elements[my_pos] = make_pair(1, 0);
-					scrap_4_tmp.elements[pos_2]  = make_pair(0, 1);
-					scrap_4_tmp.elements[pos_1]  = make_pair(1, 1);
-					scrap_4_tmp.used[make_pair( 0, 0)] = pos_3;
-					scrap_4_tmp.used[make_pair( 1, 0)] = my_pos;
-					scrap_4_tmp.used[make_pair( 0, 1)] = pos_2;
-					scrap_4_tmp.used[make_pair( 1, 1)] = pos_1;
-					break;
-				case 3:
-					scrap_4_tmp.elements[pos_2]  = make_pair(0, 0);
-					scrap_4_tmp.elements[pos_3]  = make_pair(1, 0);
-					scrap_4_tmp.elements[pos_1]  = make_pair(0, 1);
-					scrap_4_tmp.elements[my_pos] = make_pair(1, 1);
-					scrap_4_tmp.used[make_pair( 0, 0)] = pos_2;
-					scrap_4_tmp.used[make_pair( 1, 0)] = pos_3;
-					scrap_4_tmp.used[make_pair( 0, 1)] = pos_1;
-					scrap_4_tmp.used[make_pair( 1, 1)] = my_pos;
-					break;
-			}
-			scrap_4[i][j] = scrap_4_tmp;
-			// cout << " route :" << route << \
-			"my :[" << CONV_X(my_pos) << "," << CONV_Y(my_pos) << \
-				"] p1 :[" << CONV_X(pos_1) << "," << CONV_Y(pos_1) << \
-				"] p2 :[" << CONV_X(pos_2) << "," << CONV_Y(pos_2) << \
-				"] p3 :[" << CONV_X(pos_3) << "," << CONV_Y(pos_3) << "]" << endl;
-			cout << " route :" << route << \
-				"my :[" << my_pos << \
-				"] p1 :[" << pos_1 << \
-				"] p2 :[" << pos_2 << \
-				"] p3 :[" << pos_3 << "]" << endl;
-
+			scrap_4[i][j] = create_scrap_4_element( less_route_pos[i][j]);
+			//scrap_4_backup[i][j] = create_scrap_4_element( less_route_pos[i][j]);
 		}
 	}
 	// とりあえず現状表示
@@ -980,6 +979,7 @@ void PPMFILE::placement_4(void){
 					}
 					// すべての相対座標のズレが一致しているか?
 					diff_flg = 0;
+#ifdef MARGE_CHK_POS
 					for(int c=0; c<p1_abs.size(); c++){
 						if(diff_x == p1_abs[c].first - p2_abs[c].first && diff_y == p1_abs[c].second - p2_abs[c].second){
 						}else{
@@ -987,6 +987,7 @@ void PPMFILE::placement_4(void){
 							diff_flg = 1;
 						}
 					}
+#endif
 					// diffを用いて結合
 					if(diff_flg == 0){
 						for(map<int, pair<int,int> >::iterator k = scrap_4[j][0].elements.begin(); k != scrap_4[j][0].elements.end(); k++){
@@ -994,8 +995,24 @@ void PPMFILE::placement_4(void){
 							pair<int, int> pos = k->second;
 							if(scrap_4[i][0].elements.find(key) == scrap_4[i][0].elements.end()){
 								// 追加
-								scrap_4[i][0].elements[key] = make_pair( pos.first + diff_x, pos.second + diff_y);
-								scrap_4[i][0].used[make_pair( pos.first + diff_x, pos.second + diff_y)] = key;
+								pair<int,int> tmp_pair = make_pair( pos.first + diff_x, pos.second + diff_y);
+								int tmp_pos;
+#ifdef USE_DONT_CONFRICT
+								// 上書きしようとした時の対応をどうするか。。。
+								if(scrap_4[i][0].used.find(tmp_pair) == scrap_4[i][0].used.begin()){
+								}else{
+									// すでに何か要素が入っていたら
+									tmp_pos = scrap_4[i][0].used[tmp_pair];
+									if(tmp_pos != key){
+										scrap_4[i][0].elements.erase(tmp_pos);
+										//scrap_4[tmp_pos] = scrap_4_backup[tmp_pos];
+									}else{
+										// 上書きしようとしてるのが同じなら無視
+									}
+								}
+#endif
+								scrap_4[i][0].elements[key] = tmp_pair;
+								scrap_4[i][0].used[tmp_pair] = key;
 							}else{
 								// すでにある -> 無視
 								// 無視しないで、一応上書きする
@@ -1066,6 +1083,7 @@ void PPMFILE::placement_4(void){
 							cout << "dx2 :" << diff_x_2 << "dy2 :" << diff_y_2 << endl;
 							// すべての相対座標のズレが一致しているか?
 							diff_flg = 0;
+#ifdef MERGE_CHK_POS
 							for(int c=0; c<p1_abs.size(); c++){
 								if(diff_x == p1_abs[c].first - p2_abs[c].first && diff_y == p1_abs[c].second - p2_abs[c].second){
 								}else{
@@ -1073,6 +1091,7 @@ void PPMFILE::placement_4(void){
 									diff_flg = 1;
 								}
 							}
+#endif
 							// diffを用いて結合
 							if(diff_flg == 0){
 								for(map<int, pair<int,int> >::iterator k = scrap_4[i][0].elements.begin(); k != scrap_4[i][0].elements.end(); k++){
@@ -1080,8 +1099,24 @@ void PPMFILE::placement_4(void){
 									pair<int, int> pos = k->second;
 									if(scrap_4[0][0].elements.find(key) == scrap_4[0][0].elements.end()){
 										// 追加
-										scrap_4[0][0].elements[key] = make_pair( pos.first + diff_x + diff_x_2, pos.second + diff_y + diff_y_2);
-										scrap_4[0][0].used[make_pair( pos.first + diff_x + diff_x_2, pos.second + diff_y+diff_y_2)] = key;
+										// すでにその場所が使われていたら
+										// もともと書かれているものをもとに戻す
+										pair<int,int> tmp_pair = make_pair( pos.first + diff_x + diff_x_2, pos.second + diff_y + diff_y_2);
+										int tmp_pos;
+#ifdef USE_DONT_CONFRICT
+										if(scrap_4[0][0].used.find(tmp_pair) == scrap_4[0][0].used.begin()){
+										}else{
+											tmp_pos = scrap_4[0][0].used[tmp_pair];
+											if(tmp_pos != key){
+												scrap_4[0][0].elements.erase(tmp_pos);
+												//scrap_4[tmp_pos] = scrap_4_backup[tmp_pos];
+											}else{
+												// 同じ座標を上書きなら無視
+											}
+										}
+#endif
+										scrap_4[0][0].elements[key] = tmp_pair;
+										scrap_4[0][0].used[tmp_pair] = key;
 									}else{
 										// すでにある -> 無視
 									}
@@ -1283,4 +1318,31 @@ void PPMFILE::calc_cost_all(void){
 	// 独自のルールでCOST_TUPLEをソート
 	sort( cost_t_all.begin(), cost_t_all.end(), my_compare);
 	cout << "end calc" << endl;
+}
+
+// 回答が最低限の仕様を満たしているか？
+bool PPMFILE::chk_result(void){
+	vector<int> use_num(part_size_x * part_size_y, 0);
+	int max_w=0, max_h=0;
+	int un_use=0;
+	for(map<int, pair<int,int> >::iterator j = placement_pos.begin(); j != placement_pos.end(); j++){
+		int key = j->first;
+		pair<int,int> pos = j->second;
+		if(max_w < pos.first)
+			max_w = pos.first;
+		if(max_h < pos.second)
+			max_h = pos.second;
+		use_num[key] = 1;
+	}
+	for(int i=0; i<part_size_x * part_size_y; i++){
+		if(use_num[i] == 0)
+			un_use++;
+	}
+	// すべてが正しく設定されていたら
+	if(un_use == 0 && max_w+1 == part_size_x && max_h+1 == part_size_y)
+		return true;
+	else
+		return false;
+
+	return false;
 }
