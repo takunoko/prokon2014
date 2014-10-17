@@ -12,18 +12,17 @@ OPEN_CV_HEADER = `pkg-config --cflags opencv`
 OPEN_CV_LIBS = `pkg-config --libs opencv`
 
 # FLAGS = -lm
-CFLAGS=-Wall --std=c++11 ${OPEN_CV_HEADER} -O3
+# デバッグのためにO0して-gをつける
+# -O3は最適化
+#  -std=c++11, -stdlib=libc++ はMacでコンパイルする際にC++11が使われないのの対策
+#  これを入れないとtupleが使えない。
+CFLAGS=-Wall --std=c++11 ${OPEN_CV_HEADER} -O0 -g
 LDFLAGS= -lm ${OPEN_CV_LIBS} --stdlib=libc++
 
 .SUFFIXES: .cpp .o
 
 .cpp.o:
 	${CC} -o $@ -c $< ${CFLAGS}
-
-# -O3は最適化
-#  -std=c++11, -stdlib=libc++ はMacでコンパイルする際にC++11が使われないのの対策
-#  これを入れないとtupleが使えない。
-OPTION = -O3 -std=c++11 -stdlib=libc++
 
 all : cv_disp_img_tuple
 
