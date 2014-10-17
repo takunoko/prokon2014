@@ -7,8 +7,8 @@
 #include "../sort/PosData.h"
 
 // すべて、宣言されていたらその機能を使う
-// #define USE_DONT_CONFRICT
-// #define MERGE_CHK_POS
+#define USE_DONT_CONFRICT
+#define MERGE_CHK_POS
 
 // tupleを比較するときのルール
 bool my_compare( const COST_TUPLE &lhs, const COST_TUPLE &rhs){
@@ -848,7 +848,6 @@ void PPMFILE::placement_4(void){
 				}
 			}
 		}
-		// sort(less_route_pos[i].begin(), less_route_pos[i].end());
 	}
 
 	// とりあえず現状表示
@@ -908,7 +907,7 @@ void PPMFILE::placement_4(void){
 	for(int i=0; i<part_size_x * part_size_y; i++){
 		for(int j=0; j<4; j++){
 			scrap_4[i][j] = create_scrap_4_element( less_route_pos[i][j]);
-			//scrap_4_backup[i][j] = create_scrap_4_element( less_route_pos[i][j]);
+			// scrap_4_backup[i][j] = create_scrap_4_element( less_route_pos[i][j]);
 		}
 	}
 	// とりあえず現状表示
@@ -952,7 +951,6 @@ void PPMFILE::placement_4(void){
 						scrap_4[j][0].used.clear();
 						scrap_4[j][0].elements.clear();
 					}else{
-						// これが正しく動作するのかわからない
 						scrap_4[i][0] = scrap_4[j][0];
 
 						scrap_4[j][0].used.clear();
@@ -1005,6 +1003,7 @@ void PPMFILE::placement_4(void){
 									tmp_pos = scrap_4[i][0].used[tmp_pair];
 									if(tmp_pos != key){
 										scrap_4[i][0].elements.erase(tmp_pos);
+										cout << "上書きした" << endl;
 										//scrap_4[tmp_pos] = scrap_4_backup[tmp_pos];
 									}else{
 										// 上書きしようとしてるのが同じなら無視
@@ -1109,6 +1108,7 @@ void PPMFILE::placement_4(void){
 											tmp_pos = scrap_4[0][0].used[tmp_pair];
 											if(tmp_pos != key){
 												scrap_4[0][0].elements.erase(tmp_pos);
+												cout << "上書きした" << endl;
 												//scrap_4[tmp_pos] = scrap_4_backup[tmp_pos];
 											}else{
 												// 同じ座標を上書きなら無視
