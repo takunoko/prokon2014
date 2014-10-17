@@ -1227,6 +1227,8 @@ void PPMFILE::placement_4(void){
 								int tmp_pos;
 #ifdef USE_DONT_CONFRICT
 								if(scrap_4[0][0].used.find(tmp_pair) == scrap_4[0][0].used.end()){
+									// scrap_4[0][0].elements[key] = tmp_pair;
+									// scrap_4[0][0].used[tmp_pair] = key;
 								}else{
 									tmp_pos = scrap_4[0][0].used[tmp_pair];
 									if(tmp_pos != key){
@@ -1239,8 +1241,6 @@ void PPMFILE::placement_4(void){
 									}
 								}
 #endif
-								scrap_4[0][0].elements[key] = tmp_pair;
-								scrap_4[0][0].used[tmp_pair] = key;
 							}else{
 								// すでにある -> 無視
 							}
