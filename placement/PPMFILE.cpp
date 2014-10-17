@@ -1,10 +1,16 @@
 #include <iostream>
+#include <vector>
+#include <algorithm>
+#include <queue>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
 #include "PPMFILE.hpp"
 #include "../sort/PosData.h"
+
+#define PUT_TEXT_SIZE 1.2
+#define PUT_TEXT_THICK 2
 
 // すべて、宣言されていたらその機能を使う
 #define USE_DONT_CONFRICT
@@ -228,7 +234,7 @@ void PPMFILE::create_num_img(void){
 	num_img = origin_img.clone(); // origin_img をコピー　
 	for(int y=0; y < part_size_y; y++){
 		for(int x=0; x < part_size_x; x++){
-			cv::putText(num_img, IntToString((y*part_size_x)+x), cv::Point( (x * part_px_x) + (part_px_x/2) - 0, part_px_y + part_px_y*y - 5), cv::FONT_HERSHEY_SIMPLEX, 2, cv::Scalar(0,0,200), 4, CV_AA);
+			cv::putText(num_img, IntToString((y*part_size_x)+x), cv::Point( (x * part_px_x) + (part_px_x/2) - 0, part_px_y + part_px_y*y - 5), cv::FONT_HERSHEY_SIMPLEX, PUT_TEXT_SIZE, cv::Scalar(0,0,200), 1, CV_AA);
 		}
 	}
 }
@@ -1472,10 +1478,21 @@ int PPMFILE::get_piece_y(){
 	return this->part_size_y;
 }
 
+int PPMFILE::get_part_px_x(){
+	return this->part_px_x;
+}
+
+int PPMFILE::get_part_px_y(){
+	return this->part_px_y;
+}
+
 void PPMFILE::create_correct_area_result_img(void){
 	//1パーツの大きさ取得
 	int part_width = origin_img.cols/part_size_x;
 	int part_height = origin_img.rows/part_size_y;
+
+	//文字列サイズ取得
+	cv::Size textSize;
 
 	// 本来の画像サイズのtmp_result_imgを作成し，黒で塗りつぶす
 	// CV_8UC3: 3個のCV_8U(unsigned 8bit) カラー画像の画素値
@@ -1497,19 +1514,22 @@ void PPMFILE::create_correct_area_result_img(void){
 							part_height)
 						));
 			// ついでにIDを表示させる
+			int baseline=0;
+			textSize=getTextSize(IntToString(key),cv::FONT_HERSHEY_SIMPLEX,PUT_TEXT_SIZE,PUT_TEXT_THICK,&baseline);
 			cv::putText(tmp_result_img,
 					// 表示する文字列
 					IntToString(key),
 					// 表示する位置
-					cv::Point( (pos.first * part_width) + (part_width/2) - 0, part_height + part_height*pos.second - 5),
+					cv::Point( (pos.first * part_width) + (part_width/2) - textSize.width/2 , part_height + part_height*pos.second - textSize.height/2),
 					// フォントの種類
 					cv::FONT_HERSHEY_SIMPLEX,
-					2, // 文字サイズ
+					PUT_TEXT_SIZE, // 文字サイズ
 					cv::Scalar(0,0,200), // 色
-					4, //線の太さ
+					PUT_TEXT_THICK, //線の太さ
 					CV_AA); // 線の種類
 		}
 	}
+
 
 	// 線を引く
 	for(int x=1; x < part_size_x; x++){
@@ -1532,6 +1552,80 @@ void PPMFILE::disp_for_manual(const string & winname){
 }
 
 // lengthだけのパーツの数を消費する
-void PPMFILE::disp_wrong_pieces(const string & winname, int length){
-	// 間違っていると思われるファイル
+void PPMFILE::fix_manual(const string & winname, int length){
+	// buffer
+	string buffer;
+
+	// 表示用ウィンドウ
+	const string questionPicWindow="questionPicWindow";
+
+	// 間違っていると思われるピース
+	const size_t size=part_size_x*part_size_y;
+	vector<bool> used_piece_key(size);
+	// 未使用データ
+	queue<int> processingKey;
+	// 全てを使われなかったことにする
+	fill(used_piece_key.begin(),used_piece_key.end(),false);
+
+	// キュー表示用画像
+	cv::Mat queueImg(cv::Size(part_px_x*length,part_px_y),CV_8UC3,cv::Scalar(0,0,0));
+	// 表示用ウィンドウ
+	cv::namedWindow(winname,CV_WINDOW_AUTOSIZE);
+
+	// 現段階での正しい領域内に有る画像を作成する
+	create_correct_area_result_img();
+	// そして表示
+	disp_for_manual(questionPicWindow);
+
+	// 使われたものを探索する
+	for(map<int, pair<int,int> >::iterator j = placement_pos.begin(); j != placement_pos.end(); j++){
+		int key = j->first;
+		// x,y
+		pair<int, int> pos = j->second;
+		// 使われているならば
+		if(pos.first < this->part_size_x && pos.second < this->part_size_y ){
+			used_piece_key[key]=true;
+		}
+	}
+	// used_piece_keyに対して
+	for(vector<bool>::iterator j= used_piece_key.begin(); j!=used_piece_key.end();j++){
+		if(! *j){
+			// もし追加前のサイズがlength以下ならqueueImgに追加
+			int key=j-used_piece_key.begin();
+			if(processingKey.size()<length){
+				// 画像表示
+				part_img[key].copyTo(
+						queueImg(cv::Rect(
+								processingKey.size()*part_px_x,0,part_px_x,part_px_y
+								))
+						);
+				int baseline=0;
+				cv::Size textSize;
+				textSize=getTextSize(IntToString(key),cv::FONT_HERSHEY_SIMPLEX,PUT_TEXT_SIZE,PUT_TEXT_THICK,&baseline);
+				cv::putText(queueImg,
+						// 表示する文字列
+						IntToString(key),
+						// 表示する位置
+						cv::Point( (processingKey.size() * part_px_x) + (part_px_x/2) - textSize.width/2 , part_px_y - textSize.height/2),
+						// フォントの種類
+						cv::FONT_HERSHEY_SIMPLEX,
+						PUT_TEXT_SIZE, // 文字サイズ
+						cv::Scalar(0,0,200), // 色
+						PUT_TEXT_THICK, //線の太さ
+						CV_AA); // 線の種類
+				// Key表示
+			}
+			processingKey.push(key);
+		}
+	}
+
+	// 線の表示
+	for(int i=1;i<length;i++){
+		cv::line(queueImg , cv::Point( i*part_px_x, 0), cv::Point( i*part_px_x,part_px_y), cv::Scalar( 200, 0, 0), 2, 0);
+	}
+
+	cv::imshow(winname,queueImg);
+
+	// 必要画像表示完了
+	cv::waitKey(0);
 }
