@@ -16,7 +16,7 @@ OPEN_CV_LIBS = `pkg-config --libs opencv`
 # -O3は最適化
 #  -std=c++11, -stdlib=libc++ はMacでコンパイルする際にC++11が使われないのの対策
 #  これを入れないとtupleが使えない。
-CFLAGS=-g -O0 --std=c++11 -Wall ${OPEN_CV_HEADER}
+CFLAGS=-g -O3 --std=c++11 -Wall ${OPEN_CV_HEADER}
 LDFLAGS= -lm ${OPEN_CV_LIBS} --stdlib=libc++
 
 .SUFFIXES: .cpp .o
