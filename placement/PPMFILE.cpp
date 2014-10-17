@@ -901,11 +901,17 @@ void PPMFILE::placement_4(void){
 					break;
 			}
 			scrap_4[i][j] = scrap_4_tmp;
-			cout << " route :" << route << \
+			// cout << " route :" << route << \
 				"my :[" << CONV_X(my_pos) << "," << CONV_Y(my_pos) << \
 				"] p1 :[" << CONV_X(pos_1) << "," << CONV_Y(pos_1) << \
 				"] p2 :[" << CONV_X(pos_2) << "," << CONV_Y(pos_2) << \
 				"] p3 :[" << CONV_X(pos_3) << "," << CONV_Y(pos_3) << "]" << endl;
+			cout << " route :" << route << \
+				"my :[" << my_pos << \
+				"] p1 :[" << pos_1 << \
+				"] p2 :[" << pos_2 << \
+				"] p3 :[" << pos_3 << "]" << endl;
+
 		}
 	}
 	// とりあえず現状表示
@@ -1058,6 +1064,21 @@ void PPMFILE::placement_4(void){
 		scrap_4[0][0].elements[key] = make_pair( (pos.first - small_x), (pos.second - small_y));
 	}
 
+	// 座標の変換2
+	for(map<int, pair<int,int> >::iterator j = scrap_4[1][0].elements.begin(); j != scrap_4[1][0].elements.end(); j++){
+		pair<int, int> pos = j->second;
+		if(pos.first < small_x)
+			small_x = pos.first;
+		if(pos.second < small_y)
+			small_y = pos.second;
+	}
+	//座標の再配置
+	for(map<int, pair<int,int> >::iterator j = scrap_4[1][0].elements.begin(); j != scrap_4[1][0].elements.end(); j++){
+		int key = j->first;
+		pair<int, int> pos = j->second;
+		scrap_4[1][0].elements[key] = make_pair( (pos.first - small_x), (pos.second - small_y));
+	}
+
 	// 正しく削除できているか
 	for(int i=0; i<scrap_4.size(); i++){
 		cout << "---- new "<< i << " ----" << endl;
@@ -1173,38 +1194,36 @@ void PPMFILE::calc_cost_all(void){
 	for(int abs_xy=0; abs_xy < part_size_x * part_size_y; ++abs_xy){
 		for(int xy=0; xy < part_size_x * part_size_y; ++xy){
 			// 自分とのコストは計算しない
-			if(abs_xy != xy){
-				//コスト初期化
-				for(int i=0; i<4; i++){
-					cost_tmp[i] = 0;
+			//コスト初期化
+			for(int i=0; i<4; i++){
+				cost_tmp[i] = 0;
+			}
+			//カラーの数だけ繰り返す
+			for(int c=0; c < part_img[abs_xy].channels(); ++c){
+				//各ピクセル上下
+				for(int px_x=0; px_x < part_img[0].cols; ++px_x){
+					cost_tmp[DIRE_U] += abs(part_img[abs_xy].at<cv::Vec3b>( 0, px_x)[c] - part_img[xy].at<cv::Vec3b>( part_img[0].rows-1, px_x)[c]);
+					cost_tmp[DIRE_D] += abs(part_img[abs_xy].at<cv::Vec3b>( part_img[0].rows-1, px_x)[c] - part_img[xy].at<cv::Vec3b>( 0, px_x)[c]);
 				}
-				//カラーの数だけ繰り返す
-				for(int c=0; c < part_img[abs_xy].channels(); ++c){
-					//各ピクセル上下
-					for(int px_x=0; px_x < part_img[0].cols; ++px_x){
-						cost_tmp[DIRE_U] += abs(part_img[abs_xy].at<cv::Vec3b>( 0, px_x)[c] - part_img[xy].at<cv::Vec3b>( part_img[0].rows-1, px_x)[c]);
-						cost_tmp[DIRE_D] += abs(part_img[abs_xy].at<cv::Vec3b>( part_img[0].rows-1, px_x)[c] - part_img[xy].at<cv::Vec3b>( 0, px_x)[c]);
-					}
-					//各ピクセル左右
-					for(int px_y=0; px_y < part_img[0].rows; ++px_y){
-						cost_tmp[DIRE_R] += abs(part_img[abs_xy].at<cv::Vec3b>( px_y, part_img[0].cols-1)[c] - part_img[xy].at<cv::Vec3b>( px_y, 0)[c]);
-						cost_tmp[DIRE_L] += abs(part_img[abs_xy].at<cv::Vec3b>( px_y, 0)[c] - part_img[xy].at<cv::Vec3b>( px_y, part_img[0].cols-1)[c]);
-					}
+				//各ピクセル左右
+				for(int px_y=0; px_y < part_img[0].rows; ++px_y){
+					cost_tmp[DIRE_R] += abs(part_img[abs_xy].at<cv::Vec3b>( px_y, part_img[0].cols-1)[c] - part_img[xy].at<cv::Vec3b>( px_y, 0)[c]);
+					cost_tmp[DIRE_L] += abs(part_img[abs_xy].at<cv::Vec3b>( px_y, 0)[c] - part_img[xy].at<cv::Vec3b>( px_y, part_img[0].cols-1)[c]);
 				}
-				// 上下に対しては縦のピクセル数、左右に対しては横のピクセル数
-				// を×る事によって、結合度の重みを長さに依存させない
-				// ワンちゃんオーバーフローが恐い(たぶん大丈夫)
-				cost_tmp[DIRE_U] *= part_img[0].rows;
-				cost_tmp[DIRE_D] *= part_img[0].rows;
-				cost_tmp[DIRE_R] *= part_img[0].cols;
-				cost_tmp[DIRE_L] *= part_img[0].cols;
-				// cost_t [ コスト, 自分の座標, 相手の座標, 方向]
-				// cost [自分の座標][方向][相手の座標]
-				for(int k=0; k < 4; ++k){
-					cost_t_all.push_back(make_tuple( cost_tmp[k], abs_xy, xy, k));
-					cost_all[abs_xy][k].push_back(make_pair( cost_tmp[k], xy));
-					cost_all_def[abs_xy][k].push_back(make_pair( cost_tmp[k], xy));
-				}
+			}
+			// 上下に対しては縦のピクセル数、左右に対しては横のピクセル数
+			// を×る事によって、結合度の重みを長さに依存させない
+			// ワンちゃんオーバーフローが恐い(たぶん大丈夫)
+			cost_tmp[DIRE_U] *= part_img[0].rows;
+			cost_tmp[DIRE_D] *= part_img[0].rows;
+			cost_tmp[DIRE_R] *= part_img[0].cols;
+			cost_tmp[DIRE_L] *= part_img[0].cols;
+			// cost_t [ コスト, 自分の座標, 相手の座標, 方向]
+			// cost [自分の座標][方向][相手の座標]
+			for(int k=0; k < 4; ++k){
+				cost_t_all.push_back(make_tuple( cost_tmp[k], abs_xy, xy, k));
+				cost_all[abs_xy][k].push_back(make_pair( cost_tmp[k], xy));
+				cost_all_def[abs_xy][k].push_back(make_pair( cost_tmp[k], xy));
 			}
 		}
 	}

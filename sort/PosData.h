@@ -24,6 +24,8 @@ public:
   int hash();
   // ハッシュからsetDataする
   void dehash(int hash);
+  void swapData(int x1, int y1, int x2, int y2);
+  void swapData(int p1, int p2);
 };
 
 #endif
