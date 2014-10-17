@@ -1,10 +1,16 @@
 #include <iostream>
+#include <vector>
+#include <algorithm>
+#include <queue>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
 #include "PPMFILE.hpp"
 #include "../sort/PosData.h"
+
+#define PUT_TEXT_SIZE 1.2
+#define PUT_TEXT_THICK 2
 
 // すべて、宣言されていたらその機能を使う
 #define USE_DONT_CONFRICT
@@ -228,7 +234,7 @@ void PPMFILE::create_num_img(void){
 	num_img = origin_img.clone(); // origin_img をコピー　
 	for(int y=0; y < part_size_y; y++){
 		for(int x=0; x < part_size_x; x++){
-			cv::putText(num_img, IntToString((y*part_size_x)+x), cv::Point( (x * part_px_x) + (part_px_x/2) - 0, part_px_y + part_px_y*y - 5), cv::FONT_HERSHEY_SIMPLEX, 2, cv::Scalar(0,0,200), 4, CV_AA);
+			cv::putText(num_img, IntToString((y*part_size_x)+x), cv::Point( (x * part_px_x) + (part_px_x/2) - 0, part_px_y + part_px_y*y - 5), cv::FONT_HERSHEY_SIMPLEX, PUT_TEXT_SIZE, cv::Scalar(0,0,200), 1, CV_AA);
 		}
 	}
 }
@@ -1122,6 +1128,7 @@ void PPMFILE::placement_4(void){
 										// すでにその場所が使われていたら
 										// もともと書かれているものをもとに戻す
 										pair<int,int> tmp_pair = make_pair( pos.first + diff_x + diff_x_2, pos.second + diff_y + diff_y_2);
+										pair<int,int> tmp_pair2;
 										int tmp_pos2;
 #ifdef USE_DONT_COICT
 										if(scrap_4[0][0].used.find(tmp_pair) == scrap_4[0][0].used.end()){
@@ -1134,6 +1141,15 @@ void PPMFILE::placement_4(void){
 												// 同じ座標を上書きなら無視
 											}
 										}
+										if(scrap_4[0][0].elements.find(key) == scrap_4[0][0].elements.end()){
+										}else{
+											tmp_pair2 = scrap_4[0][0].elements[key];
+											if(tmp_pair2 != tmp_pair){
+												scrap_4[0][0].used.erase(tmp_pair2);
+											}else{
+												// 同じ字座標を上書きなら無視
+											}
+										}
 #endif
 										scrap_4[0][0].elements[key] = tmp_pair;
 										scrap_4[0][0].used[tmp_pair] = key;
@@ -1142,7 +1158,7 @@ void PPMFILE::placement_4(void){
 									}
 								}
 							}
-							cout << "diff_x : " << diff_x << " diff_y : " << diff_y << endl;
+							cerr << "diff_x : " << diff_x << " diff_y : " << diff_y << endl;
 							scrap_4[i][0].elements.clear();
 							scrap_4[i][0].used.clear();
 							break;
@@ -1153,7 +1169,7 @@ void PPMFILE::placement_4(void){
 		}
 	}
 
-#if 1
+#if 0
 	// 使われていないピースの計算
  	for(map<int, pair<int,int> >::iterator k = scrap_4[0][0].elements.begin(); k != scrap_4[0][0].elements.end(); k++){
  		int key = k->first;
@@ -1244,6 +1260,83 @@ void PPMFILE::placement_4(void){
 
 	// 座標の変換
 	int small_x=0, small_y=0;
+	for(int i=0; i<scrap_4.size(); i++){
+		for(map<int, pair<int,int> >::iterator j = scrap_4[i][0].elements.begin(); j != scrap_4[i][0].elements.end(); j++){
+			pair<int, int> pos = j->second;
+			if(pos.first < small_x)
+				small_x = pos.first;
+			if(pos.second < small_y)
+				small_y = pos.second;
+		}
+		//座標の再配置
+		for(map<int, pair<int,int> >::iterator j = scrap_4[i][0].elements.begin(); j != scrap_4[i][0].elements.end(); j++){
+			int key = j->first;
+			pair<int, int> pos = j->second;
+			scrap_4[i][0].elements[key] = make_pair( (pos.first - small_x), (pos.second - small_y));
+			scrap_4[i][0].used[make_pair( (pos.first - small_x), (pos.second - small_y))] = key;
+		}
+	}
+
+	// 無理やりデータを直してる
+	cout << "chk part_2" << endl;
+	for(map<int, pair<int,int> >::iterator j = scrap_4[0][0].elements.begin(); j != scrap_4[0][0].elements.end(); j++){
+		int key = j->first;
+		pair<int, int> pos = j->second;
+		if(scrap_4[0][0].elements[key] == pos && scrap_4[0][0].used[pos] == key){
+			//cout << "OK" << endl;
+		}else{
+			scrap_4[0][0].elements.erase(key);
+			cout << "erace" << endl;
+			//cout << "ERROR used(" << scrap_4[0][0].used[pos] << ") key :" << key << endl;
+		}
+	}
+
+	// 現在の情報が正しいか
+	cout << "chk part_2" << endl;
+	for(map<int, pair<int,int> >::iterator j = scrap_4[0][0].elements.begin(); j != scrap_4[0][0].elements.end(); j++){
+		int key = j->first;
+		pair<int, int> pos = j->second;
+		if(scrap_4[0][0].elements[key] == pos && scrap_4[0][0].used[pos] == key){
+			cout << "OK" << endl;
+		}else{
+			cout << "ERROR used(" << scrap_4[0][0].used[pos] << ") key :" << key << endl;
+		}
+	}
+
+// 使われていないピースの計算
+	for(int i=0; i<part_size_x* part_size_y; i++){
+		used_part[i] = 0;
+	}
+ 	for(map<int, pair<int,int> >::iterator k = scrap_4[0][0].elements.begin(); k != scrap_4[0][0].elements.end(); k++){
+ 		int key = k->first;
+ 		used_part[key] = 1;
+ 	}
+
+	// 使われてないピースをとりあえず四角の中に入れる
+	int map_x=0, map_y=0;
+	int flg_loop = 1;
+	cout << "無理やり代入" << endl;
+	for(int i=0; i<part_size_x * part_size_y; i++){
+		if(used_part[i] == 1){
+			// 要素が入っていた場合
+		}else{
+			cout << "in Data" << endl;
+			for(;map_y < part_size_y && flg_loop == 1; map_y++){
+				for(;map_x < part_size_x && flg_loop == 1; map_x++){
+					// 順番に四角内で見つけた場所に入れていく
+					if(scrap_4[0][0].used.find( make_pair(map_x,map_y)) == scrap_4[0][0].used.begin()){
+						scrap_4[0][0].used[make_pair(map_x,map_y)] = i;
+						scrap_4[0][0].elements[i] = make_pair(map_x,map_y);
+						flg_loop = 0;
+						cout << "in Data" << endl;
+					}
+				}
+			}
+			flg_loop = 1;
+		}
+	}
+
+	// 座標の変換
 	for(int i=0; i<scrap_4.size(); i++){
 		for(map<int, pair<int,int> >::iterator j = scrap_4[i][0].elements.begin(); j != scrap_4[i][0].elements.end(); j++){
 			pair<int, int> pos = j->second;
@@ -1462,4 +1555,164 @@ bool PPMFILE::chk_result(void){
 		return false;
 
 	return false;
+}
+
+int PPMFILE::get_piece_x(){
+	return this->part_size_x;
+}
+
+int PPMFILE::get_piece_y(){
+	return this->part_size_y;
+}
+
+int PPMFILE::get_part_px_x(){
+	return this->part_px_x;
+}
+
+int PPMFILE::get_part_px_y(){
+	return this->part_px_y;
+}
+
+void PPMFILE::create_correct_area_result_img(void){
+	//1パーツの大きさ取得
+	int part_width = origin_img.cols/part_size_x;
+	int part_height = origin_img.rows/part_size_y;
+
+	//文字列サイズ取得
+	cv::Size textSize;
+
+	// 本来の画像サイズのtmp_result_imgを作成し，黒で塗りつぶす
+	// CV_8UC3: 3個のCV_8U(unsigned 8bit) カラー画像の画素値
+	cv::Mat tmp_result_img(cv::Size(origin_img.cols,origin_img.rows),CV_8UC3,cv::Scalar(0,0,0));
+
+	// mapの要素はpair型
+	for(map<int, pair<int,int> >::iterator j = placement_pos.begin(); j != placement_pos.end(); j++){
+		int key = j->first;
+		// x,y
+		pair<int, int> pos = j->second;
+		if(pos.first < this->part_size_x && pos.second < this->part_size_y ){
+			// part_img: vector<cv::Mat>の分割された画像ファイル
+			part_img[key].copyTo(tmp_result_img(
+						// コピー先のtmp_result_imgの中の四角形を場所指定
+						cv::Rect(
+							pos.first*part_width,
+							pos.second*part_height,
+							part_width,
+							part_height)
+						));
+			// ついでにIDを表示させる
+			int baseline=0;
+			textSize=getTextSize(IntToString(key),cv::FONT_HERSHEY_SIMPLEX,PUT_TEXT_SIZE,PUT_TEXT_THICK,&baseline);
+			cv::putText(tmp_result_img,
+					// 表示する文字列
+					IntToString(key),
+					// 表示する位置
+					cv::Point( (pos.first * part_width) + (part_width/2) - textSize.width/2 , part_height + part_height*pos.second - textSize.height/2),
+					// フォントの種類
+					cv::FONT_HERSHEY_SIMPLEX,
+					PUT_TEXT_SIZE, // 文字サイズ
+					cv::Scalar(0,0,200), // 色
+					PUT_TEXT_THICK, //線の太さ
+					CV_AA); // 線の種類
+		}
+	}
+
+
+	// 線を引く
+	for(int x=1; x < part_size_x; x++){
+		cv::line( tmp_result_img, cv::Point( x*part_width, 0), cv::Point( x*part_width, tmp_result_img.rows), cv::Scalar( 200, 0, 0), 2, 0);
+	}
+	//横向きの線
+	for(int y=1; y < part_size_y; y++){
+		cv::line( tmp_result_img, cv::Point( 0, y*part_height), cv::Point( tmp_result_img.cols, y*part_height), cv::Scalar( 0, 0, 200), 2, 0);
+	}
+
+	// 手動用画像にコピー
+	for_manual_img = tmp_result_img.clone();
+}
+
+// マニュアルのための出力
+void PPMFILE::disp_for_manual(const string & winname){
+	// 同じ名前があれば何もしない
+	cv::namedWindow(winname,CV_WINDOW_AUTOSIZE);
+	cv::imshow(winname,for_manual_img);
+}
+
+// lengthだけのパーツの数を消費する
+void PPMFILE::fix_manual(const string & winname, int length){
+	// buffer
+	string buffer;
+
+	// 表示用ウィンドウ
+	const string questionPicWindow="questionPicWindow";
+
+	// 間違っていると思われるピース
+	const size_t size=part_size_x*part_size_y;
+	vector<bool> used_piece_key(size);
+	// 未使用データ
+	queue<int> processingKey;
+	// 全てを使われなかったことにする
+	fill(used_piece_key.begin(),used_piece_key.end(),false);
+
+	// キュー表示用画像
+	cv::Mat queueImg(cv::Size(part_px_x*length,part_px_y),CV_8UC3,cv::Scalar(0,0,0));
+	// 表示用ウィンドウ
+	cv::namedWindow(winname,CV_WINDOW_AUTOSIZE);
+
+	// 現段階での正しい領域内に有る画像を作成する
+	create_correct_area_result_img();
+	// そして表示
+	disp_for_manual(questionPicWindow);
+
+	// 使われたものを探索する
+	for(map<int, pair<int,int> >::iterator j = placement_pos.begin(); j != placement_pos.end(); j++){
+		int key = j->first;
+		// x,y
+		pair<int, int> pos = j->second;
+		// 使われているならば
+		if(pos.first < this->part_size_x && pos.second < this->part_size_y ){
+			used_piece_key[key]=true;
+		}
+	}
+	// used_piece_keyに対して
+	for(vector<bool>::iterator j= used_piece_key.begin(); j!=used_piece_key.end();j++){
+		if(! *j){
+			// もし追加前のサイズがlength以下ならqueueImgに追加
+			int key=j-used_piece_key.begin();
+			if(processingKey.size()<length){
+				// 画像表示
+				part_img[key].copyTo(
+						queueImg(cv::Rect(
+								processingKey.size()*part_px_x,0,part_px_x,part_px_y
+								))
+						);
+				int baseline=0;
+				cv::Size textSize;
+				textSize=getTextSize(IntToString(key),cv::FONT_HERSHEY_SIMPLEX,PUT_TEXT_SIZE,PUT_TEXT_THICK,&baseline);
+				cv::putText(queueImg,
+						// 表示する文字列
+						IntToString(key),
+						// 表示する位置
+						cv::Point( (processingKey.size() * part_px_x) + (part_px_x/2) - textSize.width/2 , part_px_y - textSize.height/2),
+						// フォントの種類
+						cv::FONT_HERSHEY_SIMPLEX,
+						PUT_TEXT_SIZE, // 文字サイズ
+						cv::Scalar(0,0,200), // 色
+						PUT_TEXT_THICK, //線の太さ
+						CV_AA); // 線の種類
+				// Key表示
+			}
+			processingKey.push(key);
+		}
+	}
+
+	// 線の表示
+	for(int i=1;i<length;i++){
+		cv::line(queueImg , cv::Point( i*part_px_x, 0), cv::Point( i*part_px_x,part_px_y), cv::Scalar( 200, 0, 0), 2, 0);
+	}
+
+	cv::imshow(winname,queueImg);
+
+	// 必要画像表示完了
+	cv::waitKey(0);
 }
