@@ -31,3 +31,9 @@ JSON形式なのでJSONパーサライブラリ使うと楽だと思います
 answerXX.jsonは自動生成したものなので非常に見づらいので，Jを連打して頑張ってください．
 
 楽になるコマンド(vim)`2GqaV%Jjq@a@a@a@a` 今後見やすくなるまで@aを連打する やり過ぎたと思ったらuを押す
+
+## 便利なコマンド ##
+* mogrify: 画像を上書き保存して変換  
+    縦横比は保たれる(resizeの引数に!をつけると保たずに変換される)  
+    `mogrify -resize 1024x1024 *.jpg`  
+    `mogrify -format png *.jpg` : jpgファイルをpngに一括変換
