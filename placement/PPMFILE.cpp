@@ -2,6 +2,8 @@
 #include <vector>
 #include <algorithm>
 #include <queue>
+#include <string>
+#include <cstdlib>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -1563,7 +1565,7 @@ void PPMFILE::fix_manual(const string & winname, int length){
 	const size_t size=part_size_x*part_size_y;
 	vector<bool> used_piece_key(size);
 	// 未使用データ
-	queue<int> processingKey;
+	vector<int> processingKey;
 	// 全てを使われなかったことにする
 	fill(used_piece_key.begin(),used_piece_key.end(),false);
 
@@ -1615,7 +1617,7 @@ void PPMFILE::fix_manual(const string & winname, int length){
 						CV_AA); // 線の種類
 				// Key表示
 			}
-			processingKey.push(key);
+			processingKey.push_back(key);
 		}
 	}
 
@@ -1627,5 +1629,32 @@ void PPMFILE::fix_manual(const string & winname, int length){
 	cv::imshow(winname,queueImg);
 
 	// 必要画像表示完了
-	cv::waitKey(0);
+	// 入力
+	while(1){
+		if(processingKey.empty()){
+			cv::destroyWindow(winname);
+		}
+		cout << "[d] [n]ext: pop pieces que and push poped data [d]times" << endl
+			<< "ID X,Y: move ID to X,Y or exchange ID and X,Y" << endl
+			<< "[q]uit: quit fix manual" << endl;
+		getline(cin,buffer);
+		char ch=buffer.at(0);
+		if(ch=='q'){
+			if(false&&!processingKey.empty()){
+				cout << "Queue is not empty" << endl
+					<< "Please to empty queue before quit." << endl;
+			}else{
+				break;
+			}
+		}else{
+			// 最初が数値だったら
+			int space=buffer.find(' ');
+			if(buffer.substr(0,space).find_first_not_of("0123456789")==string::npos){
+				int d=atoi(buffer.substr(0,space).c_str());
+				cout << d << endl;
+			}else{
+				cout << "Input error" << endl;
+			}
+		}
+	}
 }
