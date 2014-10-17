@@ -82,6 +82,30 @@ void PosData::setData(int ox, int oy, int x, int y) {
   data[oy][ox].y = y;
 }
 
+// ハッシュ関係
+// 現在の状態をハッシュに
+// (n*m)^2だけの数値を確保する要領が必要
+int PosData::hash(){
+ int len=width*height;
+ int hash=0;
+
+ for(int i=0;i<len;i++){
+  hash=hash*len+(getY(i%width,i/width)*width+getX(i%width,i/width));
+ }
+ return hash;
+}
+
+// hashで得た数値からデータを設定
+void PosData::dehash(int hash){
+ int len=width*height;
+
+ for(int i=0;i<len;i++){
+  int x=(len-i-1)%width,y=(len-i-1)/width;
+  int data=hash%len;
+  setData(x,y,data%width,data/width);
+  hash/=len;
+ }
+}
 void PosData::swapData(int x1, int y1, int x2, int y2) {
   swapPos(&data[y1][x1], &data[y2][x2]);
 }

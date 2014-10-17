@@ -3,7 +3,7 @@ CFLAGS :=-W -Wall -g -MMD -MP -std=c++11 -I../../sort/
 LDFLAGS= `pkg-config --libs libcurl` `pkg-config --libs opencv`
 CC=g++
 
-SRCS := Cells.cpp test_main.cpp BinaryTree.cpp BinaryTreeTest.cpp
+SRCS := Cells.cpp test_main.cpp
 DEPS := $(SRCS:%.cpp=%.d)
 
 .PHONY:all clean remake
@@ -24,5 +24,5 @@ remake:
 	make clean
 	make all
 
-cell_test:Cells.o ../../sort/PosData.o ../../sort/util.o ../../sort/Pos.o
+cell_test:test_main.o ../../sort/PosData.o ../../sort/util.o ../../sort/Pos.o
 	$(CC) -o $@ $^ $(LDFLAGS)
