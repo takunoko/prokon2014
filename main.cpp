@@ -90,15 +90,10 @@ int solveProbrem(int id){
  // ここに画像解析処理
  // どこかでPosData設定が必要
  img= new PPMFILE(recievedData,header.splitX,header.splitY);
- img->calc_cost();
- img->calc_cost_maru();
- img->calc_cost_all();
- img->get_left_top();
- img->disp_cost_list(COST_ALL);
- // newはplacement_posが生成されない
- img->placement();
 
- img->disp_placement();
+ img->calc_cost_all();
+ // newはplacement_posが生成されない
+ img->placement_4();
 
  img->set_PosData(data);
  data->dispData();
