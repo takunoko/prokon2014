@@ -1105,7 +1105,7 @@ void PPMFILE::placement_4(void){
 							}
 							int diff_x_2 = scrap_4[i][n].elements[i].first - scrap_4[i][0].elements[i].first;
 							int diff_y_2 = scrap_4[i][n].elements[i].second - scrap_4[i][0].elements[i].second;
-							cout << "dx2 :" << diff_x_2 << "dy2 :" << diff_y_2 << endl;
+							cerr << "dx2 :" << diff_x_2 << "dy2 :" << diff_y_2 << endl;
 							// すべての相対座標のズレが一致しているか?
 							diff_flg = 0;
 #ifdef MERGE_CHK_POS
@@ -1148,7 +1148,7 @@ void PPMFILE::placement_4(void){
 									}
 								}
 							}
-							cout << "diff_x : " << diff_x << " diff_y : " << diff_y << endl;
+							cerr << "diff_x : " << diff_x << " diff_y : " << diff_y << endl;
 							scrap_4[i][0].elements.clear();
 							scrap_4[i][0].used.clear();
 						}
@@ -1470,4 +1470,76 @@ bool PPMFILE::chk_result(void){
 		return false;
 
 	return false;
+}
+
+int PPMFILE::get_piece_x(){
+	return this->part_size_x;
+}
+
+int PPMFILE::get_piece_y(){
+	return this->part_size_y;
+}
+
+void PPMFILE::create_correct_area_result_img(void){
+	//1パーツの大きさ取得
+	int part_width = origin_img.cols/part_size_x;
+	int part_height = origin_img.rows/part_size_y;
+
+	// 本来の画像サイズのtmp_result_imgを作成し，黒で塗りつぶす
+	// CV_8UC3: 3個のCV_8U(unsigned 8bit) カラー画像の画素値
+	cv::Mat tmp_result_img(cv::Size(origin_img.cols,origin_img.rows),CV_8UC3,cv::Scalar(0,0,0));
+
+	// mapの要素はpair型
+	for(map<int, pair<int,int> >::iterator j = placement_pos.begin(); j != placement_pos.end(); j++){
+		int key = j->first;
+		// x,y
+		pair<int, int> pos = j->second;
+		if(pos.first < this->part_size_x && pos.second < this->part_size_y ){
+			// part_img: vector<cv::Mat>の分割された画像ファイル
+			part_img[key].copyTo(tmp_result_img(
+						// コピー先のtmp_result_imgの中の四角形を場所指定
+						cv::Rect(
+							pos.first*part_width,
+							pos.second*part_height,
+							part_width,
+							part_height)
+						));
+			// ついでにIDを表示させる
+			cv::putText(tmp_result_img,
+					// 表示する文字列
+					IntToString(key),
+					// 表示する位置
+					cv::Point( (pos.first * part_width) + (part_width/2) - 0, part_height + part_height*pos.second - 5),
+					// フォントの種類
+					cv::FONT_HERSHEY_SIMPLEX,
+					2, // 文字サイズ
+					cv::Scalar(0,0,200), // 色
+					4, //線の太さ
+					CV_AA); // 線の種類
+		}
+	}
+
+	// 線を引く
+	for(int x=1; x < part_size_x; x++){
+		cv::line( tmp_result_img, cv::Point( x*part_width, 0), cv::Point( x*part_width, tmp_result_img.rows), cv::Scalar( 200, 0, 0), 2, 0);
+	}
+	//横向きの線
+	for(int y=1; y < part_size_y; y++){
+		cv::line( tmp_result_img, cv::Point( 0, y*part_height), cv::Point( tmp_result_img.cols, y*part_height), cv::Scalar( 0, 0, 200), 2, 0);
+	}
+
+	// 手動用画像にコピー
+	for_manual_img = tmp_result_img.clone();
+}
+
+// マニュアルのための出力
+void PPMFILE::disp_for_manual(const string & winname){
+	// 同じ名前があれば何もしない
+	cv::namedWindow(winname,CV_WINDOW_AUTOSIZE);
+	cv::imshow(winname,for_manual_img);
+}
+
+// lengthだけのパーツの数を消費する
+void PPMFILE::disp_wrong_pieces(const string & winname, int length){
+	// 間違っていると思われるファイル
 }
