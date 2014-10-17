@@ -93,10 +93,11 @@ int solveProbrem(int id){
 
  img->calc_cost_all();
  // newはplacement_posが生成されない
- img->placement_4();
+
+ //img->placement_4();
+ img->placement();
 
  img->disp_placement();
-#if 0
  img->set_PosData(data);
  data->dispData();
 
@@ -161,7 +162,6 @@ int solveProbrem(int id){
    }
   }
  }
-#endif
 
 
  return EXIT_SUCCESS;
