@@ -1038,6 +1038,9 @@ void PPMFILE::placement_4(void){
 			int key = j->first;
 			pair<int, int> pos = j->second;
 			cout << key << " (" << pos.first << "," << pos.second << ")" << endl;
+			if(key != scrap_4[i][0].used[make_pair(pos.first, pos.second)])
+				cout << "######################" << endl;
+			cout << key << " [" << scrap_4[i][0].used[make_pair(pos.first, pos.second)] << "]" << endl;
 			//cout << get<0>(scrap_4[i][0].elements[j][0]) << " : (" << get<1>(scrap_4[i][0].elements[j][0]) << "," << get<2>(scrap_4[i][0].elements[j][0]) << ")" << endl;
 		}
 	}
@@ -1146,23 +1149,6 @@ void PPMFILE::placement_4(void){
 		}
 	}
 
-	// 座標の変換
-	int small_x=0, small_y=0;
-	for(int i=0; i<scrap_4.size(); i++){
-		for(map<int, pair<int,int> >::iterator j = scrap_4[i][0].elements.begin(); j != scrap_4[i][0].elements.end(); j++){
-			pair<int, int> pos = j->second;
-			if(pos.first < small_x)
-				small_x = pos.first;
-			if(pos.second < small_y)
-				small_y = pos.second;
-		}
-		//座標の再配置
-		for(map<int, pair<int,int> >::iterator j = scrap_4[i][0].elements.begin(); j != scrap_4[i][0].elements.end(); j++){
-			int key = j->first;
-			pair<int, int> pos = j->second;
-			scrap_4[i][0].elements[key] = make_pair( (pos.first - small_x), (pos.second - small_y));
-		}
-	}
 
 	// 使われていないピースの計算
 	for(map<int, pair<int,int> >::iterator k = scrap_4[0][0].elements.begin(); k != scrap_4[0][0].elements.end(); k++){
@@ -1227,8 +1213,8 @@ void PPMFILE::placement_4(void){
 								int tmp_pos;
 #ifdef USE_DONT_CONFRICT
 								if(scrap_4[0][0].used.find(tmp_pair) == scrap_4[0][0].used.end()){
-									// scrap_4[0][0].elements[key] = tmp_pair;
-									// scrap_4[0][0].used[tmp_pair] = key;
+									scrap_4[0][0].elements[key] = tmp_pair;
+									scrap_4[0][0].used[tmp_pair] = key;
 								}else{
 									tmp_pos = scrap_4[0][0].used[tmp_pair];
 									if(tmp_pos != key){
@@ -1253,6 +1239,7 @@ void PPMFILE::placement_4(void){
 	}
 
 	// 座標の変換
+	int small_x=0, small_y=0;
 	for(int i=0; i<scrap_4.size(); i++){
 		for(map<int, pair<int,int> >::iterator j = scrap_4[i][0].elements.begin(); j != scrap_4[i][0].elements.end(); j++){
 			pair<int, int> pos = j->second;
@@ -1266,6 +1253,7 @@ void PPMFILE::placement_4(void){
 			int key = j->first;
 			pair<int, int> pos = j->second;
 			scrap_4[i][0].elements[key] = make_pair( (pos.first - small_x), (pos.second - small_y));
+			scrap_4[i][0].used[make_pair( (pos.first - small_x), (pos.second - small_y))] = key;
 		}
 	}
 
