@@ -1,40 +1,21 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "Process4.h"
+#include "Process6.h"
 #include "util.h"
 
 using namespace std;
 
-Pro4::Process4(): ProcessBase() {
+Pro6::Process6(): ProcessBase() {
   target.setZero();
   target_data.setZero();
 }
 
-Pro4::Process4(int w, int h): ProcessBase(w, h) {
+Pro6::Process6(int w, int h): ProcessBase(w, h) {
   target.setZero();
   target_data.setZero();
 }
 
-int Pro4::calcParity() {
-  int sum = 0;
-  int num = 0;
-  int i, j;
-  Pos data;
-
-  for(i = 0; i < table->getWidth()*table->getHeight(); i++) {
-    num = 0;
-    for(j = i; j < table->getWidth()*table->getHeight(); j++) {
-      data = table->getData(j%table->getWidth(), j/table->getWidth());
-      if(i > (data.x+data.y*table->getWidth())) {
-        num++;
-      }
-    }
-    sum += num;
-  }
-  return sum % 2;
-}
-
-void Pro4::dispSorted() {
+void Pro6::dispSorted() {
   list<Pos>::iterator p;
 
   for(p = sorted.begin(); p != sorted.end(); p++) {
@@ -43,7 +24,7 @@ void Pro4::dispSorted() {
   puts("");
 }
 
-void Pro4::dispSortedData() {
+void Pro6::dispSortedData() {
   list<Pos>::iterator p;
 
   int i, j;
@@ -65,13 +46,13 @@ void Pro4::dispSortedData() {
 }
 
 // 安全
-int Pro4::isSelectedNextToTarget() {
+int Pro6::isSelectedNextToTarget() {
   Pos s = table->getSelected();
 
   return isNext(s, target);
 }
 
-int Pro4::isSorted(int y) {
+int Pro6::isSorted(int y) {
   int x;
   Pos data;
 
@@ -82,7 +63,7 @@ int Pro4::isSorted(int y) {
   return 1;
 }
 
-void Pro4::moveSelected(Pos destination) {
+void Pro6::moveSelected(Pos destination) {
   Pos s = table->getSelected();
   list<Pos>::iterator p;
 
@@ -162,13 +143,32 @@ void Pro4::moveSelected(Pos destination) {
     }*/
     printf("move_dir = %d\n", move_dir);
     table->swapSelected(move_dir);
+    for(p = sorted.begin(); p != sorted.end(); p++) {
+      if(checkPosEqual(surroundings(s, move_dir), *p)) {
+        if(move_flag == LR) {
+          move_dir = getReversedDirection(directionUD);
+          move_flag = UD;
+          break;
+        } else if(move_flag == UD) {
+          move_dir = getReversedDirection(directionLR);
+          move_flag = LR;
+          break;
+        }
+      }
+    }
+    /*
+    if(old_direction == move_dir) {
+      move_dir = getReversedDirection(move_dir);
+    }*/
+    printf("move_dir = %d\n", move_dir);
+    table->swapSelected(move_dir);
     table->dispData(target.x, target.y);
     old_direction = getReversedDirection(move_dir);
   }
   puts("========moveSelected end=======");
 }
 
-void Pro4::moveSelectedNextTarget() {
+void Pro6::moveSelectedNextTarget() {
   Pos s = table->getSelected();
   list<Pos>::iterator p;
 
@@ -277,7 +277,7 @@ void Pro4::moveSelectedNextTarget() {
   puts("=======moveSelectedNextTarget=======");
 }
 
-int Pro4::moveTarget(Pos pos) {
+int Pro6::moveTarget(Pos pos) {
   list<Pos>::iterator p;
 
   int directionLR;
@@ -353,7 +353,7 @@ int Pro4::moveTarget(Pos pos) {
   return 0;
 }
 
-void Pro4::rotateSelected(int direction) {
+void Pro6::rotateSelected(int direction) {
   // directionは動かす方向
   // targetから見たselectedの方向
   int dir_selected = getDirection(target, table->getSelected());
@@ -418,19 +418,21 @@ void Pro4::rotateSelected(int direction) {
   puts("======rotate end========");
 }
 
-string Pro4::sort() {
+string Pro6::sort() {
   int dummy;
-  printf("%d\n", calcParity());
+  //printf("%d\n", calcParity());
   table->dispData();
   scanf("%d", &dummy);
   // 一番右下になるデータを選択
+  /*
   if(!calcParity()) {
     table->findAndSelectData(table->getWidth()-2, table->getHeight()-1);
     printf("^^^^^^^^^%X%X\n", table->getWidth()-2, table->getHeight()-1);
   } else {
     table->findAndSelectData(table->getWidth()-1, table->getHeight()-1);
     printf("^^^^^^^^^%X%X\n", table->getWidth()-1, table->getHeight()-1);
-  }
+  }*/
+  table->findAndSelectData(table->getWidth()-1, table->getHeight()-1);
   table->dispData();
 
   sortUp();
@@ -443,7 +445,7 @@ string Pro4::sort() {
   return table->getStringSortData();
 }
 
-void Pro4::sortDown() {
+void Pro6::sortDown() {
   int i;
 
   if(isSorted(table->getHeight()-2) && isSorted(table->getHeight()-1)) return;
@@ -498,7 +500,7 @@ void Pro4::sortDown() {
   moveSelected(target_data);
 }
 
-void Pro4::sortUp() {
+void Pro6::sortUp() {
   int i, j;
   // 上半分
   for(i = 0; i < table->getHeight()-2; i++) {
@@ -526,31 +528,5 @@ void Pro4::sortUp() {
       sorted.push_back(Pos(table->getWidth()-1, i));
       continue;
     }
-    Pos dummy = table->findData(Pos(table->getWidth()-2, i));
-    if(dummy.x >= table->getWidth()-2 && dummy.x < table->getWidth() && dummy.y >= i && dummy.y < i+2) {
-      target_data = Pos(table->getWidth()-2, i);
-      target = table->findData(target_data);
-      moveTarget(Pos(table->getWidth()-2, i+2));
-    }
-    // もし，width-2のところに20が来てしまった時は20を下に移す
-    if(!checkPosEqual(table->getData(table->getWidth()-2, i), Pos(table->getWidth()-1, i)) || !checkPosEqual(table->getData(table->getWidth()-2, i+1), Pos(table->getWidth()-2, i))) {
-      target_data = Pos(table->getWidth()-1, i);
-      target = table->findData(target_data);
-      moveTarget(Pos(table->getWidth()-2, i));
-      sorted.push_back(Pos(table->getWidth()-2, i));
-      target_data = Pos(table->getWidth()-2, i);
-      target = table->findData(target_data);
-      moveTarget(Pos(table->getWidth()-2, i+1));
-      sorted.push_back(Pos(table->getWidth()-2, i+1));
-    } else {
-    }
-    moveSelected(Pos(table->getWidth()-1, i));
-    table->swapSelected(LEFT);
-    table->swapSelected(DOWN);
-    sorted.pop_back();
-    sorted.pop_back();
-    sorted.push_back(Pos(table->getWidth()-2, i));
-    sorted.push_back(Pos(table->getWidth()-1, i));
-    table->dispData();
   }
 }
