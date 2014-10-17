@@ -9,8 +9,8 @@
 #include "Process3.h"
 #include "Process4.h"
 #include "Process5.h"
-#define WIDTH 16
-#define HEIGHT 16
+#define WIDTH 8
+#define HEIGHT 8
 
 int main(void) {
   PosData *data = new PosData(WIDTH, HEIGHT);
@@ -36,7 +36,7 @@ int main(void) {
   //test->importData(*data);
   data_send = test->sort();
   delete test;
-  //cerr << data_send << endl;
+  cerr << data_send << endl;
 
   return 0;
 }

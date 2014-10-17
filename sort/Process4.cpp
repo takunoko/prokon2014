@@ -15,6 +15,25 @@ Pro4::Process4(int w, int h): ProcessBase(w, h) {
   target_data.setZero();
 }
 
+int Pro4::calcParity() {
+  int sum = 0;
+  int num = 0;
+  int i, j;
+  Pos data;
+
+  for(i = 0; i < table->getWidth()*table->getHeight(); i++) {
+    num = 0;
+    for(j = i; j < table->getWidth()*table->getHeight(); j++) {
+      data = table->getData(j%table->getWidth(), j/table->getWidth());
+      if(i > (data.x+data.y*table->getWidth())) {
+        num++;
+      }
+    }
+    sum += num;
+  }
+  return sum % 2;
+}
+
 void Pro4::dispSorted() {
   list<Pos>::iterator p;
 
@@ -400,9 +419,18 @@ void Pro4::rotateSelected(int direction) {
 }
 
 string Pro4::sort() {
+  int dummy;
+  printf("%d\n", calcParity());
   table->dispData();
+  scanf("%d", &dummy);
   // 一番右下になるデータを選択
-  table->findAndSelectData(table->getWidth()-1, table->getHeight()-1);
+  if(!calcParity()) {
+    table->findAndSelectData(table->getWidth()-2, table->getHeight()-1);
+    printf("^^^^^^^^^%X%X\n", table->getWidth()-2, table->getHeight()-1);
+  } else {
+    table->findAndSelectData(table->getWidth()-1, table->getHeight()-1);
+    printf("^^^^^^^^^%X%X\n", table->getWidth()-1, table->getHeight()-1);
+  }
   table->dispData();
 
   sortUp();
