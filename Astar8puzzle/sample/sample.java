@@ -3,7 +3,7 @@ import java.io.*;
 
 // evaluation: h*(x)  各セルの縦横の距離の差の合計
 // floor: 初期状態からの距離？
-// DataSetを継承すればいける
+// PosDataにh*(x)求めるのを追加すればいける
 class field{
  // 実際のマス
  int cell[  ]=new int[ 9 ];
@@ -73,6 +73,7 @@ class field{
 // 初期状態からの距離+h*(x)の値でソート済みのソートリスト(優先度付きキュー)
 // h*(x)各数字パネルの元の位置からの距離の輪
 // 距離: 縦横にそれぞれどれだけ離れているか
+// priority queueが標準で用意されていたのでそれで代用
 class ev_list{
  // fieldの要素
  field elem;
