@@ -23,6 +23,8 @@ using namespace std;
 
 // 問題解答関数
 int solveProbrem(int id);
+// 手動回答
+void swapPictureManual(PPMFILE *ppmData);
 
 int main(int argc,char *argv[]){
  vector<int> ids;
@@ -70,11 +72,11 @@ int solveProbrem(int id){
  }
 
 #ifdef VERBOSE
- cerr << "Split X: " << header.splitX << endl;
- cerr << "Split Y: " << header.splitY << endl;
- cerr << "Selectable Count: " << header.selectableCount << endl;
- cerr << "Select Rate: " << header.selectRate << endl;
- cerr << "Exchange Rate: " << header.exchangeRate << endl;
+ cout << "Split X: " << header.splitX << endl
+ << "Split Y: " << header.splitY << endl
+ << "Selectable Count: " << header.selectableCount << endl
+ << "Select Rate: " << header.selectRate << endl
+ << "Exchange Rate: " << header.exchangeRate << endl;
 #endif
 
  // Matにするために受け取った文字列をvector<char>型に変換
@@ -96,8 +98,10 @@ int solveProbrem(int id){
  img->placement_4();
  // 画像作成
  img->create_result_img();
- img->disp_img(RESULT_IMG);
- cv::waitKey(0);
+// img->disp_img(RESULT_IMG);
+ img->disp_placement();
+ //cv::waitKey(0);
+ swapPictureManual(img);
 
  // placement後のデータをどうにかしないとヤバイ
 #if 0
@@ -170,4 +174,28 @@ int solveProbrem(int id){
 
  return EXIT_SUCCESS;
 
+}
+
+// 手動入れ替え
+void swapPictureManual(PPMFILE *ppmData){
+ const string wrongPieceWindow="wrongPieceWindow";
+ // 画像表示
+ ppmData->fix_manual(wrongPieceWindow,(int)1024/ppmData->get_part_px_x());
+ // 間違っているであろうパーツのウィンドウ
+#if 0
+ ppmData->disp_wrong_pieces(wrongPieceWindow);
+
+ cin >> change_place;
+ // 位置文字目がqなら終了
+ //if(change_place[0] == 'q');
+ // 書式からp1,p2抜き出し
+ string::size_type camma;
+ if( (camma=change_place.find(',')) == string::npos ){
+  cerr << "FORMAT ERROR" << endl;
+ }else{
+  p1=atoi(change_place.substr(0,camma-1).c_str());
+  p2=atoi(change_place.substr(camma+1).c_str());
+  data->swapData(p1, p2);
+ }
+#endif
 }
