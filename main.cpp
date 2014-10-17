@@ -98,9 +98,9 @@ int solveProbrem(int id){
  img->placement_4();
  // 画像作成
  img->create_result_img();
- img->disp_img(RESULT_IMG);
+// img->disp_img(RESULT_IMG);
  img->disp_placement();
- cv::waitKey(0);
+ //cv::waitKey(0);
  swapPictureManual(img);
 
  // placement後のデータをどうにかしないとヤバイ
@@ -178,15 +178,9 @@ int solveProbrem(int id){
 
 // 手動入れ替え
 void swapPictureManual(PPMFILE *ppmData){
- const string questionPicWindow="questionPicWindow";
  const string wrongPieceWindow="wrongPieceWindow";
- string change_place;
- // 現在の状態での正しい領域内の画像のみ表示
- // 一回きりのみ
- ppmData->create_correct_area_result_img();
  // 画像表示
- ppmData->disp_for_manual(questionPicWindow);
- cv::waitKey(0);
+ ppmData->fix_manual(wrongPieceWindow,(int)1024/ppmData->get_part_px_x());
  // 間違っているであろうパーツのウィンドウ
 #if 0
  ppmData->disp_wrong_pieces(wrongPieceWindow);
