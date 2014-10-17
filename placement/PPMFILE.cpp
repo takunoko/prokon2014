@@ -12,7 +12,7 @@
 #define MERGE_ONE // 残っているピースをマージ
 
 // デバッグ用
-// #ifdef VERBOSE
+#define VERBOSE
 
 // tupleを比較するときのルール
 bool my_compare( const COST_TUPLE &lhs, const COST_TUPLE &rhs){
@@ -1058,54 +1058,49 @@ void PPMFILE::placement_4(void){
 	// 2番目-4番目の近傍値を用いてそいつらを集めてくる
 	{
 		// これも適当に4回ぐらい。。。(あまりかわらない？
+		int break_chk = 0;
 		for(int ii=0; ii<4; ii++){
-			for(int n=0; n<4; n++){
-				for(int i=1; i<scrap_4.size(); i++){
-					if(scrap_4[i][0].elements.size() != 0){
+			for(int i=1; i<scrap_4.size(); i++){
+				for(int n=1; n<4; n++){
+					// 要素が0でないそれぞれのelement要素について
+					for(map<int, pair<int,int> >::iterator k = scrap_4[i][0].elements.begin(); k != scrap_4[i][0].elements.end(); k++){
+						int key = k->first;
+						// エレメントの中のそれぞれのパーツについて
 						conf_cnt = 0;
-						for(map<int, pair<int,int> >::iterator k = scrap_4[i][n].elements.begin(); k != scrap_4[i][n].elements.end(); k++){
-							int key = k->first;
-							if(scrap_4[0][0].elements.find(key) == scrap_4[0][0].elements.end()){
+						for(map<int, pair<int,int> >::iterator b = scrap_4_backup[key][n].elements.begin(); b != scrap_4_backup[key][n].elements.end(); b++){
+							int key2 = b->first;
+							cout << "key * " << key2 << endl;
+							if(scrap_4[0][0].elements.find(key2) == scrap_4[0][0].elements.end()){
 								// scrap_4[0][0]にその要素が含まれているか？
 							}else{
 								// 共有しているピースの数をカウントする
 								conf_cnt++;
 							}
+							cout << "i : " << i << " n : " << n << " conf : " << conf_cnt << endl;
 						}
-						// どちらかにすべて含まれていたなら　
-						if(conf_cnt == MIN_2( scrap_4[0][0].elements.size(), scrap_4[i][0].elements.size()) && conf_cnt >= 4){
-							if(scrap_4[i][0].elements.size() <= scrap_4[0][0].elements.size()){
-								// scrap_4[0][0]のほうを消す
-								scrap_4[i][0].used.clear();
-								scrap_4[i][0].elements.clear();
-							}else{
-								// これが正しく動作するのかわからない
-								scrap_4[0][0] = scrap_4[i][0];
-
-								scrap_4[i][0].used.clear();
-								scrap_4[i][0].elements.clear();
-							}
-						}else if(conf_cnt >= 2){ // 2つ以上かぶっていたら
+						if(conf_cnt >= 2){ // 2つ以上かぶっていたら
 							// diffを検索
 							p1_abs.clear();
 							p2_abs.clear();
-							for(map<int, pair<int,int> >::iterator k = scrap_4[i][n].elements.begin(); k != scrap_4[i][n].elements.end(); k++){
-								int key = k->first;
+							for(map<int, pair<int,int> >::iterator k = scrap_4_backup[key][n].elements.begin(); k != scrap_4_backup[key][n].elements.end(); k++){
+								int key2 = k->first;
 								pair<int, int> pos = k->second;
-								if(scrap_4[0][0].elements.find(key) == scrap_4[0][0].elements.end()){
+								if(scrap_4[0][0].elements.find(key2) == scrap_4[0][0].elements.end()){
 								}else{
 									// 一致している要素
-									p1_abs.push_back( make_pair(scrap_4[0][0].elements[key].first, scrap_4[0][0].elements[key].second));
-									p2_abs.push_back( make_pair(scrap_4[i][n].elements[key].first, scrap_4[i][n].elements[key].second));
+									p1_abs.push_back( make_pair(scrap_4[0][0].elements[key2].first, scrap_4[0][0].elements[key2].second));
+									p2_abs.push_back( make_pair(scrap_4_backup[key][n].elements[key2].first, scrap_4_backup[key][n].elements[key2].second));
 
-									diff_x = scrap_4[0][0].elements[key].first - scrap_4[i][n].elements[key].first;
-									diff_y = scrap_4[0][0].elements[key].second - scrap_4[i][n].elements[key].second;
+									diff_x = scrap_4[0][0].elements[key2].first - scrap_4_backup[key][n].elements[key2].first;
+									diff_y = scrap_4[0][0].elements[key2].second - scrap_4_backup[key][n].elements[key2].second;
 									//break;
 								}
 							}
-							int diff_x_2 = scrap_4[i][n].elements[i].first - scrap_4[i][0].elements[i].first;
-							int diff_y_2 = scrap_4[i][n].elements[i].second - scrap_4[i][0].elements[i].second;
-							cout << "dx2 :" << diff_x_2 << "dy2 :" << diff_y_2 << endl;
+
+							int diff_x_2 = scrap_4_backup[key][n].elements[key].first - scrap_4_backup[key][0].elements[key].first;
+							int diff_y_2 = scrap_4_backup[key][n].elements[key].second - scrap_4_backup[key][0].elements[key].second;
+
+							cout << "dx2 :" << diff_x_2 << " dy2 :" << diff_y_2 << endl;
 							// すべての相対座標のズレが一致しているか?
 							diff_flg = 0;
 #ifdef MERGE_CHK_POS
@@ -1127,14 +1122,13 @@ void PPMFILE::placement_4(void){
 										// すでにその場所が使われていたら
 										// もともと書かれているものをもとに戻す
 										pair<int,int> tmp_pair = make_pair( pos.first + diff_x + diff_x_2, pos.second + diff_y + diff_y_2);
-										int tmp_pos;
-#ifdef USE_DONT_CONFRICT
+										int tmp_pos2;
+#ifdef USE_DONT_COICT
 										if(scrap_4[0][0].used.find(tmp_pair) == scrap_4[0][0].used.end()){
 										}else{
-											tmp_pos = scrap_4[0][0].used[tmp_pair];
-											if(tmp_pos != key){
-												scrap_4[0][0].elements.erase(tmp_pos);
-												cout << "2上書きした" << endl;
+											tmp_pos2 = scrap_4[0][0].used[tmp_pair];
+											if(tmp_pos2 != key){
+												scrap_4[0][0].elements.erase(tmp_pos2);
 												//scrap_4[tmp_pos] = scrap_4_backup[tmp_pos];
 											}else{
 												// 同じ座標を上書きなら無視
@@ -1151,6 +1145,7 @@ void PPMFILE::placement_4(void){
 							cout << "diff_x : " << diff_x << " diff_y : " << diff_y << endl;
 							scrap_4[i][0].elements.clear();
 							scrap_4[i][0].used.clear();
+							break;
 						}
 					}
 				}
@@ -1158,8 +1153,7 @@ void PPMFILE::placement_4(void){
 		}
 	}
 
-
-#if 0
+#if 1
 	// 使われていないピースの計算
  	for(map<int, pair<int,int> >::iterator k = scrap_4[0][0].elements.begin(); k != scrap_4[0][0].elements.end(); k++){
  		int key = k->first;
@@ -1171,7 +1165,6 @@ void PPMFILE::placement_4(void){
  		if(used_part[i] == 0){
  			// 使われていないピースについて
  			cout << "not use : " << i << endl;
- #ifdef MERGE_ONE
  			for(int n=0; n<4; n++){
  				for(map<int, pair<int,int> >::iterator k = scrap_4_backup[i][n].elements.begin(); k != scrap_4_backup[i][n].elements.end(); k++){
  					int key = k->first;
@@ -1206,12 +1199,11 @@ void PPMFILE::placement_4(void){
  #ifdef MERGE_CHK_POS
  					for(int c=0; c<p1_abs.size(); c++){
  						if(diff_x == p1_abs[c].first - p2_abs[c].first && diff_y == p1_abs[c].second - p2_abs[c].second){
- 						}else{
+						}else{
  							// 一致していなかったら
  							diff_flg = 1;
  						}
  					}
- #endif
  					// diffを用いて結合
  					if(diff_flg == 0){
  						for(map<int, pair<int,int> >::iterator k = scrap_4_backup[i][n].elements.begin(); k != scrap_4_backup[i][n].elements.end(); k++){
