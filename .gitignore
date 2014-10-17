@@ -1,6 +1,7 @@
 a.out
 *.o
 *.swp
+*.swo
 *.d
 *.aux
 *.log

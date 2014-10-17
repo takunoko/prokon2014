@@ -126,13 +126,44 @@ int solveProbrem(int id){
  // ACCEPTED XXかERRORがかえってくる
  // http://www.procon.gr.jp/modules/smartfaq/category.php?categoryid=23
 
+ int error_part = 0;
+ // 結果出力
+ cout << res << endl;
  if(res=="ERROR"){
   cout << "ERROR OCCURED" << endl;
  }else if(res.substr(0,8)=="ACCEPTED"){
+  error_part = atoi(res.substr(8).c_str());
   cout << atoi(res.substr(8).c_str()) << endl;
+  if(error_part > 0) {
+   // ナンバー入り画像
+   img->create_num_img();
+   img->disp_img(NUM_IMG);
+   // 回答画像
+   img->create_result_img();
+   img->disp_img(RESULT_IMG);
+   string change_place;
+   string d1, d2;
+   int p1, p2;
+   while(1) {
+    // 入力方法
+    // a,b
+    // change_placeに入力された文字列
+    cin >> change_place;
+    // 位置文字目がqなら終了
+    if(change_place[0] == 'q') break;
+    // 書式からp1,p2抜き出し
+    string::size_type camma;
+    if( (camma=change_place.find(',')) == string::npos ){
+     cerr << "FORMAT ERROR" << endl;
+    }else{
+     p1=atoi(change_place.substr(0,camma-1).c_str());
+     p2=atoi(change_place.substr(camma+1).c_str());
+     data->swapData(p1, p2);
+    }
+   }
+  }
  }
 
- cout << res << endl;
 
  return EXIT_SUCCESS;
 

@@ -199,6 +199,7 @@ string Dataset::getStringSortData() {
   str += to_string(selected_num);
   str += "\n";
   for(i = 0; i < selected_num; i++, p1_x++, p1_y++, p2++) {
+    printf("-----%X%X\n", *p1_x, *p1_y);
     sprintf(ss, "%X", *p1_x);
     str += ss;
     sprintf(ss, "%X", *p1_y);
@@ -309,28 +310,6 @@ void Dataset::swapData(int x1, int y1, int x2, int y2) {
   setDistance(x1, y1);
   setDistance(x2, y2);
 }
-/*
-void Dataset::swapDataSelected(int x, int y) {
-  swapData(selected.x, selected.y, x, y);
-  selected.x = x;
-  selected.y = y;
-  changed_num++;
-  if(move_flag == 0) {
-    selected_num++;
-    move_flag = 1;
-  }
-}
-
-void Dataset::swapDataSelected(Pos pos) {
-  swapData(selected.x, selected.y, pos.x, pos.y);
-  selected.x = pos.x;
-  selected.y = pos.y;
-  changed_num++;
-  if(move_flag == 0) {
-    selected_num++;
-    move_flag = 1;
-  }
-}*/
 
 void Dataset::swapNext(int x, int y, int direction) {
   int dx = x;
@@ -356,6 +335,8 @@ void Dataset::swapSelected(int direction) {
   }
   if(move_flag == 0) {
     selected_num++;
+
+    printf("||||||||||%X%X\n", selected.x, selected.y);
     selected_x.push_back(selected.x);
     selected_y.push_back(selected.y);
     changed_nums.push_back(0);
