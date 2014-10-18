@@ -5,7 +5,7 @@ all: $(BIN)
 
 CC=g++
 # 全警告, デバッグ, ヘッダファイル依存 C++11仕様
-CFLAGS=-Wall -g -MMD -MP -std=c++11 `pkg-config --cflags libcurl` `pkg-config --cflags opencv`
+CFLAGS=-Wall -O3 -MMD -MP -std=c++11 `pkg-config --cflags libcurl` `pkg-config --cflags opencv`
 LDFLAGS= `pkg-config --libs libcurl` `pkg-config --libs opencv`
 
 .PHONY: all clean

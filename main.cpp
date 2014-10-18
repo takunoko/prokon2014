@@ -137,7 +137,7 @@ int solveProbrem(int id){
  // もう一度: ここから(1回提出)
 
  bool flag=true;
- for(int i=0;i<9 && flag;i++){
+ for(int i=0;i<2 && flag;i++){
   int error_part = 0;
   // 結果出力
   cout << res << endl;
