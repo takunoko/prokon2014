@@ -1566,23 +1566,29 @@ void PPMFILE::fix_manual(const string & winname, int length){
 	create_correct_area_result_img();
 	// そして表示
 	disp_for_manual(questionPicWindow);
-	cv::waitKey(0);
 
 	// 必要画像表示完了
 	// 入力
-	while(0){
+	while(1){
 		cout << "ID1 ID2: swap ID1 and ID2" << endl
+			<< "[u]pdate : update window" << endl
 			<< "[q]uit: quit fix manual" << endl;
 		getline(cin,buffer);
 		char ch=buffer.at(0);
 		if(ch=='q'){
 			break;
+		}else if(ch=='u'){
+			cv::destroyWindow(questionPicWindow);
+			// 現段階での正しい領域内に有る画像を作成する
+			create_correct_area_result_img();
+			// そして表示
+			disp_for_manual(questionPicWindow);
 		}else{
 			int space=buffer.find(' ');
 			if(buffer.substr(0,space).find_first_not_of("0123456789")==string::npos){
 				int id1=atoi(buffer.substr(0,space).c_str());
 				int id2=atoi(buffer.substr(space+1).c_str());
-				
+
 				buffer=buffer.substr(space+1);
 				pair<int,int>tmp;
 
@@ -1595,8 +1601,6 @@ void PPMFILE::fix_manual(const string & winname, int length){
 				}else{
 					cout << "Input Error" << endl;
 				}
-
-
 			}else{
 				cout << "Input error" << endl;
 			}
