@@ -22,7 +22,7 @@
 //#define VERBOSE
 
 // 最初に自動で提出するかどうか
-//#define FIRST_AUTO_SUBMIT
+#define FIRST_AUTO_SUBMIT
 
 using namespace std;
 
@@ -163,7 +163,7 @@ int solveProbrem(int id){
 
  // もう一度: ここから(1回提出)
  bool flag=true;
- for(int i=0;i<2 && flag;i++){
+ while(flag){
   // TODO:
   delete sort;
   //delete sort6;
