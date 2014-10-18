@@ -108,8 +108,6 @@ class PPMFILE{
 		// 配置
 		void placement(void);
 
-		// 配置(バージョン2)
-		void new_placement(void);
 		void disp_placement(void);
 
 		// 配置(4ピース集合バージョン)
@@ -124,24 +122,11 @@ class PPMFILE{
 		// xy_1のdire方向のxy_2とのcost
 		int get_cost(int xy_1, int xy_2, int dire);
 
-		// 左上を取得してみる
-		void get_left_top();
-
 		// すべての方向に対してコストを計算する
 		void calc_cost_all();
 
-		// 横方向に画像を追加
-		void add_side( SCRAP &scrap, int, int, int, int);
-		// 縦方向に画像を追加
-		void add_ud( SCRAP &scrap, int, int, int, int);
-
+		// 回答が形式を満たしているか？
 		bool chk_result(void);
-
-		// get piece_x,piece_y 
-		int get_piece_x();
-		int get_piece_y();
-		int get_part_px_x();
-		int get_part_px_y();
 
 		// 正しい領域のみの生成した画像作成
 		void create_correct_area_result_img();

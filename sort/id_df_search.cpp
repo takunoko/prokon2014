@@ -11,15 +11,15 @@ ID_Data::ID_Data() : PosData() {
 ID_Data::ID_Data(int w, int h) : PosData(w, h) {
   md = 0;
 
-  adjacent = new list<Pos>*[height];
+  adjacent = new list<int>*[height];
   for(int i = 0; i < height; i++) {
-    adjacent[i] = new list<Pos>[width];
+    adjacent[i] = new list<int>[width];
     for(int j = 0; j < width; j++) {
       Pos p;
       for(int k = 0; k < 8; k += 2) {
         p = surroundings(Pos(j, i), k);
         if(checkInScope(width, height, p.x, p.y)) {
-          adjacent[i][j].push_back(p);
+          adjacent[i][j].push_back(k);
         }
       }
     }
@@ -79,6 +79,10 @@ int ID_Data::getMD() {
   return md;
 }
 
+Pos ID_Data::getSelected() {
+  return selected;
+}
+
 string ID_Data::getStringSortData() {
   string str = "";
   char ss[3];
@@ -90,20 +94,19 @@ string ID_Data::getStringSortData() {
   p2 = changed_nums.begin();
   p3 = process.begin();
   str += to_string(selected_num);
-  str += "\n";
+  str += "\r\n";
   for(i = 0; i < selected_num; i++, p1_x++, p1_y++, p2++) {
-    printf("-----%X%X\n", *p1_x, *p1_y);
     sprintf(ss, "%X", *p1_x);
     str += ss;
     sprintf(ss, "%X", *p1_y);
     str += ss;
-    str += "\n";
+    str += "\r\n";
     str += to_string(*p2);
-    str += "\n";
+    str += "\r\n";
     for(j = 0; j < *p2; j++, p3++) {
       str += getDirectionChar(*p3);
     }
-    str += "\n";
+    str += "\r\n";
   }
   return str;
 }

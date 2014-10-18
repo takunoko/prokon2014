@@ -14,9 +14,9 @@
 using namespace std;
 
 // サーバー
-//const string ProkonClient::SERVER_ADDRESS="172.16.1.2";
+const string ProkonClient::SERVER_ADDRESS="172.16.1.2/";
 //const string ProkonClient::SERVER_ADDRESS="localhost/web2/pic/";
-const string ProkonClient::SERVER_ADDRESS="10.211.55.5";
+//const string ProkonClient::SERVER_ADDRESS="10.211.55.5";
 // チーム固有トークン
 //const string ProkonClient::TEAM_TOKEN="0768109858";
 const string ProkonClient::TEAM_TOKEN="1";
@@ -60,7 +60,7 @@ string ProkonClient::getProblem(int problemNo,QuestionHeader & data){
  probStr << problemNo;
 
  // URL
- string url="http://" + SERVER_ADDRESS + "/problem/prob" + probStr.str() + ".ppm";
+ string url="http://" + SERVER_ADDRESS + "problem/prob" + probStr.str() + ".ppm";
 #if DEBUG==1
  cout << url << endl;
 #endif

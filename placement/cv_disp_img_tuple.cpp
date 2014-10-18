@@ -37,13 +37,8 @@ int main(void){
 	img1->calc_cost_all();
 	// img1->disp_cost_list(COST_ALL);  // 消すと結構時間が良くなる
 
-	// img1->get_left_top();
-	// img1->disp_cost_list(COST_ALL);
-	// img1->get_left_top();
-
 	// ----- この編並び替え -----
 	// img1->placement();
-	// img1->new_placement();
 	img1->placement_4();
 
 	// ----- このへん描画 -----
@@ -60,6 +55,10 @@ int main(void){
 	// ナンバー入り画像
 	img1->create_num_img();
 	img1->disp_img(NUM_IMG);
+
+	//画像を四角くする
+	// img1->fix_pic_to_square();
+
 	// 回答画像
 	img1->create_result_img();
 	img1->disp_img(RESULT_IMG);

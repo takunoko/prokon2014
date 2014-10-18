@@ -17,7 +17,7 @@ public:
   void importData(PosData &data);
   Process8();
   string sort();
-  int id_search(int move);
+  int id_search();
 } Pro8;
 
 #endif
