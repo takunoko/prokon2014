@@ -58,6 +58,7 @@ int solveProbrem(int id){
  PPMFILE *img;
  // PosData
  PosData *data;
+ // 5 or 6?
  Process5 *sort;
 
 #ifdef VERBOSE
@@ -85,6 +86,7 @@ int solveProbrem(int id){
  recievedData=cv::imdecode(cv::Mat(v),-1);
 
  data=new PosData(header.splitX,header.splitY);
+ // TODO: Process5 or 6?
  sort=new Process5(header.splitX,header.splitY);
 
 #ifdef VERBOSE
@@ -96,6 +98,7 @@ int solveProbrem(int id){
 
  img->calc_cost_all();
  // newはplacement_posが生成されない
+ // TODO: placement_5?
  img->placement_4();
  // 画像作成
  img->create_result_img();
@@ -152,9 +155,12 @@ int solveProbrem(int id){
  // http://www.procon.gr.jp/modules/smartfaq/category.php?categoryid=23
 
  // もう一度: ここから(1回提出)
-
  bool flag=true;
  for(int i=0;i<2 && flag;i++){
+  // TODO:
+  delete sort;
+  sort=new Process5(header.splitX,header.splitY);
+
   int error_part = 0;
   // 結果出力
   cout << res << endl;
