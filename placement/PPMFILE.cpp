@@ -1608,6 +1608,7 @@ void PPMFILE::fix_manual(const string & winname, int length){
 	}
 }
 
+#undef VERBOSE
 // 自動(力技)修正
 void PPMFILE::fix_pic_to_square(){
 	// セル個数
@@ -1629,8 +1630,10 @@ void PPMFILE::fix_pic_to_square(){
 		int key = j->first;
 		// x,y
 		pair<int, int> pos = j->second;
+#ifdef VERBOSE
 		cerr << "key: " << key << endl
 			<< "x: " << pos.first << " , y: " << pos.second << endl;
+#endif
 		// 指定範囲内ならば
 		if(pos.first < this->part_size_x && pos.second < this->part_size_y ){
 			//使う扱いにする
