@@ -147,4 +147,5 @@ class PPMFILE{
 		void create_correct_area_result_img();
 		void disp_for_manual(const string & winname);
 		void fix_manual(const string & winname, int length);
+		void fix_pic_to_square();
 };
