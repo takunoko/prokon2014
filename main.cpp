@@ -154,6 +154,11 @@ int solveProbrem(int id){
 // 手動入れ替え
 void swapPictureManual(PPMFILE *ppmData){
  const string wrongPieceWindow="wrongPieceWindow";
+
+ // 自動修正
+ ppmData->fix_pic_to_square();
+
+
  // 画像表示
  ppmData->fix_manual(wrongPieceWindow,(int)1024/ppmData->get_part_px_x());
  // 間違っているであろうパーツのウィンドウ
