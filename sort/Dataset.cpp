@@ -201,19 +201,19 @@ string Dataset::getStringSortData() {
   p2 = changed_nums.begin();
   p3 = process.begin();
   str += to_string(selected_num);
-  str += "\r\n";
+  str += "\n";
   for(i = 0; i < selected_num; i++, p1_x++, p1_y++, p2++) {
     sprintf(ss, "%X", *p1_x);
     str += ss;
     sprintf(ss, "%X", *p1_y);
     str += ss;
-    str += "\r\n";
+    str += "\n";
     str += to_string(*p2);
-    str += "\r\n";
+    str += "\n";
     for(j = 0; j < *p2; j++, p3++) {
       str += getDirectionChar(*p3);
     }
-    str += "\r\n";
+    str += "\n";
   }
   return str;
 }
