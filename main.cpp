@@ -161,6 +161,7 @@ int solveProbrem(int id){
   //data->dispData();
   cout << "importing" << endl;
   sort->importData(*data);
+  cout << "sorting..." << endl;
 
   string sortResult=sort->sort();
   string::size_type Pos=sortResult.find('\n');
