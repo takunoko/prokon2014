@@ -15,6 +15,7 @@
 // sort
 #include "sort/PosData.h"
 #include "sort/Process5.h"
+#include "sort/Process8.h"
 
 // デバッグ用
 //#define VERBOSE
@@ -98,13 +99,13 @@ int solveProbrem(int id){
  img->placement_4();
  // 画像作成
  img->create_result_img();
- if(img1->chk_result() == true){
+ if(img->chk_result() == true){
   cout << "result img GOOD" << endl;
  }else{
   cout << "result img BAD" << endl;
  }
  img->fix_pic_to_square();
- if(img1->chk_result() == true){
+ if(img->chk_result() == true){
   cout << "result img GOOD" << endl;
  }else{
   cout << "result img BAD" << endl;
