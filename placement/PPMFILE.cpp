@@ -1678,6 +1678,7 @@ void PPMFILE::fix_manual(const string & winname, int length){
 	create_correct_area_result_img();
 	// そして表示
 	disp_for_manual(questionPicWindow);
+	cv::moveWindow(questionPicWindow,0,0);
 
 	// 必要画像表示完了
 	// 入力
@@ -1695,6 +1696,7 @@ void PPMFILE::fix_manual(const string & winname, int length){
 			create_correct_area_result_img();
 			// そして表示
 			disp_for_manual(questionPicWindow);
+			cv::moveWindow(questionPicWindow,0,0);
 		}else{
 			int space=buffer.find(' ');
 			if(buffer.substr(0,space).find_first_not_of("0123456789")==string::npos){
