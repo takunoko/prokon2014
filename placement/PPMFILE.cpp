@@ -1563,19 +1563,17 @@ void PPMFILE::fix_manual(const string & winname, int length){
 	const size_t size=part_size_x*part_size_y;
 	vector<bool> used_piece_key(size);
 	// 未使用データ
-	queue<int> processingKey;
+	vector<int> processingKey;
+	// 空きます
+	vector<bool> isMapIdEmpty(size);
 	// 全てを使われなかったことにする
 	fill(used_piece_key.begin(),used_piece_key.end(),false);
+	fill(isMapIdEmpty.begin(),isMapIdEmpty.end(),true);
 
 	// キュー表示用画像
 	cv::Mat queueImg(cv::Size(part_px_x*length,part_px_y),CV_8UC3,cv::Scalar(0,0,0));
 	// 表示用ウィンドウ
 	cv::namedWindow(winname,CV_WINDOW_AUTOSIZE);
-
-	// 現段階での正しい領域内に有る画像を作成する
-	create_correct_area_result_img();
-	// そして表示
-	disp_for_manual(questionPicWindow);
 
 	// 使われたものを探索する
 	for(map<int, pair<int,int> >::iterator j = placement_pos.begin(); j != placement_pos.end(); j++){
@@ -1585,6 +1583,7 @@ void PPMFILE::fix_manual(const string & winname, int length){
 		// 使われているならば
 		if(pos.first < this->part_size_x && pos.second < this->part_size_y ){
 			used_piece_key[key]=true;
+			isMapIdEmpty[CONV_XY(pos.first,pos.second)]=false;
 		}
 	}
 	// used_piece_keyに対して
@@ -1592,6 +1591,8 @@ void PPMFILE::fix_manual(const string & winname, int length){
 		if(! *j){
 			// もし追加前のサイズがlength以下ならqueueImgに追加
 			int key=j-used_piece_key.begin();
+
+#if 0 // 全部表示関係
 			if(processingKey.size()<length){
 				// 画像表示
 				part_img[key].copyTo(
@@ -1615,9 +1616,25 @@ void PPMFILE::fix_manual(const string & winname, int length){
 						CV_AA); // 線の種類
 				// Key表示
 			}
-			processingKey.push(key);
+#endif
+			processingKey.push_back(key);
 		}
 	}
+
+	// 外にあるものを全て開いているところに
+	vector<int>::iterator usingKey = processingKey.begin();
+	for(vector<bool>::iterator j=isMapIdEmpty.begin();j!=isMapIdEmpty.end();j++){
+		if(*j){
+			placement_pos[*usingKey]=pair<int,int>(CONV_X(j-isMapIdEmpty.begin()) , CONV_Y(j-isMapIdEmpty.begin()) );
+			usingKey++;
+		}
+	}
+
+	// 現段階での正しい領域内に有る画像を作成する
+	create_correct_area_result_img();
+	// そして表示
+	disp_for_manual(questionPicWindow);
+
 
 	// 線の表示
 	for(int i=1;i<length;i++){
@@ -1627,5 +1644,32 @@ void PPMFILE::fix_manual(const string & winname, int length){
 	cv::imshow(winname,queueImg);
 
 	// 必要画像表示完了
-	cv::waitKey(0);
+	// 入力
+	while(1){
+		if(processingKey.empty()){
+			cv::destroyWindow(winname);
+		}
+		cout << "[d] [n]ext: pop pieces que and push poped data [d]times" << endl
+			<< "ID X,Y: move ID to X,Y or exchange ID and X,Y" << endl
+			<< "[q]uit: quit fix manual" << endl;
+		getline(cin,buffer);
+		char ch=buffer.at(0);
+		if(ch=='q'){
+			if(false&&!processingKey.empty()){
+				cout << "Queue is not empty" << endl
+					<< "Please to empty queue before quit." << endl;
+			}else{
+				break;
+			}
+		}else{
+			// 最初が数値だったら
+			int space=buffer.find(' ');
+			if(buffer.substr(0,space).find_first_not_of("0123456789")==string::npos){
+				int d=atoi(buffer.substr(0,space).c_str());
+				cout << d << endl;
+			}else{
+				cout << "Input error" << endl;
+			}
+		}
+	}
 }
