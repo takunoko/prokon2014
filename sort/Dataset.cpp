@@ -148,6 +148,10 @@ Pos Dataset::findData(Pos data) {
   return findData(data.x, data.y);
 }
 
+int Dataset::getChangedNum() {
+  return changed_num;
+}
+
 Pos Dataset::getData(int x, int y) {
   Pos dummy;
   if(!checkInScope(width, height, x, y)) myerror(1);
