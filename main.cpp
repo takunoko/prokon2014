@@ -15,10 +15,14 @@
 // sort
 #include "sort/PosData.h"
 #include "sort/Process5.h"
+#include "sort/Process6.h"
 #include "sort/Process8.h"
 
 // デバッグ用
 //#define VERBOSE
+
+// 最初に自動で提出するかどうか
+//#define FIRST_AUTO_SUBMIT
 
 using namespace std;
 
@@ -60,6 +64,7 @@ int solveProbrem(int id){
  PosData *data;
  // 5 or 6?
  Process5 *sort;
+ //Process6 *sort6;
 
 #ifdef VERBOSE
  cout << "Picture Downloading\nID: " << id<< endl;
@@ -116,7 +121,9 @@ int solveProbrem(int id){
  // img->disp_img(RESULT_IMG);
  //img->disp_placement();
  //cv::waitKey(0);
- //swapPictureManual(img);
+#ifndef FIRST_AUTO_SUBMIT
+ swapPictureManual(img);
+#endif
 
  // placement後のデータをどうにかしないとヤバイ
  img->set_PosData(data);
@@ -159,7 +166,9 @@ int solveProbrem(int id){
  for(int i=0;i<2 && flag;i++){
   // TODO:
   delete sort;
+  //delete sort6;
   sort=new Process5(header.splitX,header.splitY);
+  //sort6=new Process6(header.splitX,header.splitY);
 
   int error_part = 0;
   // 結果出力
@@ -181,6 +190,11 @@ int solveProbrem(int id){
   cout << "sorting..." << endl;
 
   string sortResult=sort->sort();
+  cout <<"Sort 5 complete" << endl;
+  //string sortResult6=sort6->sort();
+  //cout <<"Sort 6 complete" << endl;
+  
+  cout << "s/\\n/\\r\\n" << endl;
   string::size_type Pos=sortResult.find('\n');
   while(Pos!=string::npos){
    sortResult.replace(Pos,1,"\x0d\x0a");
