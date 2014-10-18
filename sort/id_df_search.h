@@ -32,6 +32,8 @@ public:
   string getStringSortData();
   void importData(PosData &import_data);
   void selectData(Pos p);
+  void setDistance(int x, int y);
+  virtual void swapData(int x1, int y1, int x2, int y2);
   int swapSelected(int direction);
   void undo();
 };

@@ -4,12 +4,23 @@
 #include "util.h"
 #include "id_df_search.h"
 #define PRINT 1
+#define DEBUG 0
 
 ID_Data::ID_Data() : PosData() {
 }
 
 ID_Data::ID_Data(int w, int h) : PosData(w, h) {
   md = 0;
+  int i, j;
+
+  distance = new Pos*[height];
+  for(i = 0; i < height; i++) {
+    distance[i] = new Pos[width];
+    for(j = 0; j < width; j++) {
+      distance[i][j].x = 0;
+      distance[i][j].y = 0;
+    }
+  }
 }
 
 void ID_Data::calcMD() {
@@ -37,7 +48,9 @@ Pos ID_Data::findData(Pos p) {
   int i, j;
   Pos loc;
 
+#if DEBUG
   if(!checkInScope(width, height, p.x, p.y)) myerror(1);
+#endif
   for(i = 0; i < this->height; i++) {
     for(j = 0; j < this->width; j++) {
       if(checkPosEqual(this->data[i][j], p)) {
@@ -111,10 +124,26 @@ void ID_Data::importData(PosData &import_data) {
 }
 
 void ID_Data::selectData(Pos p) {
+#if DEBUG
   if(!checkInScope(width, height, p.x, p.y)) myerror(1);
+#endif
   if(checkPosEqual(p.x, p.y, selected.x, selected.y)) return;
   selected = p;
   move_flag = 0;
+}
+
+void ID_Data::setDistance(int x, int y) {
+#if DEBUG
+  if(!checkInScope(width, height, x, y)) myerror(1);
+#endif
+  distance[y][x].x = abs(data[y][x].x - x);
+  distance[y][x].y = abs(data[y][x].y - y);
+}
+
+void ID_Data::swapData(int x1, int y1, int x2, int y2) {
+  swapPos(&data[y1][x1], &data[y2][x2]);
+  setDistance(x1, y1);
+  setDistance(x2, y2);
 }
 
 int ID_Data::swapSelected(int direction) {
@@ -138,8 +167,24 @@ int ID_Data::swapSelected(int direction) {
     move_flag = 1;
   }
   Pos p = surroundings(selected, direction);
+#if DEBUG
   if(!checkInScope(width, height, p.x, p.y)) return 1;
+#endif
+  //swapPos(&data[p.y][p.y], &data[selected.y][selected.x]);
   swapData(p.x, p.y, selected.x, selected.y);
+  /*
+  if(direction == UP || direction == DOWN) {
+    int dummy = distance[p.y][p.x].y;
+    distance[p.y][p.x].y = abs(data[p.y][p.x].y - p.y);
+    distance[selected.y][selected.x].y = abs(data[selected.y][selected.x].y - selected.y);
+    (dummy > distance[selected.y][selected.y].y) ? md-- : md++;
+  }
+  if(direction == RIGHT || direction == LEFT) {
+    int dummy = distance[p.y][p.x].x;
+    distance[p.y][p.x].x = abs(data[p.y][p.x].x - p.x);
+    distance[selected.y][selected.x].x = abs(data[selected.y][selected.x].x - selected.x);
+    (dummy > distance[selected.y][selected.y].x) ? md-- : md++;
+  }*/
   selected = surroundings(selected, direction);
   changed_num++;
   (changed_nums.back())++;
