@@ -14,9 +14,11 @@
 using namespace std;
 
 // サーバー
-const string ProkonClient::SERVER_ADDRESS="localhost/web2/pic";
+//const string ProkonClient::SERVER_ADDRESS="172.16.1.2";
+const string ProkonClient::SERVER_ADDRESS="localhost/web2/pic/problem/";
 // チーム固有トークン
-const string ProkonClient::TEAM_TOKEN="SKYHIGH\nCHRONOS\nENDLESS\n";
+const string ProkonClient::TEAM_TOKEN="0768109858";
+#define PORT 8080
 
 // コンストラクタ
 ProkonClient::ProkonClient(){
@@ -56,7 +58,7 @@ string ProkonClient::getProblem(int problemNo,QuestionHeader & data){
  probStr << problemNo;
 
  // URL
- string url="http://" + SERVER_ADDRESS + "/problem/prob" + probStr.str() + ".ppm";
+ string url="http://" + SERVER_ADDRESS + "/prob" + probStr.str() + ".ppm";
 #if DEBUG==1
  cout << url << endl;
 #endif
@@ -136,7 +138,7 @@ string ProkonClient::getData(string url,string postData){
  // URL設定
  curl_easy_setopt(curl,CURLOPT_URL,url.c_str());
  // port:8080
- curl_easy_setopt(curl,CURLOPT_PORT,8080);
+ curl_easy_setopt(curl,CURLOPT_PORT,PORT);
  // POSTデータ指定
  curl_easy_setopt(curl,CURLOPT_POSTFIELDS,postData.c_str());
 
