@@ -98,8 +98,18 @@ int solveProbrem(int id){
  img->placement_4();
  // 画像作成
  img->create_result_img();
+ if(img1->chk_result() == true){
+  cout << "result img GOOD" << endl;
+ }else{
+  cout << "result img BAD" << endl;
+ }
  img->fix_pic_to_square();
-// img->disp_img(RESULT_IMG);
+ if(img1->chk_result() == true){
+  cout << "result img GOOD" << endl;
+ }else{
+  cout << "result img BAD" << endl;
+ }
+ // img->disp_img(RESULT_IMG);
  //img->disp_placement();
  //cv::waitKey(0);
  //swapPictureManual(img);
@@ -139,7 +149,7 @@ int solveProbrem(int id){
  }
  // ACCEPTED XXかERRORがかえってくる
  // http://www.procon.gr.jp/modules/smartfaq/category.php?categoryid=23
- 
+
  // もう一度: ここから(1回提出)
 
  bool flag=true;
