@@ -395,34 +395,6 @@ void PPMFILE::disp_cost_list(int cost_select){
 	}
 }
 
-// 横方向に要素を結合していく
-void PPMFILE::add_side( SCRAP &scrap_tmp, int p1_x, int p1_y, int p2_x, int p2_y){
-	int p1, p2;
-	int p1_r, p2_r;
-	pair<int,int> p1_p, p2_p;
-
-	p1_p = make_pair( p1_x, p1_y);
-	p2_p = make_pair( p2_x, p2_y);
-	p1 = scrap_tmp.used_p[p1_p]; // 上にあるピース
-	p2 = scrap_tmp.used_p[p2_p]; // 下にあるピース
-	cout << "add side" << endl;
-	cout << "p1 : " << p1 << " p2 : " << p2 << endl;
-	// それぞれの右側の確率が一番高いピース
-	p1_r = cost_all[p1][DIRE_R][0].second ;
-	p2_r = cost_all[p2][DIRE_R][0].second ;
-	// p1_rの下に来る確率が一番高いのがp2_rだったらそいつらは決定
-	if(cost_all[p1_r][DIRE_D][0].second == p2_r){
-	}
-
-	scrap_tmp.used_p[p1_p] = 100;
-
-	// 左側に ,,
-	p1_r = cost_all[p1][3][0].second ;
-	p2_r = cost_all[p2][3][0].second ;
-}
-
-// 上下方向に結合していく
-
 // 画像を配置していく
 void PPMFILE::placement(void){
 	vector<SCRAP> scraps;
@@ -461,24 +433,6 @@ void PPMFILE::placement(void){
 				scrap_tmp.elements[get<2>(cost_t[i])] = dire_pair;
 				scrap_tmp.used_p[dire_pair] = get<2>(cost_t[i]);
 				convert_scrap_size( &scrap_tmp.width, &scrap_tmp.height, get<3>(cost_t[i]));
-
-				// 上下か左右によって条件分岐 (とりあえず、追加方式はナシで)
-				// switch(get<3>(cost_t[i])){
-				// 	case DIRE_U:
-				// 		add_side( scrap_tmp, 0,0, 0,-1);
-				// 		break;
-				// 	case DIRE_D:
-				// 		add_side( scrap_tmp, 0,0, 0,1);
-				// 		break;
-				// 	case DIRE_R:
-				// 		// add_up( scrap_tmp, 0,0, 1,0);
-				// 		break;
-				// 	case DIRE_L:
-				// 		// add_up( scrap_tmp, 0,0, -1,0);
-				// 		break;
-				// }
-				// cout << "scrap_tmp used_p change ? " << scrap_tmp.used_p[make_pair(0,0)] << endl;
-
 				scraps.push_back(scrap_tmp);
 			}
 			else{						// 2だけつかわれてる
@@ -643,66 +597,6 @@ void PPMFILE::placement(void){
 	}
 	// グローバルに結果をコピー
 	placement_pos = scraps[0].elements;
-}
-
-// 最初に、確実にあってると思われる4ピースを検出する
-void PPMFILE::new_placement(void){
-	vector<int> used_part(part_size_x * part_size_y, -1);
-
-	int p1, p2;
-
-	int core_flg = 0;
-
-	// 最初にある２つのペアからつなげて4つにする
-	for(int i=0; i< cost_t.size() && core_flg == 0; i++){
-		p1 = get<1>(cost_t[i]); // p1,p2はそれぞれもとの場所を指す
-		p2 = get<2>(cost_t[i]);
-
-		int p1_right = cost_all[p1][DIRE_R][0].second;
-		int p2_right = cost_all[p2][DIRE_R][0].second;
-		int p1_right_up = cost_all[p1_right][DIRE_U][0].second;
-		int p1_right_down = cost_all[p1_right][DIRE_D][0].second;
-
-		int p1_up = cost_all[p1][DIRE_U][0].second;
-		int p2_up = cost_all[p2][DIRE_U][0].second;
-		int p1_up_right = cost_all[p1_up][DIRE_R][0].second;
-		int p1_up_left = cost_all[p1_up][DIRE_L][0].second;
-
-		// とりあえず、それらのピースに対して右側と上側しかみてないけどたぶんヒットする
-		// というか、必ず同じ場所を回ってくるはず。
-		switch(get<3>(cost_t[i])){
-			case DIRE_U:
-				if(p1_right_up == p2_right){
-					cout << "sucsess U" << endl;
-					used_part[p1_right] = used_part[p2_right] = 1;
-					core_flg = 1;
-				}
-				break;
-			case DIRE_D:
-				if(p1_right_down == p2_right){
-					cout << "sucsess D" << endl;
-					used_part[p1_right] = used_part[p2_right] = 1;
-					core_flg = 1;
-				}
-				break;
-			case DIRE_R:
-				if(p1_up_right == p2_up){
-					cout << "sucsess R" << endl;
-					cout << "p1 : " << p1 << " p2 : " << p2 << " p1_up : " << p1_up << " p2_up : " << p2_up << " p1_up_right : " << p1_up_right << endl;
-					used_part[p1_up] = used_part[p2_up] = 1;
-					core_flg = 1;
-				}
-				break;
-			case DIRE_L:
-				if(p1_up_left == p2_up){
-					cout << "sucsess L" << endl;
-					used_part[p1_up] = used_part[p2_up] = 1;
-					core_flg = 1;
-				}
-				break;
-		}
-	}
-	used_part[p1] = used_part[p2] = 1;
 }
 
 // 4ピースセット作戦
@@ -1077,14 +971,12 @@ void PPMFILE::placement_4(void){
 						conf_cnt = 0;
 						for(map<int, pair<int,int> >::iterator b = scrap_4_backup[key][n].elements.begin(); b != scrap_4_backup[key][n].elements.end(); b++){
 							int key2 = b->first;
-							cout << "key * " << key2 << endl;
 							if(scrap_4[0][0].elements.find(key2) == scrap_4[0][0].elements.end()){
 								// scrap_4[0][0]にその要素が含まれているか？
 							}else{
 								// 共有しているピースの数をカウントする
 								conf_cnt++;
 							}
-							cout << "i : " << i << " n : " << n << " conf : " << conf_cnt << endl;
 						}
 						if(conf_cnt >= 2){ // 2つ以上かぶっていたら
 							// diffを検索
@@ -1105,10 +997,11 @@ void PPMFILE::placement_4(void){
 								}
 							}
 
-							int diff_x_2 = scrap_4_backup[key][n].elements[key].first - scrap_4_backup[key][0].elements[key].first;
-							int diff_y_2 = scrap_4_backup[key][n].elements[key].second - scrap_4_backup[key][0].elements[key].second;
+							int diff_x_2 = scrap_4_backup[key][n].elements[key].first - scrap_4[i][0].elements[key].first;
+							int diff_y_2 = scrap_4_backup[key][n].elements[key].second - scrap_4[i][0].elements[key].second;
+							// cout << "diff_x : " << diff_x << " diff_y : " << diff_y << endl;
+							// cout << "diff_x_2 : " << diff_x_2 << " diff_y_2 : " << diff_y_2 << endl;
 
-							cout << "dx2 :" << diff_x_2 << " dy2 :" << diff_y_2 << endl;
 							// すべての相対座標のズレが一致しているか?
 							diff_flg = 0;
 #ifdef MERGE_CHK_POS
@@ -1155,12 +1048,12 @@ void PPMFILE::placement_4(void){
 #endif
 										scrap_4[0][0].elements[key] = tmp_pair;
 										scrap_4[0][0].used[tmp_pair] = key;
+										cout << "padding X : " << tmp_pair.first << " padding Y : " << tmp_pair.second << endl;
 									}else{
 										// すでにある -> 無視
 									}
 								}
 							}
-							cerr << "diff_x : " << diff_x << " diff_y : " << diff_y << endl;
 							scrap_4[i][0].elements.clear();
 							scrap_4[i][0].used.clear();
 							break;
@@ -1171,18 +1064,53 @@ void PPMFILE::placement_4(void){
 		}
 	}
 
-#if 0 // 使われていないピースがそもとも間違っている
+	// // 座標の変換
+	int small_x=0, small_y=0;
+
+	// 座標を変換して
+	for(int i=0; i<scrap_4.size(); i++){
+		for(map<int, pair<int,int> >::iterator j = scrap_4[i][0].elements.begin(); j != scrap_4[i][0].elements.end(); j++){
+			pair<int, int> pos = j->second;
+			if(pos.first < small_x)
+				small_x = pos.first;
+			if(pos.second < small_y)
+				small_y = pos.second;
+		}
+		//座標の再配置
+		for(map<int, pair<int,int> >::iterator j = scrap_4[i][0].elements.begin(); j != scrap_4[i][0].elements.end(); j++){
+			int key = j->first;
+			pair<int, int> pos = j->second;
+			scrap_4[i][0].elements[key] = make_pair( (pos.first - small_x), (pos.second - small_y));
+			scrap_4[i][0].used[make_pair( (pos.first - small_x), (pos.second - small_y))] = key;
+		}
+	}
+
+	// 無理やりデータを直してる
+	cout << "convert data set" << endl;
+	{
+		scrap_4[0][0].used.clear();
+		for(map<int, pair<int,int> >::iterator j = scrap_4[0][0].elements.begin(); j != scrap_4[0][0].elements.end(); j++){
+			int key = j->first;
+			pair<int, int> pos = j->second;
+			scrap_4[0][0].used[pos] = key;
+		}
+		scrap_4[0][0].elements.clear();
+		for(map<pair<int,int>, int >::iterator j = scrap_4[0][0].used.begin(); j != scrap_4[0][0].used.end(); j++){
+			pair<int, int> pos = j->first;
+			int key = j->second;
+			scrap_4[0][0].elements[key] = pos;
+		}
+	}
+
+	#if 1 // 使われていないピースがそもとも間違っている
 	// 使われていないピースの計算
  	for(map<int, pair<int,int> >::iterator k = scrap_4[0][0].elements.begin(); k != scrap_4[0][0].elements.end(); k++){
  		int key = k->first;
- 		// pair<int,int> pos = k->second;
  		used_part[key] = 1;
  	}
- 	cout << "Not Used[0][0]" << endl;
  	for(int i=1; i< part_size_x * part_size_y; i++){
  		if(used_part[i] == 0){
  			// 使われていないピースについて
- 			cout << "not use : " << i << endl;
  			for(int n=0; n<4; n++){
  				for(map<int, pair<int,int> >::iterator k = scrap_4_backup[i][n].elements.begin(); k != scrap_4_backup[i][n].elements.end(); k++){
  					int key = k->first;
@@ -1193,6 +1121,7 @@ void PPMFILE::placement_4(void){
  						conf_cnt++;
  					}
  				}
+
  				if(conf_cnt >= 2){ // 2つ以上つながっていたら
  					p1_abs.clear();
  					p2_abs.clear();
@@ -1209,9 +1138,8 @@ void PPMFILE::placement_4(void){
  							//break;
  						}
  					}
- 					int diff_x_2 = scrap_4_backup[i][n].elements[i].first - scrap_4_backup[i][0].elements[i].first;
- 					int diff_y_2 = scrap_4_backup[i][n].elements[i].second - scrap_4_backup[i][0].elements[i].second;
- 					cout << "diff_2_x :" << diff_x_2 << "diff_2_y :" << diff_y_2 << endl;
+ 					int diff_x_2 = 0 ;
+ 					int diff_y_2 = 0 ;
  					// すべての相対座標のズレが一致しているか?
  					diff_flg = 0;
  #ifdef MERGE_CHK_POS
@@ -1231,11 +1159,9 @@ void PPMFILE::placement_4(void){
  								// 追加
  								pair<int,int> tmp_pair = make_pair( pos.first + diff_x + diff_x_2, pos.second + diff_y + diff_y_2);
  								int tmp_pos;
- #ifdef USE_DONT_CONFRICT
  								if(scrap_4[0][0].used.find(tmp_pair) == scrap_4[0][0].used.end()){
  									scrap_4[0][0].elements[key] = tmp_pair;
  									scrap_4[0][0].used[tmp_pair] = key;
- 									cout << "dx2: " << diff_x_2 << " dy2: " << diff_y_2 << endl;
  								}else{
  									tmp_pos = scrap_4[0][0].used[tmp_pair];
  									if(tmp_pos != key){
@@ -1247,7 +1173,6 @@ void PPMFILE::placement_4(void){
  										// 同じ座標を上書きなら無視
  									}
  								}
- #endif
  							}else{
  								// すでにある -> 無視
  							}
@@ -1261,7 +1186,7 @@ void PPMFILE::placement_4(void){
 #endif
 
 	// // 座標の変換
-	int small_x=0, small_y=0;
+	small_x=0, small_y=0;
 #ifdef USE_ALL_PIECE
 	for(int i=0; i<scrap_4.size(); i++){
 		for(map<int, pair<int,int> >::iterator j = scrap_4[i][0].elements.begin(); j != scrap_4[i][0].elements.end(); j++){
@@ -1280,28 +1205,13 @@ void PPMFILE::placement_4(void){
 		}
 	}
 
-	// 無理やりデータを直してる
-	cout << "chk part_2" << endl;
-	scrap_4[0][0].used.clear();
-	for(map<int, pair<int,int> >::iterator j = scrap_4[0][0].elements.begin(); j != scrap_4[0][0].elements.end(); j++){
-		int key = j->first;
-		pair<int, int> pos = j->second;
-		scrap_4[0][0].used[pos] = key;
-	}
-	scrap_4[0][0].elements.clear();
-	for(map<pair<int,int>, int >::iterator j = scrap_4[0][0].used.begin(); j != scrap_4[0][0].used.end(); j++){
-		pair<int, int> pos = j->first;
-		int key = j->second;
-		scrap_4[0][0].elements[key] = pos;
-	}
-
 	// 現在の情報が正しいか
 	cout << "chk part_3" << endl;
 	for(map<int, pair<int,int> >::iterator j = scrap_4[0][0].elements.begin(); j != scrap_4[0][0].elements.end(); j++){
 		int key = j->first;
 		pair<int, int> pos = j->second;
 		if(scrap_4[0][0].elements[key] == pos && scrap_4[0][0].used[pos] == key){
-			cout << "OK" << endl;
+			// cout << "OK" << endl;
 		}else{
 			cout << "ERROR used(" << scrap_4[0][0].used[pos] << ") key :" << key << endl;
 		}
@@ -1456,31 +1366,6 @@ void PPMFILE::set_PosData(PosData *data){
 	}
 }
 
-// 左上のピースを取得してみる
-void PPMFILE::get_left_top(){
-	vector< pair<int,int> > bad_up( part_size_x * part_size_y);
-	vector<bool> used_flg( part_size_x * part_size_y, false);
-
-	cout << " get left top " << endl << endl ;
-	sort( cost_t_all.begin(), cost_t_all.end(), my_compare_2);
-
-	int i2=0;
-	for(int i=0; i < cost_t_all.size(); i++){
-		// 後半のイコールの数字をいじっていい感じのところを持ってくる
-		if(used_flg[get<1>(cost_t_all[i])] == false && get<3>(cost_t_all[i]) == 2){
-			used_flg[get<1>(cost_t_all[i])] = true;
-			cout << " in  :(" << CONV_X(get<1>(cost_t_all[i]))  << "," << CONV_Y(get<1>(cost_t_all[i])) << ") cost" << get<0>(cost_t_all[i]) << endl;
-			bad_up[i2] = (make_pair(get<0>(cost_t_all[i]), get<1>(cost_t_all[i])));
-			i2++;
-		}
-	}
-	sort(bad_up.begin(), bad_up.end());
-
-	for(int i=0; i < bad_up.size(); i++){
-		cout << "score : " << bad_up[i].first << " pos(" << CONV_X(bad_up[i].second) << "," << CONV_Y(bad_up[i].second) << ")" << endl;
-	}
-}
-
 // コストをムダも含めてすべて計算する
 void PPMFILE::calc_cost_all(void){
 	// costのサイズ変更
@@ -1580,22 +1465,6 @@ bool PPMFILE::chk_result(void){
 		return false;
 
 	return false;
-}
-
-int PPMFILE::get_piece_x(){
-	return this->part_size_x;
-}
-
-int PPMFILE::get_piece_y(){
-	return this->part_size_y;
-}
-
-int PPMFILE::get_part_px_x(){
-	return this->part_px_x;
-}
-
-int PPMFILE::get_part_px_y(){
-	return this->part_px_y;
 }
 
 void PPMFILE::create_correct_area_result_img(void){
