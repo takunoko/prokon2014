@@ -9,18 +9,27 @@
 #include "client.h"
 #include "QuestionHeader.hpp"
 
+#define LOCALHOST
+
 #define DEBUG 1
 
 using namespace std;
 
-// サーバー
-const string ProkonClient::SERVER_ADDRESS="172.16.1.2/";
-//const string ProkonClient::SERVER_ADDRESS="localhost/web2/pic/";
-//const string ProkonClient::SERVER_ADDRESS="10.211.55.5";
-// チーム固有トークン
-//const string ProkonClient::TEAM_TOKEN="0768109858";
-const string ProkonClient::TEAM_TOKEN="1";
 #define PORT 80
+
+// サーバー
+#ifdef LOCALHOST
+// ローカルホスト用
+const string ProkonClient::SERVER_ADDRESS="localhost/web2/pic/";
+#undef PORT
+#define PORT 8080
+#else
+// 本番用
+const string ProkonClient::SERVER_ADDRESS="172.16.1.2/";
+#endif
+
+// チーム固有トークン
+const string ProkonClient::TEAM_TOKEN="0768109858";
 
 // コンストラクタ
 ProkonClient::ProkonClient(){

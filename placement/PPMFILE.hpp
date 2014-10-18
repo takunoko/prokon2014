@@ -113,6 +113,9 @@ class PPMFILE{
 		// 配置(4ピース集合バージョン)
 		void placement_4(void);
 
+		// 配置(4ピース集合 逆バージョン)
+		void placement_5(void);
+
 		//PosDataにデータを挿入
 		void set_PosData(PosData *data);
 
@@ -131,6 +134,6 @@ class PPMFILE{
 		// 正しい領域のみの生成した画像作成
 		void create_correct_area_result_img();
 		void disp_for_manual(const string & winname);
-		void fix_manual(const string & winname, int length);
+		void fix_manual(const string & winname);
 		void fix_pic_to_square();
 };

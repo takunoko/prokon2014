@@ -39,7 +39,8 @@ int main(void){
 
 	// ----- この編並び替え -----
 	// img1->placement();
-	img1->placement_4();
+	// placement_4の逆バージョン
+	img1->placement_5();
 
 	// ----- このへん描画 -----
 	// img1->write_line();
@@ -57,7 +58,7 @@ int main(void){
 	img1->disp_img(NUM_IMG);
 
 	//画像を四角くする
-	// img1->fix_pic_to_square();
+	img1->fix_pic_to_square();
 
 	// 回答画像
 	img1->create_result_img();
