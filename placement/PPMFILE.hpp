@@ -131,6 +131,6 @@ class PPMFILE{
 		// 正しい領域のみの生成した画像作成
 		void create_correct_area_result_img();
 		void disp_for_manual(const string & winname);
-		void fix_manual(const string & winname, int length);
+		void fix_manual(const string & winname);
 		void fix_pic_to_square();
 };

@@ -12,6 +12,7 @@ public:
   PosData(int w, int h);
   ~PosData();
   void dispData();
+  void dispOne();
   int getHeight();
   int getWidth();
   Pos getData(Pos p);

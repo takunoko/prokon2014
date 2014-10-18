@@ -7,6 +7,7 @@ typedef class Process8 {
   int start_bound;
   int isCleared;
   int limit;
+  int move;
 protected:
   ID_Data *table;
 
