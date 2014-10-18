@@ -37,12 +37,11 @@ int Pro8::calcParity() {
 
 
 int Pro8::id_search() {
-  move++;
   //printf("D%d,%d\n", table->getMD(), lower_bound);
   //printf("S%d,%d\n", table->getChangedNum(), move);
     //printf("%d\n", table->getMD());
     //table->dispData();
-  if(table->getChangedNum() >= limit) {
+  if(move >= limit) {
     if(table->getMD() <= start_bound) {
       isCleared = 1;
       return 1;
@@ -59,8 +58,10 @@ int Pro8::id_search() {
       if(table->swapSelected(k)) {
         continue;
       }
-      if(table->getChangedNum()+table->getMD() <= limit) {
+      if(move+table->getMD() <= limit) {
+        move++;
         int is = id_search();
+        move--;
         if(is) {
           return 1;
         }
@@ -76,13 +77,30 @@ void Pro8::importData(PosData &data) {
 }
 
 string Pro8::sort() {
-
+  table->findAndSelectData(Pos(table->getWidth()-1, table->getHeight()-1));
+  printf("parity = %d\n", calcParity());
+  if(calcParity() != 0) {
+    table->dispOne();
+    puts("ppppppp");
+    printf("panapp %d, %d\n", table->getWidth()-2, table->getHeight()-1);
+    Pos dummy2 = Pos(table->getWidth()-1, table->getHeight()-1);
+    if(checkPosEqual((dummy2), table->getData(Pos(table->getWidth()-2, table->getHeight()-1))) ) {
+      table->selectData(Pos(table->getWidth()-2, table->getHeight()-2));
+    } else
+      table->selectData(Pos(table->getWidth()-2, table->getHeight()-1));
+    Pos dummy = surroundings(table->getSelected(), RIGHT);
+    if(checkPosEqual((dummy), table->getData(dummy2)) ) {
+      table->swapSelected(LEFT);
+    } else 
+      table->swapSelected(RIGHT);
+  }
   table->findAndSelectData(Pos(table->getWidth()-1, table->getHeight()-1));
   table->dispData();
   table->dispOne();
   table->calcMD();
   printf("---%d\n", table->getMD());
   printf("parity = %d\n", calcParity());
+  start_bound = calcParity();
 
   lower_bound = table->getMD();
   limit = table->getMD();
