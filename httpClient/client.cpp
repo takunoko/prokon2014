@@ -9,7 +9,7 @@
 #include "client.h"
 #include "QuestionHeader.hpp"
 
-#define LOCALHOST
+//#define LOCALHOST
 
 #define DEBUG 1
 
