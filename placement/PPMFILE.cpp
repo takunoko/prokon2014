@@ -1359,19 +1359,14 @@ void PPMFILE::placement_4(void){
 #endif
 
 	// 座標の変換
-	int min_x, min_y;
+	small_x = 0; small_y = 0;
 	for(int i=0; i<scrap_4.size(); i++){
-		min_x=9; min_y=9;
 		for(map<int, pair<int,int> >::iterator j = scrap_4[i][0].elements.begin(); j != scrap_4[i][0].elements.end(); j++){
 			pair<int, int> pos = j->second;
 			if(pos.first < small_x)
 				small_x = pos.first;
-			if(pos.first > min_x)
-				min_x = pos.first;
 			if(pos.second < small_y)
 				small_y = pos.second;
-			if(pos.second > min_y)
-				min_y = pos.second;
 		}
 		//座標の再配置
 		for(map<int, pair<int,int> >::iterator j = scrap_4[i][0].elements.begin(); j != scrap_4[i][0].elements.end(); j++){
