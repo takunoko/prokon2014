@@ -1570,11 +1570,6 @@ void PPMFILE::fix_manual(const string & winname, int length){
 	fill(used_piece_key.begin(),used_piece_key.end(),false);
 	fill(isMapIdEmpty.begin(),isMapIdEmpty.end(),true);
 
-	// キュー表示用画像
-	cv::Mat queueImg(cv::Size(part_px_x*length,part_px_y),CV_8UC3,cv::Scalar(0,0,0));
-	// 表示用ウィンドウ
-	cv::namedWindow(winname,CV_WINDOW_AUTOSIZE);
-
 	// 使われたものを探索する
 	for(map<int, pair<int,int> >::iterator j = placement_pos.begin(); j != placement_pos.end(); j++){
 		int key = j->first;
@@ -1589,34 +1584,8 @@ void PPMFILE::fix_manual(const string & winname, int length){
 	// used_piece_keyに対して
 	for(vector<bool>::iterator j= used_piece_key.begin(); j!=used_piece_key.end();j++){
 		if(! *j){
-			// もし追加前のサイズがlength以下ならqueueImgに追加
 			int key=j-used_piece_key.begin();
 
-#if 0 // 全部表示関係
-			if(processingKey.size()<length){
-				// 画像表示
-				part_img[key].copyTo(
-						queueImg(cv::Rect(
-								processingKey.size()*part_px_x,0,part_px_x,part_px_y
-								))
-						);
-				int baseline=0;
-				cv::Size textSize;
-				textSize=getTextSize(IntToString(key),cv::FONT_HERSHEY_SIMPLEX,PUT_TEXT_SIZE,PUT_TEXT_THICK,&baseline);
-				cv::putText(queueImg,
-						// 表示する文字列
-						IntToString(key),
-						// 表示する位置
-						cv::Point( (processingKey.size() * part_px_x) + (part_px_x/2) - textSize.width/2 , part_px_y - textSize.height/2),
-						// フォントの種類
-						cv::FONT_HERSHEY_SIMPLEX,
-						PUT_TEXT_SIZE, // 文字サイズ
-						cv::Scalar(0,0,200), // 色
-						PUT_TEXT_THICK, //線の太さ
-						CV_AA); // 線の種類
-				// Key表示
-			}
-#endif
 			processingKey.push_back(key);
 		}
 	}
@@ -1635,22 +1604,10 @@ void PPMFILE::fix_manual(const string & winname, int length){
 	// そして表示
 	disp_for_manual(questionPicWindow);
 
-
-	// 線の表示
-	for(int i=1;i<length;i++){
-		cv::line(queueImg , cv::Point( i*part_px_x, 0), cv::Point( i*part_px_x,part_px_y), cv::Scalar( 200, 0, 0), 2, 0);
-	}
-
-	cv::imshow(winname,queueImg);
-
 	// 必要画像表示完了
 	// 入力
 	while(1){
-		if(processingKey.empty()){
-			cv::destroyWindow(winname);
-		}
-		cout << "[d] [n]ext: pop pieces que and push poped data [d]times" << endl
-			<< "ID X,Y: move ID to X,Y or exchange ID and X,Y" << endl
+		cout << "ID X,Y: move ID to X,Y or exchange ID and X,Y" << endl
 			<< "[q]uit: quit fix manual" << endl;
 		getline(cin,buffer);
 		char ch=buffer.at(0);
@@ -1667,6 +1624,7 @@ void PPMFILE::fix_manual(const string & winname, int length){
 			if(buffer.substr(0,space).find_first_not_of("0123456789")==string::npos){
 				int d=atoi(buffer.substr(0,space).c_str());
 				cout << d << endl;
+				// TODO:x,y入力
 			}else{
 				cout << "Input error" << endl;
 			}
