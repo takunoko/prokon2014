@@ -7,7 +7,8 @@ using namespace std;
 
 class ID_Data : public PosData {
 public:
-  list<int> **adjacent;
+  int *data1;
+  list<int> *adjacent;
   Pos selected;
   int md;
   int selected_num, changed_num;

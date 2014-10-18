@@ -38,6 +38,17 @@ void PosData::dispData() {
   puts("");
 }
 
+void PosData::dispOne() {
+  int i, j;
+  for(i = 0; i < height; i++) {
+    for(j = 0; j < width; j++) {
+      printf("%4d", data[i][j].x+data[i][j].y*width);
+    }
+    puts("");
+  }
+  puts("");
+}
+
 Pos PosData::getData(Pos p) {
   return data[p.y][p.x];
 }
@@ -62,6 +73,12 @@ int PosData::getY(int ox, int oy) {
 void PosData::randomizeData() {
   int i, j, x, y;
 
+  for(i = 0; i < height; i++) {
+    for(j = 0; j < width; j++) {
+      data[i][j].x = j;
+      data[i][j].y = i;
+    }
+  }
   for(i = 0; i < height; i++) {
     for(j = 0; j < width; j++) {
       x = rand() % width;

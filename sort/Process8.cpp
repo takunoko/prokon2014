@@ -22,10 +22,12 @@ int Pro8::calcParity() {
   for(i = 0; i < table->getWidth()*table->getHeight(); i++) {
     num = 0;
     data2 = table->getData(Pos(i%table->getWidth(), i/table->getWidth()));
-    for(j = i; j < table->getWidth()*table->getHeight(); j++) {
-      data = table->getData(Pos(j%table->getWidth(), j/table->getWidth()));
-      if(data2.x+data2.y*table->getWidth() > (data.x+data.y*table->getWidth())) {
-        num++;
+    if(!checkPosEqual(Pos(i%table->getWidth(), i/table->getWidth()), table->selected)) {
+      for(j = i; j < table->getWidth()*table->getHeight(); j++) {
+        data = table->getData(Pos(j%table->getWidth(), j/table->getWidth()));
+        if(data2.x+data2.y*table->getWidth() > (data.x+data.y*table->getWidth())) {
+          num++;
+        }
       }
     }
     sum += num;
@@ -35,30 +37,35 @@ int Pro8::calcParity() {
 
 
 int Pro8::id_search() {
+  move++;
   //printf("D%d,%d\n", table->getMD(), lower_bound);
   //printf("S%d,%d\n", table->getChangedNum(), move);
-  if(table->getChangedNum() > limit) {
-    printf("%d\n", table->getMD());
-    table->dispData();
-    if(table->getMD() <= 1) {
+    //printf("%d\n", table->getMD());
+    //table->dispData();
+  if(table->getChangedNum() >= limit) {
+    if(table->getMD() <= start_bound) {
       isCleared = 1;
       return 1;
     }
-  }else {
-    if(table->getChangedNum()+table->getMD() < lower_bound) {
-      for(list<int>::iterator i = table->adjacent[table->selected.y][table->selected.x].begin(); i != table->adjacent[table->selected.y][table->selected.x].end(); i++) {
-        if(getReversedDirection(table->getLastMove()) == *i) {
-          continue;
-        }
-        if(table->swapSelected(*i)) {
-          continue;
-        }
-        int is= id_search();
+  } else {
+    for(int k = 0; k < 8; k+=2) {
+      Pos p = surroundings(table->selected, k);
+      if(!checkInScope(table->getWidth(), table->getHeight(), p.x, p.y)) {
+        continue;
+      }
+      if(getReversedDirection(table->getLastMove()) == k) {
+        continue;
+      }
+      if(table->swapSelected(k)) {
+        continue;
+      }
+      if(table->getChangedNum()+table->getMD() <= limit) {
+        int is = id_search();
         if(is) {
           return 1;
         }
-        table->undo();
       }
+      table->undo();
     }
   }
   return 0;
@@ -69,18 +76,22 @@ void Pro8::importData(PosData &data) {
 }
 
 string Pro8::sort() {
-  limit = 31;
 
   table->findAndSelectData(Pos(table->getWidth()-1, table->getHeight()-1));
+  table->dispData();
+  table->dispOne();
   table->calcMD();
-  //if(calcParity()) return "";
+  printf("---%d\n", table->getMD());
+  printf("parity = %d\n", calcParity());
 
   lower_bound = table->getMD();
-  start_bound = table->getMD()%2;
+  limit = table->getMD();
+  start_bound = calcParity();
   printf("D%d\n", table->getMD());
   isCleared = 0;
+  move = 0;
 
-  for(; isCleared == 0; lower_bound+=2) {
+  for(; isCleared == 0 && limit < 82; limit+=2) {
     id_search();
     printf("asd%d\n", table->getChangedNum());
   }

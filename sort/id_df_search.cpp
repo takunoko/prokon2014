@@ -10,20 +10,6 @@ ID_Data::ID_Data() : PosData() {
 
 ID_Data::ID_Data(int w, int h) : PosData(w, h) {
   md = 0;
-
-  adjacent = new list<int>*[height];
-  for(int i = 0; i < height; i++) {
-    adjacent[i] = new list<int>[width];
-    for(int j = 0; j < width; j++) {
-      Pos p;
-      for(int k = 0; k < 8; k += 2) {
-        p = surroundings(Pos(j, i), k);
-        if(checkInScope(width, height, p.x, p.y)) {
-          adjacent[i][j].push_back(k);
-        }
-      }
-    }
-  }
 }
 
 void ID_Data::calcMD() {
@@ -152,11 +138,15 @@ int ID_Data::swapSelected(int direction) {
     move_flag = 1;
   }
   Pos p = surroundings(selected, direction);
+  if(!checkInScope(width, height, p.x, p.y)) return 1;
   swapData(p.x, p.y, selected.x, selected.y);
-  surroundings(&selected.x, &selected.y, direction);
+  selected = surroundings(selected, direction);
   changed_num++;
-  (*--changed_nums.end())++;
+  (changed_nums.back())++;
   process.push_back(direction);
+  //calcMD();
+
+  return 0;
 }
 
 void ID_Data::undo() {
@@ -166,12 +156,15 @@ void ID_Data::undo() {
     selected_y.pop_back();
     selected_num--;
   }
-  //if(changed_nums.back() <= 0) return;
+  //1if(changed_nums.back() <= 0) return;
   int direction = getReversedDirection((process.back()));
   //process.pop_back();
   Pos p = surroundings(selected, direction);
   swapData(p.x, p.y, selected.x, selected.y);
+  selected = surroundings(selected, direction);
   process.pop_back();
   (changed_nums.back())--;
   changed_num--;
+  //calcMD();
+  //calcMD();
 }
