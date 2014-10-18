@@ -3,7 +3,7 @@
 #include "Pos.h"
 
 class PosData {
-private:
+protected:
   Pos **data;
   int width, height;
 
@@ -14,6 +14,7 @@ public:
   void dispData();
   int getHeight();
   int getWidth();
+  Pos getData(Pos p);
   int getX(int ox, int oy);
   int getY(int ox, int oy);
   void randomizeData();

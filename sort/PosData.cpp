@@ -38,6 +38,10 @@ void PosData::dispData() {
   puts("");
 }
 
+Pos PosData::getData(Pos p) {
+  return data[p.y][p.x];
+}
+
 int PosData::getHeight() {
   return this->height;
 }

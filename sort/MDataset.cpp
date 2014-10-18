@@ -3,19 +3,19 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include "Dataset.h"
+#include "MDataset.h"
 #include "PosData.h"
 #include "util.h"
-#define PRINT 0
+#define PRINT 1
 
 using namespace std;
 
-Dataset::Dataset() {
+MDataset::MDataset() {
   height = width = selected_num = changed_num = move_flag = 0;
   selected.setZero();
 }
 
-Dataset::Dataset(int w, int h) {
+MDataset::MDataset(int w, int h) {
   if(!checkInScope(MAXWIDTH, MAXHEIGHT, w, h)) myerror(1);
   this->width = w;
   this->height = h;
@@ -23,11 +23,24 @@ Dataset::Dataset(int w, int h) {
   makeArray();
 }
 
-Dataset::~Dataset() {
+MDataset::~MDataset() {
   deleteArray();
 }
 
-int Dataset::checkSorted() {
+void MDataset::calcMD() {
+  int i, j;
+
+  mdistance = 0;
+  for(i = 0; i < height; i++) {
+    for(j = 0; j < width; j++) {
+      // 選択しているところのMDは加算しないほうがいいかも
+      if(!checkPosEqual(j, i, selected.x, selected.y))
+        mdistance += abs(data[i][j].x-j) + abs(data[i][j].y-i);
+    }
+  }
+}
+
+int MDataset::checkSorted() {
   int i, j;
 
   for(i = 0; i < height; i++)
@@ -36,50 +49,23 @@ int Dataset::checkSorted() {
   return 1;
 }
 
-int Dataset::checkData(PosData check_data) {
-  int i, j;
-  if(!checkPosEqual(check_data.getWidth(), check_data.getHeight(), width, height)) myerror(1);
-  Pos *dummy = new Pos[width * height];
-
-  for(i = 0; i < height; i++) {
-    for(j = 0; j < width; j++) {
-      if(!checkInScope(width, height, check_data.getX(j, i), check_data.getY(j, i))) {
-        delete [] dummy;
-        return 1;
-      }
-      dummy[height*check_data.getY(j, i) + check_data.getX(j, i)].x = check_data.getX(j, i);
-      dummy[height*check_data.getY(j, i) + check_data.getX(j, i)].y = check_data.getY(j, i);
-    }
-  }
-  for(i = 0; i < height*width; i++) {
-    if(dummy[i].x < 0 || dummy[i].y < 0) {
-      delete [] dummy;
-      return 1;
-    }
-  }
-  delete [] dummy;
-  return 0;
-}
-
-void Dataset::deleteArray() {
+void MDataset::deleteArray() {
   int i;
 
   for(i = 0; i < this->height; i++) {
     delete [] data[i];
-    delete [] distance[i];
   }
   delete [] data;
-  delete [] distance;
 }
 
-void Dataset::dispCost() {
+void MDataset::dispCost() {
 #if PRINT
   printf("(selected=%d, changed=%d)\n", selected_num, changed_num);
 #endif
 }
 
 // xとyに負の値を入れると[]を付けない
-void Dataset::dispData(int x, int y) {
+void MDataset::dispData(int x, int y) {
 #if PRINT
   int i, j;
 
@@ -97,34 +83,19 @@ void Dataset::dispData(int x, int y) {
 #endif
 }
 
-// distanceを表示
-void Dataset::dispDistance() {
-#if PRINT
-  int i, j;
-
-  for(i = 0; i < this->height; i++) {
-    for(j = 0; j < this->width; j++) {
-      printf("[%2d,%2d]", this->distance[i][j].x, this->distance[i][j].y);
-    }
-    puts("");
-  }
-  puts("");
-#endif
-}
-
-void Dataset::findAndSelectData(int x, int y) {
+void MDataset::findAndSelectData(int x, int y) {
   Pos fd;
 
   fd = findData(x, y);
   selectData(fd.x, fd.y);
 }
 
-void Dataset::findAndSelectData(Pos data) {
+void MDataset::findAndSelectData(Pos data) {
   findAndSelectData(data.x, data.y);
 }
 
 // data_xとdata_yの値の入ったdataの要素の場所をxとyに入れる
-Pos Dataset::findData(int data_x, int data_y) {
+Pos MDataset::findData(int data_x, int data_y) {
   int i, j;
   Pos loc;
 
@@ -144,11 +115,31 @@ Pos Dataset::findData(int data_x, int data_y) {
   return Pos(-1, -1);
 }
 
-Pos Dataset::findData(Pos data) {
-  return findData(data.x, data.y);
+Pos MDataset::findData(Pos data) {
+  int i, j;
+  Pos loc;
+
+  if(!checkInScope(width, height, data.x, data.y)) myerror(1);
+  for(i = 0; i < this->height; i++) {
+    for(j = 0; j < this->width; j++) {
+      if(checkPosEqual(this->data[i][j].x, this->data[i][j].y, data.x, data.y)) {
+        loc.x = j;
+        loc.y = i;
+        return loc;
+      }
+    }
+  }
+#if PRINT
+  puts("Cant find data");
+#endif
+  return Pos(-1, -1);
 }
 
-Pos Dataset::getData(int x, int y) {
+int MDataset::getChangedNum() {
+  return changed_num;
+}
+
+Pos MDataset::getData(int x, int y) {
   Pos dummy;
   if(!checkInScope(width, height, x, y)) myerror(1);
   dummy.x = data[y][x].x;
@@ -157,36 +148,31 @@ Pos Dataset::getData(int x, int y) {
   return dummy;
 }
 
-Pos Dataset::getDistance(int x, int y) {
-  Pos dummy;
-  if(!checkInScope(width, height, x, y)) myerror(1);
-  dummy.x = distance[y][x].x;
-  dummy.y = distance[y][x].y;
-
-  return dummy;
+int MDataset::getDistance() {
+  return mdistance;
 }
 
-int Dataset::getWidth() {
+int MDataset::getLastMove() {
+  return process.back();
+}
+
+int MDataset::getWidth() {
   return this->width;
 }
 
-int Dataset::getHeight() {
+int MDataset::getHeight() {
   return this->height;
 }
 
-Pos Dataset::getSelected() {
+Pos MDataset::getSelected() {
   return selected;
 }
 
-Pos Dataset::getSelectedData() {
+Pos MDataset::getSelectedData() {
   return getData(selected.x, selected.y);
 }
 
-Pos Dataset::getSelectedDistance() {
-  return getDistance(selected.x, selected.y);
-}
-
-string Dataset::getStringSortData() {
+string MDataset::getStringSortData() {
   string str = "";
   char ss[3];
   int i, j;
@@ -199,6 +185,7 @@ string Dataset::getStringSortData() {
   str += to_string(selected_num);
   str += "\n";
   for(i = 0; i < selected_num; i++, p1_x++, p1_y++, p2++) {
+    printf("-----%X%X\n", *p1_x, *p1_y);
     sprintf(ss, "%X", *p1_x);
     str += ss;
     sprintf(ss, "%X", *p1_y);
@@ -214,19 +201,19 @@ string Dataset::getStringSortData() {
   return str;
 }
 
-int Dataset::getX(int ox, int oy) {
+int MDataset::getX(int ox, int oy) {
   if(!checkInScope(width, height, ox, oy)) myerror(1);
   return data[oy][ox].x;
 }
 
-int Dataset::getY(int ox, int oy) {
+int MDataset::getY(int ox, int oy) {
   if(!checkInScope(width, height, ox, oy)) myerror(1);
   return data[oy][ox].y;
 }
 
 
 // 未完成。コピーコンストラクタとか
-void Dataset::importData(PosData &import_data) {
+void MDataset::importData(PosData &import_data) {
   int i, j;
 
   //if(checkData(import_data)) myerroR(1);
@@ -240,25 +227,21 @@ void Dataset::importData(PosData &import_data) {
 }
 
 // dataとdistanceの領域を確保
-void Dataset::makeArray() {
+void MDataset::makeArray() {
   int i, j;
 
   data = new Pos*[height];
-  distance = new Pos*[height];
   for(i = 0; i < height; i++) {
     data[i] = new Pos[width];
-    distance[i] = new Pos[width];
     for(j = 0; j < width; j++) {
       data[i][j].x = j;
       data[i][j].y = i;
-      distance[i][j].x = 0;
-      distance[i][j].y = 0;
     }
   }
 }
 
 // dataをごちゃまぜにかき回す
-void Dataset::randomizeData() {
+void MDataset::randomizeData() {
   int i, j, x, y;
 
   resetData();
@@ -273,21 +256,19 @@ void Dataset::randomizeData() {
 }
 
 // dataを綺麗にソートされた状態にする
-void Dataset::resetData() {
+void MDataset::resetData() {
   int i, j;
 
   for(i = 0; i < this->height; i++) {
     for(j = 0; j < this->width; j++) {
       this->data[i][j].x = j;
       this->data[i][j].y = i;
-      this->distance[i][j].x = 0;
-      this->distance[i][j].y = 0;
     }
   }
   selected_num = changed_num = move_flag = 0;
 }
 
-void Dataset::selectData(int x, int y) {
+void MDataset::selectData(int x, int y) {
   if(!checkInScope(width, height, x, y)) myerror(1);
   if(checkPosEqual(x, y, selected.x, selected.y)) return;
   selected.x = x;
@@ -295,54 +276,83 @@ void Dataset::selectData(int x, int y) {
   move_flag = 0;
 }
 
-void Dataset::setDistance(int x, int y) {
-  if(!checkInScope(width, height, x, y)) myerror(1);
-  distance[y][x].x = data[y][x].x - x;
-  distance[y][x].y = data[y][x].y - y;
-}
-
-void Dataset::swapData(int x1, int y1, int x2, int y2) {
+void MDataset::swapData(int x1, int y1, int x2, int y2) {
   if(!checkInScope(width, height, x1, y1)) myerror(1);
   if(!checkInScope(width, height, x2, y2)) myerror(1);
 
   swapPos(&data[y1][x1], &data[y2][x2]);
-  setDistance(x1, y1);
-  setDistance(x2, y2);
 }
 
-void Dataset::swapNext(int x, int y, int direction) {
+void MDataset::swapNext(int x, int y, int direction) {
   int dx = x;
   int dy = y;
 
-  if(!checkInScope(width, height, x, y)) myerror(1);
+  if(!checkInScope(width, height, x, y)) return;
   if(direction < EQUAL || direction >= DIRECTION_NUM) myerror(1);
   surroundings(&dx, &dy, direction);
   swapData(dx, dy, x, y);
 }
 
-void Dataset::swapSelected(int direction) {
+int MDataset::swapSelected(int direction) {
   if(direction == EQUAL) {
 #if PRINT
     puts("direction = EQUAL");
 #endif
-    return;
+    myerror(1);
   } else if(direction % 2 == 1) {
 #if PRINT
     puts("naname direction");
 #endif
-    return;
+    myerror(1);
   }
   if(move_flag == 0) {
     selected_num++;
-
     selected_x.push_back(selected.x);
     selected_y.push_back(selected.y);
     changed_nums.push_back(0);
     move_flag = 1;
   }
+
+  Pos d = surroundings(selected, direction);
+  if(!checkInScope(width, height, d.x, d.y)) return 1;
+  
+  if(direction == RIGHT || direction == LEFT) {
+    /*if(getDirectionLR(data[selected.y][selected.x].x, selected.x) != direction) {
+      mdistance--;
+    } else {
+      mdistance++;
+    }*/
+    if(getDirectionLR(data[d.y][d.x].x, d.x) == direction) {
+      mdistance--;
+    } else {
+      mdistance++;
+    }
+  } else if(direction == UP || direction == DOWN){
+    /*if(getDirectionUD(data[selected.y][selected.x].y, selected.y) != direction) {
+      mdistance--;
+    } else {
+      mdistance++;
+    }*/
+    if(getDirectionUD(data[d.y][d.x].y, d.y) == direction) {
+      mdistance--;
+    } else {
+      mdistance++;
+    }
+  }
   swapNext(selected.x, selected.y, direction);
   surroundings(&selected.x, &selected.y, direction);
   changed_num++;
-  (*--changed_nums.end())++;
+  (changed_nums.back())++;
   process.push_back(direction);
+
+  return 0;
+}
+
+void MDataset::undo() {
+  //if(changed_nums.back() <= 0) return;
+  swapSelected(getReversedDirection((process.back())));
+  //process.pop_back();
+  process.pop_back();
+  (changed_nums.back())-=1;
+  changed_num-=1;
 }
