@@ -17,7 +17,7 @@
 #include "sort/Process5.h"
 
 // デバッグ用
-#define VERBOSE
+//#define VERBOSE
 
 using namespace std;
 
@@ -98,13 +98,13 @@ int solveProbrem(int id){
  img->placement_4();
  // 画像作成
  img->create_result_img();
+ img->fix_pic_to_square();
 // img->disp_img(RESULT_IMG);
- img->disp_placement();
+ //img->disp_placement();
  //cv::waitKey(0);
- swapPictureManual(img);
+ //swapPictureManual(img);
 
  // placement後のデータをどうにかしないとヤバイ
-#if 1
  img->set_PosData(data);
  data->dispData();
 
@@ -133,19 +133,29 @@ int solveProbrem(int id){
  }
  // ACCEPTED XXかERRORがかえってくる
  // http://www.procon.gr.jp/modules/smartfaq/category.php?categoryid=23
+ 
+ // もう一度: ここから(1回提出)
 
- int error_part = 0;
- // 結果出力
- cout << res << endl;
- if(res=="ERROR"){
-  cout << "ERROR OCCURED" << endl;
- }else if(res.substr(0,8)=="ACCEPTED"){
-  error_part = atoi(res.substr(8).c_str());
-  cout << atoi(res.substr(8).c_str()) << endl;
+ bool flag=true;
+ for(int i=0;i<9 && flag;i++){
+  int error_part = 0;
+  // 結果出力
+  cout << res << endl;
+  if(res=="ERROR"){
+   cout << "ERROR OCCURED" << endl;
+  }else if(res.substr(0,8)=="ACCEPTED"){
+   error_part = atoi(res.substr(8).c_str());
+   cout << atoi(res.substr(8).c_str()) << endl;
+  }
+  // データ書き換え
   swapPictureManual(img);
+  img->set_PosData(data);
+  data->dispData();
+  sort->importData(*data);
+  string sortResult=sort->sort();
+  res=client.sendAnswer(id,sortResult);
+  cout << sortResult << endl;
  }
-
-#endif
 
  return EXIT_SUCCESS;
 
