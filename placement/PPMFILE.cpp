@@ -18,6 +18,7 @@
 #define USE_DONT_CONFRICT
 #define MERGE_CHK_POS
 #define MERGE_ONE // 残っているピースをマージ
+#define USE_ALL_PIECE // 使われてないピースを全部使う
 
 // デバッグ用
 #define VERBOSE
@@ -707,7 +708,6 @@ void PPMFILE::new_placement(void){
 // 4ピースセット作戦
 // 戦略としては、すべてのピースに対して自分の近くの4ピースを検索する。
 // 自分付近の4ピースは計4つあるが、これについては最も良い物を作成する
-// 1*n n*1 の場合には正しく動作しない
 void PPMFILE::placement_4(void){
 	// <コスト, ルート, 自分の座標, 遷移1, 遷移2, 遷移3, 最強点の数>
 	// ルートは 0: URDL / 1: RDLU / 2: DLUR / 3:LURD
@@ -1171,7 +1171,7 @@ void PPMFILE::placement_4(void){
 		}
 	}
 
-#if 0
+#if 0 // 使われていないピースがそもとも間違っている
 	// 使われていないピースの計算
  	for(map<int, pair<int,int> >::iterator k = scrap_4[0][0].elements.begin(); k != scrap_4[0][0].elements.end(); k++){
  		int key = k->first;
@@ -1260,8 +1260,9 @@ void PPMFILE::placement_4(void){
  	}
 #endif
 
-	// 座標の変換
+	// // 座標の変換
 	int small_x=0, small_y=0;
+#ifdef USE_ALL_PIECE
 	for(int i=0; i<scrap_4.size(); i++){
 		for(map<int, pair<int,int> >::iterator j = scrap_4[i][0].elements.begin(); j != scrap_4[i][0].elements.end(); j++){
 			pair<int, int> pos = j->second;
@@ -1281,20 +1282,21 @@ void PPMFILE::placement_4(void){
 
 	// 無理やりデータを直してる
 	cout << "chk part_2" << endl;
+	scrap_4[0][0].used.clear();
 	for(map<int, pair<int,int> >::iterator j = scrap_4[0][0].elements.begin(); j != scrap_4[0][0].elements.end(); j++){
 		int key = j->first;
 		pair<int, int> pos = j->second;
-		if(scrap_4[0][0].elements[key] == pos && scrap_4[0][0].used[pos] == key){
-			//cout << "OK" << endl;
-		}else{
-			scrap_4[0][0].elements.erase(key);
-			cout << "erace" << endl;
-			//cout << "ERROR used(" << scrap_4[0][0].used[pos] << ") key :" << key << endl;
-		}
+		scrap_4[0][0].used[pos] = key;
+	}
+	scrap_4[0][0].elements.clear();
+	for(map<pair<int,int>, int >::iterator j = scrap_4[0][0].used.begin(); j != scrap_4[0][0].used.end(); j++){
+		pair<int, int> pos = j->first;
+		int key = j->second;
+		scrap_4[0][0].elements[key] = pos;
 	}
 
 	// 現在の情報が正しいか
-	cout << "chk part_2" << endl;
+	cout << "chk part_3" << endl;
 	for(map<int, pair<int,int> >::iterator j = scrap_4[0][0].elements.begin(); j != scrap_4[0][0].elements.end(); j++){
 		int key = j->first;
 		pair<int, int> pos = j->second;
@@ -1316,41 +1318,67 @@ void PPMFILE::placement_4(void){
 
 	// 使われてないピースをとりあえず四角の中に入れる
 	int map_x=0, map_y=0;
-	int flg_loop = 1;
-	cout << "無理やり代入" << endl;
+	int loop_chk = 1;
+	cout << "使われていないピースの補完" << endl;
 	for(int i=0; i<part_size_x * part_size_y; i++){
 		if(used_part[i] == 1){
 			// 要素が入っていた場合
 		}else{
-			cout << "in Data" << endl;
-			for(;map_y < part_size_y && flg_loop == 1; map_y++){
-				for(;map_x < part_size_x && flg_loop == 1; map_x++){
+			// その要素がなかった場合
+			cout << "USE :" << i << endl;
+			for(map_y = 0; map_y < part_size_y && loop_chk == 1; map_y++){
+				for(map_x = 0; map_x < part_size_x && loop_chk == 1; map_x++){
 					// 順番に四角内で見つけた場所に入れていく
-					if(scrap_4[0][0].used.find( make_pair(map_x,map_y)) == scrap_4[0][0].used.begin()){
+					if(scrap_4[0][0].used.find( make_pair(map_x,map_y)) == scrap_4[0][0].used.end()){
 						scrap_4[0][0].used[make_pair(map_x,map_y)] = i;
 						scrap_4[0][0].elements[i] = make_pair(map_x,map_y);
-						flg_loop = 0;
-						cout << "in Data" << endl;
+						cout << "in Data :" << i << endl;
+						loop_chk = 0;
+					}else{
+						cout << "cant insert : " << i << endl;
 					}
 				}
 			}
-			flg_loop = 1;
+			loop_chk = 1;
 		}
 	}
 
+	// 使われていないピースの計算
+	for(int i=0; i<part_size_x* part_size_y; i++){
+		used_part[i] = 0;
+	}
+	for(map<int, pair<int,int> >::iterator k = scrap_4[0][0].elements.begin(); k != scrap_4[0][0].elements.end(); k++){
+		int key = k->first;
+		used_part[key] = 1;
+	}
+
+	for(int i=0; i<part_size_x * part_size_y; i++){
+		if(scrap_4[0][0].elements.find(i) == scrap_4[0][0].elements.end())
+			cout << "do not use " << i << endl;
+	}
+#endif
+
 	// 座標の変換
+	int min_x, min_y;
 	for(int i=0; i<scrap_4.size(); i++){
+		min_x=9; min_y=9;
 		for(map<int, pair<int,int> >::iterator j = scrap_4[i][0].elements.begin(); j != scrap_4[i][0].elements.end(); j++){
 			pair<int, int> pos = j->second;
 			if(pos.first < small_x)
 				small_x = pos.first;
+			if(pos.first > min_x)
+				min_x = pos.first;
 			if(pos.second < small_y)
 				small_y = pos.second;
+			if(pos.second > min_y)
+				min_y = pos.second;
 		}
 		//座標の再配置
 		for(map<int, pair<int,int> >::iterator j = scrap_4[i][0].elements.begin(); j != scrap_4[i][0].elements.end(); j++){
 			int key = j->first;
 			pair<int, int> pos = j->second;
+			// scrap_4[i][0].elements[key] = make_pair( (pos.first - small_x)-min_x, (pos.second - small_y)-min_y);
+			// scrap_4[i][0].used[make_pair( (pos.first - small_x)-min_x, (pos.second - small_y) - min_y)] = key;
 			scrap_4[i][0].elements[key] = make_pair( (pos.first - small_x), (pos.second - small_y));
 			scrap_4[i][0].used[make_pair( (pos.first - small_x), (pos.second - small_y))] = key;
 		}
