@@ -1676,100 +1676,131 @@ void PPMFILE::fix_manual(const string & winname, int length){
 	// 表示用ウィンドウ
 	const string questionPicWindow="questionPicWindow";
 
-	// 間違っていると思われるピース
-	const size_t size=part_size_x*part_size_y;
-	vector<bool> used_piece_key(size);
-	// 未使用データ
-	vector<int> processingKey;
-	// 全てを使われなかったことにする
-	fill(used_piece_key.begin(),used_piece_key.end(),false);
-
-	// キュー表示用画像
-	cv::Mat queueImg(cv::Size(part_px_x*length,part_px_y),CV_8UC3,cv::Scalar(0,0,0));
-	// 表示用ウィンドウ
-	cv::namedWindow(winname,CV_WINDOW_AUTOSIZE);
+	// 自動修正
+	fix_pic_to_square();
 
 	// 現段階での正しい領域内に有る画像を作成する
 	create_correct_area_result_img();
 	// そして表示
 	disp_for_manual(questionPicWindow);
 
+	// 必要画像表示完了
+	// 入力
+	while(1){
+		cout << "ID1 ID2: swap ID1 and ID2" << endl
+			<< "[u]pdate : update window" << endl
+			<< "[q]uit: quit fix manual" << endl;
+		getline(cin,buffer);
+		char ch=buffer.at(0);
+		if(ch=='q'){
+			break;
+		}else if(ch=='u'){
+			cv::destroyWindow(questionPicWindow);
+			// 現段階での正しい領域内に有る画像を作成する
+			create_correct_area_result_img();
+			// そして表示
+			disp_for_manual(questionPicWindow);
+		}else{
+			int space=buffer.find(' ');
+			if(buffer.substr(0,space).find_first_not_of("0123456789")==string::npos){
+				int id1=atoi(buffer.substr(0,space).c_str());
+				int id2=atoi(buffer.substr(space+1).c_str());
+
+				buffer=buffer.substr(space+1);
+				pair<int,int>tmp;
+
+				if(placement_pos.find(id1)!=placement_pos.end()&&
+						placement_pos.find(id2)!=placement_pos.end()){
+					// これでいけるかわからない
+					tmp=placement_pos[id1];
+					placement_pos[id1]=placement_pos[id2];
+					placement_pos[id2]=tmp;
+				}else{
+					cout << "Input Error" << endl;
+				}
+			}else{
+				cout << "Input error" << endl;
+			}
+		}
+	}
+}
+
+#undef VERBOSE
+// 自動(力技)修正
+void PPMFILE::fix_pic_to_square(){
+	// セル個数
+	size_t cellLength=part_size_x*part_size_y;
+	// 空きマス(解析後座標)
+	vector<bool> isMapIdEmpty(cellLength);
+	// ピースが使われたか否か(解析前座標)
+	vector<bool> used_piece_key(cellLength);
+
+	// 未使用データの配列
+	vector<int> processingKey;
+
+	// 全てを使われなかったことにする
+	fill(used_piece_key.begin(),used_piece_key.end(),false);
+	fill(isMapIdEmpty.begin(),isMapIdEmpty.end(),true);
+
 	// 使われたものを探索する
 	for(map<int, pair<int,int> >::iterator j = placement_pos.begin(); j != placement_pos.end(); j++){
 		int key = j->first;
 		// x,y
 		pair<int, int> pos = j->second;
-		// 使われているならば
+#ifdef VERBOSE
+		cerr << "key: " << key << endl
+			<< "x: " << pos.first << " , y: " << pos.second << endl;
+#endif
+		// 指定範囲内ならば
 		if(pos.first < this->part_size_x && pos.second < this->part_size_y ){
+			//使う扱いにする
 			used_piece_key[key]=true;
+			isMapIdEmpty[CONV_XY(pos.first,pos.second)]=false;
+		}
+		else{
+			cerr << "not in maps" << endl;
 		}
 	}
+
+#ifdef VERBOSE
+	cerr << "map cell empty check" << endl;
+	for(vector<bool>::iterator j = isMapIdEmpty.begin(); j != isMapIdEmpty.end(); j++){
+		if(*j){
+			cerr << (j- isMapIdEmpty.begin() ) << endl;
+		}
+	}
+#endif
+
 	// used_piece_keyに対して
 	for(vector<bool>::iterator j= used_piece_key.begin(); j!=used_piece_key.end();j++){
 		if(! *j){
-			// もし追加前のサイズがlength以下ならqueueImgに追加
+			// 要素番号を抜き出す
 			int key=j-used_piece_key.begin();
-			if(processingKey.size()<length){
-				// 画像表示
-				part_img[key].copyTo(
-						queueImg(cv::Rect(
-								processingKey.size()*part_px_x,0,part_px_x,part_px_y
-								))
-						);
-				int baseline=0;
-				cv::Size textSize;
-				textSize=getTextSize(IntToString(key),cv::FONT_HERSHEY_SIMPLEX,PUT_TEXT_SIZE,PUT_TEXT_THICK,&baseline);
-				cv::putText(queueImg,
-						// 表示する文字列
-						IntToString(key),
-						// 表示する位置
-						cv::Point( (processingKey.size() * part_px_x) + (part_px_x/2) - textSize.width/2 , part_px_y - textSize.height/2),
-						// フォントの種類
-						cv::FONT_HERSHEY_SIMPLEX,
-						PUT_TEXT_SIZE, // 文字サイズ
-						cv::Scalar(0,0,200), // 色
-						PUT_TEXT_THICK, //線の太さ
-						CV_AA); // 線の種類
-				// Key表示
-			}
+			// 使ってないkeyが入る
 			processingKey.push_back(key);
 		}
 	}
 
-	// 線の表示
-	for(int i=1;i<length;i++){
-		cv::line(queueImg , cv::Point( i*part_px_x, 0), cv::Point( i*part_px_x,part_px_y), cv::Scalar( 200, 0, 0), 2, 0);
-	}
-
-	cv::imshow(winname,queueImg);
-
-	// 必要画像表示完了
-	// 入力
-	while(1){
-		if(processingKey.empty()){
-			cv::destroyWindow(winname);
+#ifdef VERBOSE
+	cerr << "out of map cell" << endl;
+	for(vector<bool>::iterator j = used_piece_key.begin(); j != used_piece_key.end(); j++){
+		if(*j){
+			cerr << (j- isMapIdEmpty.begin() ) << endl;
 		}
-		cout << "[d] [n]ext: pop pieces que and push poped data [d]times" << endl
-			<< "ID X,Y: move ID to X,Y or exchange ID and X,Y" << endl
-			<< "[q]uit: quit fix manual" << endl;
-		getline(cin,buffer);
-		char ch=buffer.at(0);
-		if(ch=='q'){
-			if(false&&!processingKey.empty()){
-				cout << "Queue is not empty" << endl
-					<< "Please to empty queue before quit." << endl;
-			}else{
-				break;
-			}
-		}else{
-			// 最初が数値だったら
-			int space=buffer.find(' ');
-			if(buffer.substr(0,space).find_first_not_of("0123456789")==string::npos){
-				int d=atoi(buffer.substr(0,space).c_str());
-				cout << d << endl;
-			}else{
-				cout << "Input error" << endl;
-			}
+	}
+#endif
+
+	// 外にあるものを全て開いているところに
+	vector<int>::iterator usingKey = processingKey.begin();
+	cout <<"processing:" <<  (processingKey.end() - processingKey.begin()) << endl;
+	for(vector<bool>::iterator j=isMapIdEmpty.begin();j!=isMapIdEmpty.end();j++){
+		if(*j){
+			int pos=j-isMapIdEmpty.begin();
+			cerr <<"pos:" <<  (j-isMapIdEmpty.begin()) << endl
+				<< "key: " << *usingKey <<  endl;
+			// 使われていないものを入れていく
+			placement_pos[*usingKey]=pair<int,int>(CONV_X(pos) , CONV_Y(pos) );
+			usingKey++;
 		}
 	}
 }

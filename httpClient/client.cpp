@@ -14,7 +14,7 @@
 using namespace std;
 
 // サーバー
-//const string ProkonClient::SERVER_ADDRESS="172.168.1.2";
+//const string ProkonClient::SERVER_ADDRESS="172.16.1.2";
 const string ProkonClient::SERVER_ADDRESS="localhost/web2/pic/";
 // チーム固有トークン
 const string ProkonClient::TEAM_TOKEN="0768109858";
