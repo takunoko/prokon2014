@@ -2,17 +2,22 @@
 #include <stdlib.h>
 #include "Pos.h"
 #include "util.h"
-#include "id_df_search.h"
+#include "HIData.h"
 #define PRINT 1
 
-ID_Data::ID_Data() : PosData() {
+HIData::HIData() {
 }
 
-ID_Data::ID_Data(int w, int h) : PosData(w, h) {
+HIData::HIData(int w, int h) {
+  width = w;
+  height = h;
   md = 0;
+
+  data = new int[w*h];
+  distance = new int[w*h];
 }
 
-void ID_Data::calcMD() {
+void HIData::calcMD() {
   int i, j;
 
   md = 0;
@@ -20,56 +25,60 @@ void ID_Data::calcMD() {
     for(j = 0; j < width; j++) {
       // 選択しているところのMDは加算しないほうがいいかも
       if(!checkPosEqual(j, i, selected.x, selected.y))
-        md += abs(data[i][j].x-j) + abs(data[i][j].y-i);
+        md += abs(data[convertHex(j, i)]%width-j) + abs(data[convertHex(j, i)]/width-i);
     }
   }
 }
 
-void ID_Data::findAndSelectData(Pos p) {
-  Pos fd;
+void HIData::dispData() {
+  int i, j;
+
+  for(i = 0; i < height; i++) {
+    for(j = 0; j < width; j++) {
+      printf("%3d", data[convertHex(j, i)]);
+    }
+    puts("");
+  }
+  puts("");
+}
+
+void HIData::findAndSelectData(int p) {
+  int fd;
 
   fd = findData(p);
   selectData(fd);
 }
 
-// data_xとdata_yの値の入ったdataの要素の場所をxとyに入れる
-Pos ID_Data::findData(Pos p) {
-  int i, j;
-  Pos loc;
+int HIData::findData(int p) {
+  int i;
 
-  if(!checkInScope(width, height, p.x, p.y)) myerror(1);
+  if(p < 0 || p >= width*height) myerror(1);
   for(i = 0; i < this->height; i++) {
-    for(j = 0; j < this->width; j++) {
-      if(checkPosEqual(this->data[i][j], p)) {
-        loc.x = j;
-        loc.y = i;
-        return loc;
-      }
-    }
+    if(i == p) return i;
   }
 #if PRINT
   puts("Cant find data");
 #endif
-  return Pos(-1, -1);
+  return -1;
 }
 
-int ID_Data::getChangedNum() {
+int HIData::getChangedNum() {
   return changed_num;
 }
 
-int ID_Data::getLastMove() {
+int HIData::getLastMove() {
   return process.back();
 }
 
-int ID_Data::getMD() {
+int HIData::getMD() {
   return md;
 }
 
-Pos ID_Data::getSelected() {
+Pos HIData::getSelected() {
   return selected;
 }
 
-string ID_Data::getStringSortData() {
+string HIData::getStringSortData() {
   string str = "";
   char ss[3];
   int i, j;
@@ -97,27 +106,30 @@ string ID_Data::getStringSortData() {
   return str;
 }
 
-void ID_Data::importData(PosData &import_data) {
+void HIData::importData(PosData &import_data) {
   int i, j;
 
   //if(checkData(import_data)) myerroR(1);
   for(i = 0; i < import_data.getHeight(); i++) {
     for(j = 0; j < import_data.getWidth(); j++) {
-      this->data[i][j].x = import_data.getX(j, i);
-      this->data[i][j].y = import_data.getY(j, i);
+      data[convertHex(j, i)] = convertHex(import_data.getX(j, i), import_data.getY(j, i));
     }
   }
   dispData();
 }
 
-void ID_Data::selectData(Pos p) {
-  if(!checkInScope(width, height, p.x, p.y)) myerror(1);
-  if(checkPosEqual(p.x, p.y, selected.x, selected.y)) return;
-  selected = p;
+void HIData::selectData(int p) {
+  if(p < 0 || p >= width*height) myerror(1);
+  if(p == convertHex(selected.x, selected.y)) return;
+  selected = Pos(convertX(p), convertY(p));
   move_flag = 0;
 }
 
-int ID_Data::swapSelected(int direction) {
+void HIData::swapData(int p1, int p2) {
+  swapNum(&data[p1], &data[p2]);
+}
+
+int HIData::swapSelected(int pos) {
   if(direction == EQUAL) {
 #if PRINT
     puts("direction = EQUAL");
@@ -139,7 +151,7 @@ int ID_Data::swapSelected(int direction) {
   }
   Pos p = surroundings(selected, direction);
   if(!checkInScope(width, height, p.x, p.y)) return 1;
-  swapData(p.x, p.y, selected.x, selected.y);
+  swapData(, selected.x, selected.y);
   selected = surroundings(selected, direction);
   changed_num++;
   (changed_nums.back())++;
@@ -149,7 +161,7 @@ int ID_Data::swapSelected(int direction) {
   return 0;
 }
 
-void ID_Data::undo() {
+void HIData::undo() {
   if((changed_nums.back()) <= 0) {
     changed_nums.pop_back();
     selected_x.pop_back();
