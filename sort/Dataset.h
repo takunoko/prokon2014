@@ -40,6 +40,7 @@ public:
   void findAndSelectData(Pos data);
   Pos findData(int data_x, int data_y);
   Pos findData(Pos data);
+  int getChangedNum();
   Pos getData(int x, int y);
   Pos getDistance(int x, int y);
   int getHeight();

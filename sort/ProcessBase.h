@@ -15,6 +15,7 @@ public:
   ProcessBase(int width, int height);
   ProcessBase(int width, int height, int max_select, int select_cost, int change_cost);
   ~ProcessBase();
+  int getChangedNum();
   void importData(PosData &data);
 } ProBase;
 
