@@ -124,6 +124,12 @@ int solveProbrem(int id){
  try {
   // 引数に問題番号を指定して画像のバイナリstringを返す(cv::Mat形式にするかも)
   string sortResult=sort->sort();
+  // \nを\x0d\x0aに変換
+  string::size_type Pos=sortResult.find('\n');
+  while(Pos!=string::npos){
+   sortResult.replace(Pos,1,"\x0d\x0a");
+   Pos=sortResult.find('\n',Pos+2);
+  }
   res=client.sendAnswer(id,sortResult);
   cout << sortResult << endl;
  } catch (char const * exception) {
@@ -147,12 +153,23 @@ int solveProbrem(int id){
    error_part = atoi(res.substr(8).c_str());
    cout << atoi(res.substr(8).c_str()) << endl;
   }
+  cout << "No2" << endl;
   // データ書き換え
   swapPictureManual(img);
+  cout << "Setting" << endl;
   img->set_PosData(data);
-  data->dispData();
+  //data->dispData();
+  cout << "importing" << endl;
   sort->importData(*data);
+
   string sortResult=sort->sort();
+  string::size_type Pos=sortResult.find('\n');
+  while(Pos!=string::npos){
+   sortResult.replace(Pos,1,"\x0d\x0a");
+   Pos=sortResult.find('\n',Pos+2);
+  }
+  cout << "sending..." << endl;
+
   res=client.sendAnswer(id,sortResult);
   cout << sortResult << endl;
  }
