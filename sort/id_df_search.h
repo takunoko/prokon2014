@@ -6,7 +6,8 @@
 using namespace std;
 
 class ID_Data : public PosData {
-  list<Pos> **adjacent;
+public:
+  list<int> **adjacent;
   Pos selected;
   int md;
   int selected_num, changed_num;
@@ -26,6 +27,7 @@ public:
   int getChangedNum();
   int getLastMove();
   int getMD();
+  Pos getSelected();
   string getStringSortData();
   void importData(PosData &import_data);
   void selectData(Pos p);

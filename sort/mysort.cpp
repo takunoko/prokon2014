@@ -10,8 +10,8 @@
 #include "Process5.h"
 #include "Process6.h"
 #include "Process8.h"
-#define WIDTH 16
-#define HEIGHT 16
+#define WIDTH 3
+#define HEIGHT 3
 
 int main(void) {
   PosData *data = new PosData(WIDTH, HEIGHT);

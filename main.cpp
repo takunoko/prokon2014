@@ -123,7 +123,7 @@ int solveProbrem(int id){
 
  try {
   // 引数に問題番号を指定して画像のバイナリstringを返す(cv::Mat形式にするかも)
-  string sortResult=sort->sort();
+  string sortResult=sort->sort()+"\n";
   res=client.sendAnswer(id,sortResult);
   cout << sortResult << endl;
  } catch (char const * exception) {
@@ -152,7 +152,7 @@ int solveProbrem(int id){
   img->set_PosData(data);
   data->dispData();
   sort->importData(*data);
-  string sortResult=sort->sort();
+  string sortResult=sort->sort()+"\n";
   res=client.sendAnswer(id,sortResult);
   cout << sortResult << endl;
  }
