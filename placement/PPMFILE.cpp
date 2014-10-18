@@ -1532,8 +1532,7 @@ void PPMFILE::disp_for_manual(const string & winname){
 	cv::imshow(winname,for_manual_img);
 }
 
-// lengthだけのパーツの数を消費する
-void PPMFILE::fix_manual(const string & winname, int length){
+void PPMFILE::fix_manual(const string & winname){
 	// buffer
 	string buffer;
 

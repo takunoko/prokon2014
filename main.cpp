@@ -188,6 +188,6 @@ void swapPictureManual(PPMFILE *ppmData){
 
 
  // 画像表示
- ppmData->fix_manual(wrongPieceWindow,(int)1024/ppmData->get_part_px_x());
+ ppmData->fix_manual(wrongPieceWindow);
  // 間違っているであろうパーツのウィンドウ
 }
