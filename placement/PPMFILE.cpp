@@ -21,7 +21,7 @@
 #define USE_ALL_PIECE // 使われてないピースを全部使う
 
 // デバッグ用
-#define VERBOSE
+// #define VERBOSE
 
 // tupleを比較するときのルール
 bool my_compare( const COST_TUPLE &lhs, const COST_TUPLE &rhs){

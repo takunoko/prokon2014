@@ -53,17 +53,17 @@ int main(void){
 	}
 
 	// ナンバー入り画像
-	img1->create_num_img();
-	img1->disp_img(NUM_IMG);
+	// img1->create_num_img();
+	// img1->disp_img(NUM_IMG);
 
-	//画像を四角くする
+	// //画像を四角くする
 	// img1->fix_pic_to_square();
 
-	// 回答画像
-	img1->create_result_img();
-	img1->disp_img(RESULT_IMG);
+	// // 回答画像
+	// img1->create_result_img();
+	// img1->disp_img(RESULT_IMG);
 
-	cv::waitKey(0);	//waitKey(0)で何か入力するまで処理を停止
+	//cv::waitKey(0);	//waitKey(0)で何か入力するまで処理を停止
 
 	return 0;
 }
