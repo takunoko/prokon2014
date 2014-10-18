@@ -14,10 +14,12 @@
 using namespace std;
 
 // サーバー
-const string ProkonClient::SERVER_ADDRESS="172.16.1.2";
+//const string ProkonClient::SERVER_ADDRESS="172.16.1.2";
 //const string ProkonClient::SERVER_ADDRESS="localhost/web2/pic/";
+const string ProkonClient::SERVER_ADDRESS="10.211.55.5";
 // チーム固有トークン
-const string ProkonClient::TEAM_TOKEN="0768109858";
+//const string ProkonClient::TEAM_TOKEN="0768109858";
+const string ProkonClient::TEAM_TOKEN="1";
 #define PORT 80
 
 // コンストラクタ
@@ -104,7 +106,7 @@ string ProkonClient::sendAnswer(int problemNo,string answer){
  // 受信データ
  string chunk;
  //http://{ServerAddress}/SubmitAnswer
- string url="http://" + SERVER_ADDRESS + "/SubmitAnswer.pl";
+ string url="http://" + SERVER_ADDRESS + "/SubmitAnswer";
  // エスケープされた文字列 free用
  char * escapedStr;
 
