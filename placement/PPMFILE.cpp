@@ -2276,6 +2276,11 @@ void PPMFILE::fix_manual(const string & winname){
 					cerr << buffer.substr(buffer.find(' ',space+1)) << endl;
 					int d=atoi(buffer.substr(buffer.find(' ',space+1)).c_str());
 					cout << d << endl;
+					// 全てに対してX方向にシフト
+					map<int,pair<int,int>>::iterator now;
+					for(now=placement_pos.begin();now!=placement_pos.end();now++){
+						//now->
+					}
 				}else if(XorY == 'y' || XorY == 'Y'){
 					// X shift
 					// 2個目のスペース
