@@ -4,6 +4,8 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+#include "setting.h"
+
 // httpクライアント
 #include "httpClient/client.h"
 // 問題ヘッダ部(コメント部分)
@@ -21,8 +23,8 @@
 // デバッグ用
 //#define VERBOSE
 
-// 最初に自動で提出するかどうか
-#define FIRST_AUTO_SUBMIT
+
+//
 
 using namespace std;
 
@@ -103,8 +105,11 @@ int solveProbrem(int id){
 
  img->calc_cost_all();
  // newはplacement_posが生成されない
- // TODO: placement_5?
+#ifdef WITH_PLACEMENT_5
+ img->placement_5();
+#else
  img->placement_4();
+#endif
  // 画像作成
  img->create_result_img();
  if(img->chk_result() == true){
