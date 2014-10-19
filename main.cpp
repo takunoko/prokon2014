@@ -107,6 +107,8 @@ int solveProbrem(int id){
  // newはplacement_posが生成されない
 #ifdef WITH_PLACEMENT_5
  img->placement_5();
+#elif defined(WITH_PLACEMENT_6)
+ img->placement_6();
 #else
  img->placement_4();
 #endif

@@ -12,5 +12,7 @@
 // placement_5を使うか(デフォルトはplacement_4)
 #define WITH_PLACEMENT_5
 
-// localhostテスト
-#define LOCALHOST_SERVER
+#define WITH_PLACEMENT_6
+
+// localhostテスト(本番用)
+//#define LOCALHOST_SERVER
