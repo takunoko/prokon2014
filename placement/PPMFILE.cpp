@@ -2273,8 +2273,17 @@ void PPMFILE::fix_manual(const string & winname){
 				if(XorY == 'x' || XorY == 'X'){
 					// X shift
 					// 2個目のスペース
+					cerr << buffer.substr(buffer.find(' ',space+1)) << endl;
 					int d=atoi(buffer.substr(buffer.find(' ',space+1)).c_str());
 					cout << d << endl;
+				}else if(XorY == 'y' || XorY == 'Y'){
+					// X shift
+					// 2個目のスペース
+					cerr << buffer.substr(buffer.find(' ',space+1)) << endl;
+					int d=atoi(buffer.substr(buffer.find(' ',space+1)).c_str());
+					cout << d << endl;
+				}else{
+					cout << "Input error" << endl;
 				}
 			}
 		}else{

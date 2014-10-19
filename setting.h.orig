@@ -13,4 +13,4 @@
 #define WITH_PLACEMENT_5
 
 // localhostテスト
-#define LOCALHOST
+#define LOCALHOST_SERVER

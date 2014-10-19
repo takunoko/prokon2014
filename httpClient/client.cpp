@@ -17,11 +17,13 @@ using namespace std;
 #define PORT 80
 
 // サーバー
-#ifdef LOCALHOST
+#ifdef LOCALHOST_SERVER
+
 // ローカルホスト用
 const string ProkonClient::SERVER_ADDRESS="localhost/web2/pic/";
 #undef PORT
 #define PORT 8080
+
 #else
 // 本番用
 const string ProkonClient::SERVER_ADDRESS="172.16.1.2/";
