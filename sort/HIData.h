@@ -1,15 +1,17 @@
-#ifndef INCLUDED_ID_DF_SEARCH_H
-#define INCLUDED_ID_DF_SEARCH_H
+#ifndef INCLUDED_HIDATA_H
+#define INCLUDED_HIDATA_H
 #include "PosData.h"
 #include <list>
 
 using namespace std;
 
-class ID_Data : public PosData {
+class HIData {
 public:
+  int *data;
+  int *distance;
   list<int> *adjacent;
-  Pos **distance;
-  Pos selected;
+  int selected;
+  int width, height;
   int md;
   int selected_num, changed_num;
   int move_flag;
@@ -19,22 +21,22 @@ public:
   list<int> changed_nums;
 
 private:
-  ID_Data();
+  HIData();
 public:
-  ID_Data(int w, int h);
+  HIData(int w, int h);
   void calcMD();
-  void findAndSelectData(Pos data);
-  Pos findData(Pos data);
+  void dispData();
+  void findAndSelectData(int data);
+  int findData(int p);
   int getChangedNum();
   int getLastMove();
   int getMD();
   Pos getSelected();
   string getStringSortData();
   void importData(PosData &import_data);
-  void selectData(Pos p);
-  void setDistance(int x, int y);
-  virtual void swapData(int x1, int y1, int x2, int y2);
-  int swapSelected(int direction);
+  void selectData(int p);
+  void swapData(int p1, int p2);
+  int swapSelected(int pos);
   void undo();
 };
 

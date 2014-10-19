@@ -4,6 +4,8 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+#include "setting.h"
+
 // httpクライアント
 #include "httpClient/client.h"
 // 問題ヘッダ部(コメント部分)
@@ -15,9 +17,14 @@
 // sort
 #include "sort/PosData.h"
 #include "sort/Process5.h"
+#include "sort/Process6.h"
+#include "sort/Process8.h"
 
 // デバッグ用
 //#define VERBOSE
+
+
+//
 
 using namespace std;
 
@@ -57,7 +64,9 @@ int solveProbrem(int id){
  PPMFILE *img;
  // PosData
  PosData *data;
+ // 5 or 6?
  Process5 *sort;
+ //Process6 *sort6;
 
 #ifdef VERBOSE
  cout << "Picture Downloading\nID: " << id<< endl;
@@ -84,6 +93,7 @@ int solveProbrem(int id){
  recievedData=cv::imdecode(cv::Mat(v),-1);
 
  data=new PosData(header.splitX,header.splitY);
+ // TODO: Process5 or 6?
  sort=new Process5(header.splitX,header.splitY);
 
 #ifdef VERBOSE
@@ -95,14 +105,30 @@ int solveProbrem(int id){
 
  img->calc_cost_all();
  // newはplacement_posが生成されない
+#ifdef WITH_PLACEMENT_5
+ img->placement_5();
+#else
  img->placement_4();
+#endif
  // 画像作成
  img->create_result_img();
+ if(img->chk_result() == true){
+  cout << "result img GOOD" << endl;
+ }else{
+  cout << "result img BAD" << endl;
+ }
  img->fix_pic_to_square();
-// img->disp_img(RESULT_IMG);
+ if(img->chk_result() == true){
+  cout << "result img GOOD" << endl;
+ }else{
+  cout << "result img BAD" << endl;
+ }
+ // img->disp_img(RESULT_IMG);
  //img->disp_placement();
  //cv::waitKey(0);
- //swapPictureManual(img);
+#ifndef FIRST_AUTO_SUBMIT
+ swapPictureManual(img);
+#endif
 
  // placement後のデータをどうにかしないとヤバイ
  img->set_PosData(data);
@@ -139,11 +165,16 @@ int solveProbrem(int id){
  }
  // ACCEPTED XXかERRORがかえってくる
  // http://www.procon.gr.jp/modules/smartfaq/category.php?categoryid=23
- 
- // もう一度: ここから(1回提出)
 
+ // もう一度: ここから(1回提出)
  bool flag=true;
- for(int i=0;i<2 && flag;i++){
+ while(flag){
+  // TODO:
+  delete sort;
+  //delete sort6;
+  sort=new Process5(header.splitX,header.splitY);
+  //sort6=new Process6(header.splitX,header.splitY);
+
   int error_part = 0;
   // 結果出力
   cout << res << endl;
@@ -164,6 +195,11 @@ int solveProbrem(int id){
   cout << "sorting..." << endl;
 
   string sortResult=sort->sort();
+  cout <<"Sort 5 complete" << endl;
+  //string sortResult6=sort6->sort();
+  //cout <<"Sort 6 complete" << endl;
+  
+  cout << "s/\\n/\\r\\n" << endl;
   string::size_type Pos=sortResult.find('\n');
   while(Pos!=string::npos){
    sortResult.replace(Pos,1,"\x0d\x0a");

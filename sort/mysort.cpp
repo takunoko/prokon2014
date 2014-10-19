@@ -10,8 +10,8 @@
 #include "Process5.h"
 #include "Process6.h"
 #include "Process8.h"
-#define WIDTH 4
-#define HEIGHT 4
+#define WIDTH 16
+#define HEIGHT 16
 
 int main(void) {
   PosData *data = new PosData(WIDTH, HEIGHT);
@@ -20,7 +20,6 @@ int main(void) {
 
   srand((unsigned)time(NULL));
 
-  /*
   for(i = 0; i < data->getHeight(); i++) {
     for(j = 0; j < data->getWidth(); j++) {
       data->setData(j, i, j, i);
@@ -32,15 +31,20 @@ int main(void) {
       y = rand() % data->getHeight();
       data->swapData(j, i, x, y);
     }
-  }*/
+  }
 
   // ソート
-  Process8 *test = new Process8(WIDTH, HEIGHT);
-  //test->importData(*data);
+  Process5 *dull = new Process5(WIDTH, HEIGHT);
+  Process6 *test = new Process6(WIDTH, HEIGHT);
+  test->importData(*data);
+  dull->importData(*data);
   data_send = test->sort();
   //test->sort();
   delete test;
   cerr << data_send << endl;
+  data_send = dull->sort();
+  cerr << data_send << endl;
+  delete dull;
 
   return 0;
 }

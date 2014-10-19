@@ -24,6 +24,10 @@ ProBase::~ProcessBase() {
   delete table;
 }
 
+int ProBase::getChangedNum() {
+  return table->getChangedNum();
+}
+
 void ProBase::importData(PosData &data) {
   table->importData(data);
 }

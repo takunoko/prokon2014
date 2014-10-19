@@ -15,7 +15,27 @@ Pro6::Process6(int w, int h): ProcessBase(w, h) {
   target_data.setZero();
 }
 
+int Pro6::calcParity() {
+  int sum = 0;
+  int num = 0;
+  int i, j;
+  Pos data;
+
+  for(i = 0; i < table->getWidth()*table->getHeight(); i++) {
+    num = 0;
+    for(j = i; j < table->getWidth()*table->getHeight(); j++) {
+      data = table->getData(j%table->getWidth(), j/table->getWidth());
+      if(i > (data.x+data.y*table->getWidth())) {
+        num++;
+      }
+    }
+    sum += num;
+  }
+  return sum % 2;
+}
+
 void Pro6::dispSorted() {
+  return;
   list<Pos>::iterator p;
 
   for(p = sorted.begin(); p != sorted.end(); p++) {
@@ -25,6 +45,7 @@ void Pro6::dispSorted() {
 }
 
 void Pro6::dispSortedData() {
+  return;
   list<Pos>::iterator p;
 
   int i, j;
@@ -74,7 +95,6 @@ void Pro6::moveSelected(Pos destination) {
   int half;
   int old_direction = -1;
 
-  puts("-------moveSelected-------");
 
   while(!checkPosEqual(destination, s)) {
     s = table->getSelected();
@@ -141,31 +161,10 @@ void Pro6::moveSelected(Pos destination) {
     if(old_direction == move_dir) {
       move_dir = getReversedDirection(move_dir);
     }*/
-    printf("move_dir = %d\n", move_dir);
-    table->swapSelected(move_dir);
-    for(p = sorted.begin(); p != sorted.end(); p++) {
-      if(checkPosEqual(surroundings(s, move_dir), *p)) {
-        if(move_flag == LR) {
-          move_dir = getReversedDirection(directionUD);
-          move_flag = UD;
-          break;
-        } else if(move_flag == UD) {
-          move_dir = getReversedDirection(directionLR);
-          move_flag = LR;
-          break;
-        }
-      }
-    }
-    /*
-    if(old_direction == move_dir) {
-      move_dir = getReversedDirection(move_dir);
-    }*/
-    printf("move_dir = %d\n", move_dir);
     table->swapSelected(move_dir);
     table->dispData(target.x, target.y);
     old_direction = getReversedDirection(move_dir);
   }
-  puts("========moveSelected end=======");
 }
 
 void Pro6::moveSelectedNextTarget() {
@@ -179,7 +178,6 @@ void Pro6::moveSelectedNextTarget() {
   int half = 1;
   int old_direction = -1;
 
-  puts("-------moveSelectedNextTarget-------");
   table->dispData(target.x, target.y);
 
   while(!isSelectedNextToTarget()) {
@@ -274,7 +272,6 @@ void Pro6::moveSelectedNextTarget() {
     table->dispData(target.x, target.y);
     old_direction = getReversedDirection(move_dir);
   }
-  puts("=======moveSelectedNextTarget=======");
 }
 
 int Pro6::moveTarget(Pos pos) {
@@ -288,7 +285,6 @@ int Pro6::moveTarget(Pos pos) {
   int old_direction = -1;
   int old_flag = -1;
 
-  puts("-------moveTarget-------");
 
   while(!checkPosEqual(target, pos)) {
     target = table->findData(target_data);
@@ -341,7 +337,6 @@ int Pro6::moveTarget(Pos pos) {
         }
       }
     }
-    printf("directionaaaaa%d, %d, %d\n", directionLR, directionUD, move_dir);
     moveSelectedNextTarget();
     rotateSelected(move_dir);
     table->swapSelected(getReversedDirection(move_dir));
@@ -349,7 +344,6 @@ int Pro6::moveTarget(Pos pos) {
     old_direction = getReversedDirection(move_dir);
     old_flag = move_flag;
   }
-  puts("=======moveTarget end========");
   return 0;
 }
 
@@ -363,21 +357,15 @@ void Pro6::rotateSelected(int direction) {
   //-----------------------------直すところ
   int move_direction = (dir_selected > direction) ? -1 : 1;
 
-  puts("-------rotateSelected-------");
-  printf("direction = %d\n", direction);
-  printf("target = %d, %d\n", target.x, target.y);
   if(direction == EQUAL) return;
   if(checkPosEqual(table->getSelected(), surroundings(target, direction)))  {
-    puts("selected dont need to rotate");
     return;
   }
   if(!checkInScope(table->getWidth(), table->getHeight(), surroundings(target, direction).x, surroundings(target, direction).y)) {
-    puts("cant rotate(move target)...");
     return;
   }
 
   if(move_distance > DIRECTION_NUM / 2) {
-    puts("rotate distance is too long");
     move_distance = DIRECTION_NUM - move_distance;
     move_direction *= -1;
   }
@@ -404,25 +392,18 @@ void Pro6::rotateSelected(int direction) {
 
   int move_dir;
   int j = dir_selected;
-  printf("move_direction = %d\n", move_direction);
-  printf("move_distance = %d\n", move_distance);
   for(i = 0; i < move_distance; i++) {
     // 目的地についたら止めたほうがいいかも
     j = (j + move_direction + DIRECTION_NUM) % DIRECTION_NUM;
     move_dir = getDirection(table->getSelected(), surroundings(target, j));
-    printf("j = %d\n", j);
-    printf("move_dir = %d\n", move_dir);
     table->swapSelected(move_dir);
     table->dispData(target.x, target.y);
   }
-  puts("======rotate end========");
 }
 
 string Pro6::sort() {
   int dummy;
-  //printf("%d\n", calcParity());
   table->dispData();
-  scanf("%d", &dummy);
   // 一番右下になるデータを選択
   /*
   if(!calcParity()) {
@@ -432,7 +413,7 @@ string Pro6::sort() {
     table->findAndSelectData(table->getWidth()-1, table->getHeight()-1);
     printf("^^^^^^^^^%X%X\n", table->getWidth()-1, table->getHeight()-1);
   }*/
-  table->findAndSelectData(table->getWidth()-1, table->getHeight()-1);
+  table->findAndSelectData(table->getWidth()-1, 1);
   table->dispData();
 
   sortUp();
@@ -448,53 +429,53 @@ string Pro6::sort() {
 void Pro6::sortDown() {
   int i;
 
-  if(isSorted(table->getHeight()-2) && isSorted(table->getHeight()-1)) return;
+  if(isSorted(0) && isSorted(1)) return;
   for(i = 0; i < table->getWidth()-2; i++) {
-    Pos dummy = table->findData(Pos(i, table->getHeight()-2));
+    Pos dummy = table->findData(Pos(i, 1));
     if(dummy.x >= i && dummy.x < i+2) {
-      target_data = Pos(i, table->getHeight()-2);
+      target_data = Pos(i, 1);
       target = table->findData(target_data);
       moveTarget(Pos(i+2, dummy.y));
     }
-    target_data = Pos(i, table->getHeight()-1);
+    target_data = Pos(i, 0);
     target = table->findData(target_data);
-    moveTarget(Pos(i, table->getHeight()-2));
-    sorted.push_back(Pos(i, table->getHeight()-2));
-    target_data = Pos(i, table->getHeight()-2);
+    moveTarget(Pos(i, 1));
+    sorted.push_back(Pos(i, 1));
+    target_data = Pos(i, 1);
     target = table->findData(target_data);
-    moveTarget(Pos(i+1, table->getHeight()-2));
-    sorted.push_back(Pos(i+1, table->getHeight()-2));
+    moveTarget(Pos(i+1, 1));
+    sorted.push_back(Pos(i+1, 1));
 
-    moveSelected(Pos(i, table->getHeight()-1));
-    table->swapSelected(UP);
+    moveSelected(Pos(i, 0));
+    table->swapSelected(DOWN);
     table->swapSelected(RIGHT);
     sorted.pop_back();
     sorted.pop_back();
-    sorted.push_back(Pos(i, table->getHeight()-1));
-    sorted.push_back(Pos(i, table->getHeight()-2));
+    sorted.push_back(Pos(i, 0));
+    sorted.push_back(Pos(i, 1));
     table->dispData();
   }
-  target_data = Pos(table->getWidth()-2, table->getHeight()-2);
+  target_data = Pos(table->getWidth()-2, 1);
   target = table->findData(target_data);
   moveTarget(target_data);
-  sorted.push_back(Pos(table->getWidth()-2, table->getHeight()-2));
+  sorted.push_back(Pos(table->getWidth()-2, 1));
   table->dispData();
 
-  target_data = Pos(table->getWidth()-2, table->getHeight()-1);
+  target_data = Pos(table->getWidth()-2, 0);
   target = table->findData(target_data);
   table->dispData(target.x, target.y);
-  if(checkPosEqual(target, Pos(table->getWidth()-1, table->getHeight()-2))) {
+  if(checkPosEqual(target, Pos(table->getWidth()-1, 1))) {
     table->selectData(target.x, target.y);
     moveSelected(target_data);
   }
-  target_data = Pos(table->getWidth()-1, table->getHeight()-2);
+  target_data = Pos(table->getWidth()-1, 1);
   target = table->findData(target_data);
   table->dispData(target.x, target.y);
-  if(checkPosEqual(target, Pos(table->getWidth()-2, table->getHeight()-1))) {
+  if(checkPosEqual(target, Pos(table->getWidth()-2, 0))) {
     table->selectData(target.x, target.y);
     moveSelected(target_data);
   }
-  target_data = Pos(table->getWidth()-1, table->getHeight()-1);
+  target_data = Pos(table->getWidth()-1, 0);
   target = table->findData(target_data);
   table->selectData(target.x, target.y);
   moveSelected(target_data);
@@ -503,7 +484,7 @@ void Pro6::sortDown() {
 void Pro6::sortUp() {
   int i, j;
   // 上半分
-  for(i = 0; i < table->getHeight()-2; i++) {
+  for(i = table->getHeight()-1; i >= 2; i--) {
     // 端以外の
     if(isSorted(i)) {
       puts("continue1");
@@ -528,5 +509,31 @@ void Pro6::sortUp() {
       sorted.push_back(Pos(table->getWidth()-1, i));
       continue;
     }
+    Pos dummy = table->findData(Pos(table->getWidth()-2, i));
+    if(dummy.x >= table->getWidth()-2 && dummy.x < table->getWidth() && dummy.y <= i && dummy.y > i-2) {
+      target_data = Pos(table->getWidth()-2, i);
+      target = table->findData(target_data);
+      moveTarget(Pos(table->getWidth()-2, i-2));
+    }
+    // もし，width-2のところに20が来てしまった時は20を下に移す
+    if(!checkPosEqual(table->getData(table->getWidth()-2, i), Pos(table->getWidth()-1, i)) || !checkPosEqual(table->getData(table->getWidth()-2, i-1), Pos(table->getWidth()-2, i))) {
+      target_data = Pos(table->getWidth()-1, i);
+      target = table->findData(target_data);
+      moveTarget(Pos(table->getWidth()-2, i));
+      sorted.push_back(Pos(table->getWidth()-2, i));
+      target_data = Pos(table->getWidth()-2, i);
+      target = table->findData(target_data);
+      moveTarget(Pos(table->getWidth()-2, i-1));
+      sorted.push_back(Pos(table->getWidth()-2, i-1));
+    } else {
+    }
+    moveSelected(Pos(table->getWidth()-1, i));
+    table->swapSelected(LEFT);
+    table->swapSelected(UP);
+    sorted.pop_back();
+    sorted.pop_back();
+    sorted.push_back(Pos(table->getWidth()-2, i));
+    sorted.push_back(Pos(table->getWidth()-1, i));
+    table->dispData();
   }
 }
