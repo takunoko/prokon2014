@@ -6,12 +6,11 @@
 // for isdigit
 #include <cctype>
 
+#include "../setting.h"
 #include "client.h"
 #include "QuestionHeader.hpp"
 
-//#define LOCALHOST
-
-#define DEBUG 1
+#define DEBUG
 
 using namespace std;
 
@@ -70,7 +69,7 @@ string ProkonClient::getProblem(int problemNo,QuestionHeader & data){
 
  // URL
  string url="http://" + SERVER_ADDRESS + "problem/prob" + probStr.str() + ".ppm";
-#if DEBUG==1
+#ifdef DEBUG
  cout << url << endl;
 #endif
 
