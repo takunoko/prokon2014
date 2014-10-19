@@ -18,6 +18,8 @@
 
 // 画像ファイル名と分割数
 // 後々、分割数をファイルから読み込む
+#include <time.h>
+
 
 #define FILENAME "../pic_data/problem/prob01.ppm"
 using namespace std;
@@ -27,6 +29,11 @@ using namespace std;
 int main(void){
 	// 引数で渡されるべき部分
 	cv::Mat origin_img_tmp = cv::imread(FILENAME, -1);
+
+	// @virus氏　なんとかプログラムの最初でやってほしい　
+	time_t  nowtime;
+	time(&nowtime);
+	srand((int)nowtime);
 
 	// 本番環境では、PPMFILE( cv::Mat オリジナルのイメージ, int 分割数X, int 分割数Y, PosData);
 	PPMFILE *img1 = new PPMFILE( origin_img_tmp, PIECE_X, PIECE_Y);
@@ -40,7 +47,8 @@ int main(void){
 	// ----- この編並び替え -----
 	// img1->placement();
 	// placement_4の逆バージョン
-	img1->placement_5();
+	// img1->placement_5();
+	img1->placement_6();
 
 	// ----- このへん描画 -----
 	// img1->write_line();
