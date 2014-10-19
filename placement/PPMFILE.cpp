@@ -2947,6 +2947,8 @@ void PPMFILE::fix_manual(const string & winname){
 
 	// 表示用ウィンドウ
 	const string questionPicWindow="questionPicWindow";
+	// アップデートフラグ
+	bool picUpdated;
 
 	// 自動修正
 	fix_pic_to_square();
@@ -2960,6 +2962,7 @@ void PPMFILE::fix_manual(const string & winname){
 	// 必要画像表示完了
 	// 入力
 	while(1){
+		picUpdated=false;
 		cout << "ID1 ID2: swap ID1 and ID2" << endl
 			<< "[sh]ift X|Y d: shift X or Y (+-)d times (not completed)" << endl
 			<< "[q]uit: quit fix manual" << endl;
@@ -2971,26 +2974,47 @@ void PPMFILE::fix_manual(const string & winname){
 			// s****
 			ch=buffer.at(1);
 			if(ch=='h'){
+				cerr << "shift" << endl;
 				// shift
 				int space=buffer.find(' ');
 				char XorY=buffer.at(space+1);
 				if(XorY == 'x' || XorY == 'X'){
 					// X shift
 					// 2個目のスペース
-					cerr << buffer.substr(buffer.find(' ',space+1)) << endl;
+					cerr << "shift x " << buffer.substr(buffer.find(' ',space+1)) << endl;
 					int d=atoi(buffer.substr(buffer.find(' ',space+1)).c_str());
 					cout << d << endl;
 					// 全てに対してX方向にシフト
+					// <要素番号,<本来のx,本来のy>
 					map<int,pair<int,int>>::iterator now;
 					for(now=placement_pos.begin();now!=placement_pos.end();now++){
-						//now->
+						now->second.first+=d;
+						// 負数処理
+						// 超過処理
+						now->second.first%=part_size_x;
+						while(now->second.first<0){
+							now->second.first+=part_size_x;
+						}
 					}
+					picUpdated=true;
 				}else if(XorY == 'y' || XorY == 'Y'){
 					// X shift
 					// 2個目のスペース
 					cerr << buffer.substr(buffer.find(' ',space+1)) << endl;
 					int d=atoi(buffer.substr(buffer.find(' ',space+1)).c_str());
 					cout << d << endl;
+					// shift
+					map<int,pair<int,int>>::iterator now;
+					for(now=placement_pos.begin();now!=placement_pos.end();now++){
+						now->second.second+=d;
+						// 負数処理
+						// 超過処理
+						now->second.second%=part_size_x;
+						while(now->second.second<0){
+							now->second.second+=part_size_y;
+						}
+					}
+					picUpdated=true;
 				}else{
 					cout << "Input error" << endl;
 				}
@@ -3006,18 +3030,12 @@ void PPMFILE::fix_manual(const string & winname){
 
 				if(placement_pos.find(id1)!=placement_pos.end()&&
 						placement_pos.find(id2)!=placement_pos.end()){
-					// これでいけるかわからない
+					// --これでいけるかわからない-- 問題なさそう
 					tmp=placement_pos[id1];
 					placement_pos[id1]=placement_pos[id2];
 					placement_pos[id2]=tmp;
 
-					// 以下再描画
-					cv::destroyWindow(questionPicWindow);
-					// 現段階での正しい領域内に有る画像を作成する
-					create_correct_area_result_img();
-					// そして表示
-					disp_for_manual(questionPicWindow);
-					cv::moveWindow(questionPicWindow,0,0);
+					picUpdated=true;
 				}else{
 					cout << "Input Error" << endl;
 				}
@@ -3025,10 +3043,18 @@ void PPMFILE::fix_manual(const string & winname){
 				cout << "Input error" << endl;
 			}
 		}
+		// 再描画処理
+		if(picUpdated){
+			cv::destroyWindow(questionPicWindow);
+			// 現段階での正しい領域内に有る画像を作成する
+			create_correct_area_result_img();
+			// そして表示
+			disp_for_manual(questionPicWindow);
+			cv::moveWindow(questionPicWindow,0,0);
+		}
 	}
 }
 
-#undef VERBOSE
 // 自動(力技)修正
 void PPMFILE::fix_pic_to_square(){
 	// セル個数
@@ -3059,8 +3085,7 @@ void PPMFILE::fix_pic_to_square(){
 			//使う扱いにする
 			used_piece_key[key]=true;
 			isMapIdEmpty[CONV_XY(pos.first,pos.second)]=false;
-		}
-		else{
+		}else{
 			cerr << "not in maps" << endl;
 		}
 	}
@@ -3107,3 +3132,4 @@ void PPMFILE::fix_pic_to_square(){
 		}
 	}
 }
+#undef VERBOSE
