@@ -116,6 +116,9 @@ class PPMFILE{
 		// 配置(4ピース集合 逆バージョン)
 		void placement_5(void);
 
+		// 配列(4ピース集合 ランダムバージョン)
+		void placement_6(void);
+
 		//PosDataにデータを挿入
 		void set_PosData(PosData *data);
 
