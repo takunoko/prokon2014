@@ -2257,11 +2257,26 @@ void PPMFILE::fix_manual(const string & winname){
 	// 入力
 	while(1){
 		cout << "ID1 ID2: swap ID1 and ID2" << endl
+			<< "[sh]ift X|Y d: shift X or Y (+-)d times (not completed)" << endl
 			<< "[q]uit: quit fix manual" << endl;
 		getline(cin,buffer);
 		char ch=buffer.at(0);
 		if(ch=='q'){
 			break;
+		}else if(ch=='s'){
+			// s****
+			ch=buffer.at(1);
+			if(ch=='h'){
+				// shift
+				int space=buffer.find(' ');
+				char XorY=buffer.at(space+1);
+				if(XorY == 'x' || XorY == 'X'){
+					// X shift
+					// 2個目のスペース
+					int d=atoi(buffer.substr(buffer.find(' ',space+1)).c_str());
+					cout << d << endl;
+				}
+			}
 		}else{
 			int space=buffer.find(' ');
 			if(buffer.substr(0,space).find_first_not_of("0123456789")==string::npos){
