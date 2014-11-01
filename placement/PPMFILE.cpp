@@ -2989,9 +2989,9 @@ void PPMFILE::fix_manual(const string & winname){
 					map<int,pair<int,int>>::iterator now;
 					for(now=placement_pos.begin();now!=placement_pos.end();now++){
 						now->second.first+=d;
-						// 負数処理
 						// 超過処理
 						now->second.first%=part_size_x;
+						// 負数処理
 						while(now->second.first<0){
 							now->second.first+=part_size_x;
 						}
@@ -3007,9 +3007,9 @@ void PPMFILE::fix_manual(const string & winname){
 					map<int,pair<int,int>>::iterator now;
 					for(now=placement_pos.begin();now!=placement_pos.end();now++){
 						now->second.second+=d;
-						// 負数処理
 						// 超過処理
-						now->second.second%=part_size_x;
+						now->second.second%=part_size_y;
+						// 負数処理
 						while(now->second.second<0){
 							now->second.second+=part_size_y;
 						}
